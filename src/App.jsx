@@ -36,7 +36,7 @@ const allServices = {
   folhaPagamento: "Folha de Pagamento (INSS)",
   pasep: "Recuperação/Compensação PASEP",
   rpps: "RPPS (Regime Próprio)",
-  impostoRenda: "Imposto de Renda (IRRF)",
+  impostoRenda: "– Imposto de Renda Retido na Fonte incidente sobre fornecimento de bens ou prestação de serviços em geral",
   cfem: "Compensação (Recursos Minerais - CFEM)",
   cfurh: "Compensação (Recursos Hídricos - CFURH)",
   tabelaSUS: "Tabela SUS",
@@ -50,26 +50,81 @@ const allServices = {
   servicosTecnicos: "Serviços Técnicos (DF)",
 };
 
-const serviceTitles = {
-  folhaPagamento: "2.1 – Folha de Pagamento (INSS)",
-  pasep: "2.2 – Recuperação/Compensação PASEP",
-  rpps: "2.3 – RPPS (Regime Próprio)",
-  impostoRenda: "2.4 – Imposto de Renda (IRRF)",
-  cfem: "2.5 – Compensação (Recursos Minerais - CFEM)",
-  cfurh: "2.6 – Compensação (Recursos Hídricos - CFURH)",
-  tabelaSUS: "2.7 – Tabela SUS",
-  fundef: "2.8 – Recuperação FUNDEF",
-  fundeb: "2.9 – Recuperação FUNDEB",
-  energiaEletrica: "2.10 – Auditoria de Energia Elétrica",
-  royaltiesOleoGas: "2.11 – Royalties (Óleo, Xisto e Gás)",
-  repassesFPM: "2.12 – Repasses de Recursos do FPM (IPI/IR)",
-  revisaoParcelamento: "2.13 – Revisão dos Parcelamentos Previdenciários",
-  issqn: "2.14 – Recuperação de Créditos de ISSQN",
-  servicosTecnicos: "2.15 – Serviços Técnicos (DF)",
-};
-
 // --- Banco de textos oficiais de cada serviço (HTML) ---
 const serviceTextDatabase = {
+  impostoRenda: `
+<p>No julgamento do IRDR, ficou estabelecido que a Constituição Federal, através do 
+art. 158, inciso I, que define o direito do Ente municipal ao produto da arrecadação 
+8 -
+do imposto de renda retido na fonte.</p>
+<p>No julgamento no STF, foi negado provimento ao Recurso Extraordinário da União 
+para estabelecer a seguinte tese em sede de repercussão geral:</p>
+<p>Pertence ao Município, aos Estados e ao Distrito Federal a titularidade das 
+receitas arrecadadas a título de imposto de renda retido na fonte incidente sobre 
+valores pagos por eles, suas autarquias e fundações a pessoas físicas ou jurídicas 
+contratadas para a prestação de bens ou serviços, conforme disposto nos arts. 
+158, I, e 157, I, da Constituição Federal.</p>
+<p>Portanto, é direito de os Estados e Municípios se apropriarem do IRRF sobre seus 
+pagamentos, o STF determinou que as regras aplicáveis a tais entes fossem aquelas 
+previstas na legislação editada para os órgãos e entidades da União. Um detalhe ainda 
+não comentado diz respeito ao histórico processual após as decisões de outubro de 
+2021.</p>
+<p>Tanto na ação que tratou do direito dos Municípios (RE nº 1.293.453/RS), como 
+também naquela que discutiu a mesma tese em prol dos Estados (ACO nº 2.897/AL), 
+houve a oposição de Embargos de Declaração por parte da União.</p>
+<p>Apesar do uso de argumentos razoáveis em relação ao pedido de modulação dos 
+efeitos, os ministros do STF não levaram em conta qualquer consideração nesse 
+sentido e, ao negar acolhimento aos Embargos de Declaração, afastou qualquer 
+possibilidade de aplicação restrita do julgado. Inclusive, a leitura da decisão aponta e 
+existência de um único parágrafo fundamentando a negativa, cuja redação afirma:</p>
+<p>“Relativamente ao pedido de modulação dos efeitos do julgado, não merece ser 
+atendido, pois não se encontram presentes os requisitos do § 3º do art. 927 do 
+Código de Processo Civil de 2015”.</p>
+<p>Entretanto, isso não afasta a legitimidade dos entes federativos, os quais devem se 
+pautar nas regras a serem adotadas a partir dos julgados do STF para apurar os valores 
+que se deixou de arrecadar, buscando inclusive ferramentas e profissionais que 
+possuam a expertise necessária para tanto, inclusive para otimizar o processo de 
+apuração da quantia com o uso de tecnologia que reduza a análise manual das 
+informações.</p>
+<p>Em relação ao objeto desta (Recuperação/ compensação IR) o valor estimado de 
+recuperação da receita é de {{impostoRenda_estimate}}.</p>
+  `,
+
+  rpps: `
+    <p>A Portaria 15.829/20 da Secretaria Especial de Previdência e Trabalho, que veio para
+regulamentar a operacionalização da compensação financeira entre o Regime Geral 
+de Previdência e os Regimes Próprios de Previdência da União, Estados, DF e
+Municípios e destes entre si.</p>
+<p>Devemos, antes de tudo, entender o contexto e porque foi necessária a edição de uma
+portaria para regulamentar a operacionalização da compensação.</p>
+<p>Desde o ano 2000 a operacionalização de COMPREV ocorre entre RGPS e RPPS. O
+Decreto de 2019 veio no intuito de trazer necessários e importantes avanços para
+melhor operacionalizar essa compensação e regulamentar e efetivamente executar a
+operacionalização entre regimes próprios, já prevista, mesmo que de forma tímida
+desde 1999, porém, sem regulamentação específica, o que impossibilitava a efetiva
+operação.</p>
+<p>Ainda, vale ressaltar, as normas da Portaria da MPS 6.209/00 são aplicadas às
+compensações e continuam em vigor, tendo em vista que um dos objetivos da
+Portaria 15.829/20 foi o de manter as disposições até que ocorra a transição e
+adaptações dos sistemas trazidos pelo Decreto 10.188/19, naquilo, é claro, que não
+conflitar com este e a Lei 9.796/99.</p>
+<p>A operacionalização, como se sabe, é efetuada através do sistema COMPREV. Não
+se nega que o sistema nasceu, para a época, muito moderno, evitando o uso de papel
+e o trânsito de documentos entre os entes, por exemplo. Contudo, após 20 anos,
+muitos avanços tecnológicos surgiram, levando a necessidade de uma adequação e
+melhoria nesse sistema.</p>
+<p>Portanto, em 2019 a legislação de COMPREV sofreu diversas mudanças
+significativas, como as que enumeraremos e explicaremos brevemente abaixo.</p>
+<p>Cabe frisar que a presente proposta de serviços de assessoria é motivada pela
+necessidade da contratação para assessorar os servidores no que tange os
+procedimentos administrativos para prevenir possíveis inconsistências que ensejem
+problemas junto aos órgãos de controles atuando de forma preventiva e aplicando,
+por meio da capacitação, as orientações sobre as medidas legais e cabíveis quanto às matériias envolvidas.</p>
+<p>Por oportuno, a seguir colaciona-se quadro técnico ilustrativo:</p>
+<div class="image-placeholder"></div>
+<p>Em relação ao objeto desta (INSS – RPPS) o valor estimado de recuperação da 
+receita é de {{rpps_estimate}}.</p>
+  `,
   folhaPagamento: `<p>Realização de auditoria das folhas de pagamento referentes ao Regime Geral, bem como das GFIPS e tabela de incidências do INSS.</p>
   <p>Há muito se discute acerca da correta base de cálculo das contribuições previdenciárias, especialmente porque há conflitos entre a legislação infraconstitucional e as diretrizes da Constituição Federal.</p>
   <p>A controvérsia cinge-se quanto à incidência ou não da contribuição previdenciária patronal sobre as verbas de caráter indenizatório, pagas aos servidores públicos municipais, celetistas
@@ -145,6 +200,10 @@ const ControlsSidebar = ({
   setServices,
   customCabimentos,
   setCustomCabimentos,
+  customEstimates,
+  setCustomEstimates,
+  rppsImage,
+  setRppsImage,
   savedProposals,
   onLoadProposal,
   onDeleteProposal,
@@ -166,6 +225,21 @@ const ControlsSidebar = ({
       .replace(/<[^>]+>/g, "") // Remove tags HTML
       .trim();
     setCustomCabimentos((prev) => ({ ...prev, [serviceName]: sanitizedValue }));
+  };
+
+  const handleEstimateChange = (serviceName, value) => {
+    setCustomEstimates((prev) => ({ ...prev, [serviceName]: value }));
+  };
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setRppsImage(reader.result);
+        };
+        reader.readAsDataURL(file);
+    }
   };
 
   const handleOptionChange = (e) => {
@@ -325,6 +399,64 @@ const ControlsSidebar = ({
                   />
                 </div>
               )}
+              {key === 'rpps' && services[key] && (
+                <div style={{ marginLeft: "24px", marginTop: "4px" }}>
+                  <label style={{ fontSize: '12px' }}>Valor Estimado</label>
+                  <input
+                    type="text"
+                    value={customEstimates.rpps}
+                    onChange={(e) => handleEstimateChange('rpps', e.target.value)}
+                    placeholder="Valor estimado"
+                    style={{
+                      width: "100%",
+                      padding: "6px 8px",
+                      fontSize: "13px",
+                      border: "1px solid #ccc",
+                      borderRadius: "4px",
+                      fontFamily: "inherit",
+                    }}
+                  />
+                </div>
+              )}
+              {key === 'rpps' && services[key] && (
+                <div style={{ marginLeft: "24px", marginTop: "4px" }}>
+                  <label style={{ fontSize: '12px' }}>Imagem</label>
+                  <input
+                      type="file"
+                      id="rpps-image-input"
+                      style={{ display: 'none' }}
+                      accept="image/png, image/jpeg"
+                      onChange={handleImageUpload}
+                  />
+                  <button
+                      onClick={() => document.getElementById('rpps-image-input').click()}
+                      className="btn"
+                      style={{ width: '100%', marginTop: '4px' }}
+                  >
+                      Anexar Imagem
+                  </button>
+                  {rppsImage && <img src={rppsImage} alt="Preview" style={{ width: '100%', marginTop: '8px' }} />}
+                </div>
+              )}
+              {key === 'impostoRenda' && services[key] && (
+                <div style={{ marginLeft: "24px", marginTop: "4px" }}>
+                  <label style={{ fontSize: '12px' }}>Valor Estimado</label>
+                  <input
+                    type="text"
+                    value={customEstimates.impostoRenda}
+                    onChange={(e) => handleEstimateChange('impostoRenda', e.target.value)}
+                    placeholder="Valor estimado"
+                    style={{
+                      width: "100%",
+                      padding: "6px 8px",
+                      fontSize: "13px",
+                      border: "1px solid #ccc",
+                      borderRadius: "4px",
+                      fontFamily: "inherit",
+                    }}
+                  />
+                </div>
+              )}
             </div>
           );
         })}
@@ -448,7 +580,7 @@ const ControlsSidebar = ({
   );
 };
 
-const ProposalDocument = ({ theme, options, services, customCabimentos }) => {
+const ProposalDocument = ({ theme, options, services, customCabimentos, customEstimates, rppsImage }) => {
   const themeColors = colors[theme];
 
   const Footer = () => (
@@ -561,14 +693,46 @@ const ProposalDocument = ({ theme, options, services, customCabimentos }) => {
   const renderServiceSection = (serviceKey, title, content) => {
     if (!services[serviceKey]) return null;
 
-    // Converter HTML string para elementos React
+    let processedContent = content;
+    if (content) {
+        if (serviceKey === 'rpps' && customEstimates.rpps) {
+            processedContent = content.replace('{{rpps_estimate}}', customEstimates.rpps);
+        }
+        if (serviceKey === 'impostoRenda' && customEstimates.impostoRenda) {
+            processedContent = content.replace('{{impostoRenda_estimate}}', customEstimates.impostoRenda);
+        }
+    } else if (!content) {
+        // Handle missing content
+        return (
+            <>
+                <hr style={{ border: "2px solid black", margin: "24px 0" }} />
+                <h3 className="font-bold text-lg mt-6 mb-2" style={{ color: "#000" }}>{title}</h3>
+                <div className="space-y-4"><p>Conteúdo não disponível.</p></div>
+            </>
+        );
+    }
+
     const tempDiv = document.createElement("div");
-    tempDiv.innerHTML = DOMPurify.sanitize(content);
-    const paragraphs = Array.from(tempDiv.querySelectorAll("p")).map((p, idx) => (
-      <p key={idx} style={{ margin: "8px 0" }}>
-        {p.textContent}
-      </p>
-    ));
+    tempDiv.innerHTML = DOMPurify.sanitize(processedContent, { ADD_TAGS: ["div"], ADD_ATTR: ["class"] });
+
+    // Use querySelectorAll to select only the elements I want to render.
+    const elements = Array.from(tempDiv.querySelectorAll("p, div.image-placeholder")).map((el, idx) => {
+      if (el.tagName === 'P') {
+        return <p key={idx} style={{ margin: "8px 0" }}>{el.textContent}</p>;
+      }
+      if (el.tagName === 'DIV' && el.classList.contains('image-placeholder')) {
+        if (rppsImage) {
+            return <img key={idx} src={rppsImage} style={{ width: '100%', height: 'auto', maxHeight: '600px', objectFit: 'contain', margin: '16px 0' }} />;
+        } else {
+            return (
+              <div key={idx} style={{ border: '1px solid #000', height: '400px', width: '80%', margin: '16px auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <p style={{ color: '#888' }}>Espaço para imagem/gráfico</p>
+              </div>
+            );
+        }
+      }
+      return null;
+    }).filter(Boolean);
 
     return (
       <>
@@ -576,7 +740,7 @@ const ProposalDocument = ({ theme, options, services, customCabimentos }) => {
         <h3 className="font-bold text-lg mt-6 mb-2" style={{ color: "#000" }}>
           {title}
         </h3>
-        <div className="space-y-4">{paragraphs}</div>
+        <div className="space-y-4">{elements}</div>
       </>
     );
   };
@@ -661,14 +825,13 @@ const ProposalDocument = ({ theme, options, services, customCabimentos }) => {
             />
           </div>
 
-          <div style={{ marginTop: 200 }}>
+          <div style={{ marginTop: 350, textAlign: "center" }}>
             <div
               style={{
                 borderTop: "1px solid #000",
                 paddingTop: 25,
-                maxWidth: "55%",
-                marginLeft: "auto",
-                marginRight: "auto",
+                maxWidth: "52%",
+                marginLeft: "38%",
               }}>
               <div style={{ textAlign: "right", marginBottom: 30 }}>
                 <p style={{ margin: "4px 0" }}>
@@ -918,7 +1081,7 @@ const ProposalDocument = ({ theme, options, services, customCabimentos }) => {
           <h2 className="text-2xl font-bold" style={{ borderBottom: "1px solid #ddd", paddingBottom: 8 }}>
             6. Disposições Finais
           </h2>
-          <div style={{textAlign: 'left'}}>
+          <div style={{ textAlign: 'left' }}>
             <p>
               Nesse sentido, ficamos no aguardo da manifestação deste Município para promover os ajustes contratuais que entenderem necessários, sendo mantida a mesma forma de remuneração aqui proposta, com fundamento no art. 6º, XVIII, “e” e art. 74, III, “e”, da Lei n.º 14.133/2021.
             </p>
@@ -968,6 +1131,10 @@ function App() {
     issqn: "Cabível",
     servicosTecnicos: "Cabível",
   });
+  const [customEstimates, setCustomEstimates] = useState({
+    rpps: "R$ 24.020.766,00 (vinte e quatro milhões, vinte mil e setecentos e sessenta e seis reais)",
+    impostoRenda: "R$ 41.040.705,85 (quarenta e um milhões, quarenta mil, setecentos e cinco reais e oitenta e cinco centavos)",
+  });
   const [savedProposals, setSavedProposals] = useState([]);
   const [modal, setModal] = useState({
     open: false,
@@ -979,6 +1146,7 @@ function App() {
     onConfirm: () => { },
     onCancel: () => { },
   });
+  const [rppsImage, setRppsImage] = useState(null);
 
   const generatePdf = async () => {
     console.log("Gerando PDF...");
@@ -1561,6 +1729,10 @@ function App() {
           setServices={setServices}
           customCabimentos={customCabimentos}
           setCustomCabimentos={setCustomCabimentos}
+          customEstimates={customEstimates}
+          setCustomEstimates={setCustomEstimates}
+          rppsImage={rppsImage}
+          setRppsImage={setRppsImage}
           savedProposals={savedProposals || []}
           onLoadProposal={loadProposal}
           onDeleteProposal={deleteProposal}
@@ -1571,7 +1743,7 @@ function App() {
           onDownloadPdf={generatePdf} // Adicionado
         />
         <div className="content">
-          <ProposalDocument theme={theme} options={options} services={services} customCabimentos={customCabimentos} />
+          <ProposalDocument theme={theme} options={options} services={services} customCabimentos={customCabimentos} customEstimates={customEstimates} rppsImage={rppsImage} />
         </div>
         <Modal {...modal} />
       </main>
