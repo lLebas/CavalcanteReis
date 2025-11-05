@@ -173,9 +173,26 @@ const ControlsSidebar = ({
     // Sanitizar entrada para prevenir XSS
     const sanitizedValue = value
       .replace(/<script[^>]*>.*?<\/script>/gi, "") // Remove scripts
-      .replace(/<[^>]+>/g, "") // Remove tags HTML
-      .trim();
+      .replace(/<[^>]+>/g, ""); // Remove tags HTML
     setOptions((prev) => ({ ...prev, [name]: sanitizedValue }));
+  };
+
+  const handleDateChange = (e) => {
+    let input = e.target.value.replace(/\D/g, '');
+    if (input.length > 8) {
+        input = input.slice(0, 8);
+    }
+
+    let formattedInput = '';
+    if (input.length > 4) {
+        formattedInput = `${input.slice(0, 2)}/${input.slice(2, 4)}/${input.slice(4)}`;
+    } else if (input.length > 2) {
+        formattedInput = `${input.slice(0, 2)}/${input.slice(2)}`;
+    } else {
+        formattedInput = input;
+    }
+
+    setOptions((prev) => ({ ...prev, data: formattedInput }));
   };
 
   return (
@@ -241,9 +258,9 @@ const ControlsSidebar = ({
         <input
           name="data"
           value={options.data}
-          onChange={handleOptionChange}
-          maxLength={50}
-          placeholder="DD de mês de AAAA"
+          onChange={handleDateChange}
+          maxLength={10}
+          placeholder="DD/MM/AAAA"
         />
       </div>
 
@@ -330,8 +347,8 @@ const ControlsSidebar = ({
             </button>
             <button
               id="download-pdf"
-              className="btn"
-              style={{ flex: 1, marginBottom: "8px", background: themeColors.buttonSecondary, color: themeColors.buttonText }}
+              className="btn primary"
+              style={{ flex: 1, marginBottom: "8px" }}
               onClick={onDownloadPdf}>
               ⬇️ Baixar PDF
             </button>
@@ -811,23 +828,30 @@ function App() {
 
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
 
-    for (let i = 0; i < pageElements.length; i++) {
-        const pageElement = pageElements[i];
-        const canvas = await html2canvas(pageElement, {
-            scale: 2, // Maior escala para melhor qualidade
-            useCORS: true,
-            backgroundColor: '#ffffff',
-        });
-        
-        const imgData = canvas.toDataURL('image/png');
-        
-        if (i > 0) {
-            pdf.addPage();
-        }
-        
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+    const canvasPromises = Array.from(pageElements).map(pageElement =>
+      html2canvas(pageElement, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+      })
+    );
+
+    const canvases = await Promise.all(canvasPromises);
+
+    for (let i = 0; i < canvases.length; i++) {
+      const canvas = canvases[i];
+      const imgData = canvas.toDataURL('image/png');
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      const aspectRatio = imgHeight / imgWidth;
+      const pdfHeight = pdfWidth * aspectRatio;
+
+      if (i > 0) {
+        pdf.addPage();
+      }
+
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
     }
 
     pdf.save(`Proposta-${options.municipio || "Municipio"}.pdf`);
@@ -835,590 +859,240 @@ function App() {
   };
 
   // Funções auxiliares
-  const generateDocx = async () => {
-    console.log("Gerando DOCX...");
-
-    // Validar campos obrigatórios
-    if (!options.municipio || !options.data) {
-      setModal({
-        open: true,
-        title: "Campos Obrigatórios",
-        message: "Por favor, preencha o Município Destinatário e a Data da Proposta antes de baixar o documento.",
-        confirmText: "OK",
-        cancelText: "",
-        type: "warning",
-        onConfirm: () =>
-          setModal({
-            open: false,
-            title: "",
-            message: "",
-            confirmText: "OK",
-            cancelText: "",
-            type: "info",
-            onConfirm: () => {},
-            onCancel: () => {},
-          }),
-        onCancel: () => {},
-      });
-      return;
-    }
-
-    try {
-      // Carregar a imagem do logo
-      const logoResponse = await fetch("/logo-cavalcante-reis.png");
-      const logoBlob = await logoResponse.blob();
-      const logoArrayBuffer = await logoBlob.arrayBuffer();
-      const logoBuffer = new Uint8Array(logoArrayBuffer);
-
-      // Função auxiliar para criar linha de tabela
-      const createTableRow = (teseText, cabimentoText) => {
-        return new TableRow({
+    const generateDocx = async () => {
+      console.log("Gerando DOCX...");
+  
+      // Validar campos obrigatórios
+      if (!options.municipio || !options.data) {
+        setModal({
+          open: true,
+          title: "Campos Obrigatórios",
+          message: "Por favor, preencha o Município Destinatário e a Data da Proposta antes de baixar o documento.",
+          confirmText: "OK",
+          cancelText: "",
+          type: "warning",
+          onConfirm: () => setModal((m) => ({ ...m, open: false })),
+        });
+        return;
+      }
+  
+      try {
+        // Carregar a imagem do logo
+        const logoResponse = await fetch("/logo-cavalcante-reis.png");
+        const logoBlob = await logoResponse.blob();
+        const logoBuffer = await logoBlob.arrayBuffer();
+  
+        const pageMargins = { top: 1440, right: 1440, bottom: 1440, left: 1440 };
+        const defaultFont = "Garamond";
+        const defaultSize = 24;
+        const titleSize = 28;
+  
+        const headerLogo = new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 100 },
           children: [
-            new TableCell({
-              children: [
-                new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: teseText,
-                      font: "Garamond",
-                      size: 26,
-                    }),
-                  ],
-                }),
-              ],
-            }),
-            new TableCell({
-              children: [
-                new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: cabimentoText,
-                      font: "Garamond",
-                      size: 26,
-                    }),
-                  ],
-                }),
-              ],
+            new ImageRun({
+              data: logoBuffer,
+              transformation: { width: 166, height: 87 },
             }),
           ],
         });
-      };
-
-      // Criar linhas da tabela dinamicamente baseado nos serviços selecionados
-      const tableRows = [
-        // Header
-        new TableRow({
-          children: [
-            new TableCell({
-              shading: { fill: "F7F7F7" },
-              children: [
-                new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: "TESE",
-                      bold: true,
-                      font: "Garamond",
-                      size: 26,
-                    }),
-                  ],
-                }),
-              ],
-            }),
-            new TableCell({
-              shading: { fill: "F7F7F7" },
-              children: [
-                new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: "CABIMENTO / PERSPECTIVA",
-                      bold: true,
-                      font: "Garamond",
-                      size: 26,
-                    }),
-                  ],
-                }),
-              ],
-            }),
-          ],
-        }),
-      ];
-
-      // Adicionar linhas de serviços selecionados
-      if (services.folhaPagamento) {
-        tableRows.push(
+  
+        const createSectionTitle = (text) =>
+          new Paragraph({
+            spacing: { after: 300 },
+            border: { bottom: { color: "DDDDDD", space: 1, style: "single", size: 6 } },
+            children: [new TextRun({ text, bold: true, font: defaultFont, size: titleSize })],
+          });
+  
+        // Função auxiliar para criar linha de tabela
+        const createTableRow = (teseText, cabimentoText) => {
+          return new TableRow({
+            children: [
+              new TableCell({
+                children: [new Paragraph({ children: [new TextRun({ text: teseText, font: defaultFont, size: 26 })] })],
+              }),
+              new TableCell({
+                children: [new Paragraph({ children: [new TextRun({ text: cabimentoText, font: defaultFont, size: 26 })] })],
+              }),
+            ],
+          });
+        };
+  
+        // Criar linhas da tabela dinamicamente
+        const tableRows = [
           new TableRow({
             children: [
               new TableCell({
-                children: [
-                  new Paragraph({
-                    children: [
-                      new TextRun({
-                        text: "Folha de pagamento, recuperação de verbas indenizatórias e contribuições previdenciárias (INSS)",
-                        font: "Garamond",
-                        size: 26,
-                      }),
-                    ],
-                  }),
-                ],
+                shading: { fill: "F7F7F7" },
+                children: [new Paragraph({ children: [new TextRun({ text: "TESE", bold: true, font: defaultFont, size: 26 })] })],
               }),
               new TableCell({
-                children: [
-                  new Paragraph({
-                    children: [
-                      new TextRun({
-                        text: "A perspectiva de incremento/recuperação é de aproximadamente o valor referente a até duas folhas de pagamento mensais.",
-                        font: "Garamond",
-                        size: 26,
-                      }),
-                    ],
-                  }),
-                ],
+                shading: { fill: "F7F7F7" },
+                children: [new Paragraph({ children: [new TextRun({ text: "CABIMENTO / PERSPECTIVA", bold: true, font: defaultFont, size: 26 })] })],
               }),
             ],
-          })
-        );
+          }),
+        ];
+  
+        if (services.folhaPagamento) tableRows.push(createTableRow("Folha de pagamento, recuperação de verbas indenizatórias e contribuições previdenciárias (INSS)", "A perspectiva de incremento/recuperação é de aproximadamente o valor referente a até duas folhas de pagamento mensais."));
+        if (services.pasep) tableRows.push(createTableRow("Recuperação/ compensação PASEP", customCabimentos.pasep));
+        if (services.rpps) tableRows.push(createTableRow("RPPS Regime Próprio de Previdência Social", customCabimentos.rpps));
+        if (services.impostoRenda) tableRows.push(createTableRow("Recuperação/Compensação de Imposto de Renda", customCabimentos.impostoRenda));
+        if (services.cfem) tableRows.push(createTableRow("Compensação financeira pela exploração de recursos minerais – CFEM", customCabimentos.cfem));
+        if (services.cfurh) tableRows.push(createTableRow("Compensação Financeira pela Utilização dos Recursos Hídricos – CFURH", customCabimentos.cfurh));
+        if (services.tabelaSUS) tableRows.push(createTableRow("Tabela SUS", customCabimentos.tabelaSUS));
+        if (services.fundef) tableRows.push(createTableRow("FUNDEF - Atuação em feito para agilizar a tramitação.", customCabimentos.fundef));
+        if (services.fundeb) tableRows.push(createTableRow("Recuperação dos valores repassados à menor a título de FUNDEB.", customCabimentos.fundeb));
+        if (services.energiaEletrica) tableRows.push(createTableRow("Auditoria e Consultoria do pagamento de Energia Elétrica", customCabimentos.energiaEletrica));
+        if (services.royaltiesOleoGas) tableRows.push(createTableRow("Royalties pela exploração de óleo bruto, xisto betuminoso e gás natural.", customCabimentos.royaltiesOleoGas));
+        if (services.repassesFPM) tableRows.push(createTableRow("Repasses dos recursos de FPM com base na real e efetiva arrecadação do IPI e IR.", customCabimentos.repassesFPM));
+        if (services.revisaoParcelamento) tableRows.push(createTableRow("Revisão dos parcelamentos previdenciários", customCabimentos.revisaoParcelamento));
+        if (services.issqn) tableRows.push(createTableRow("Recuperação de Créditos de ISSQN", customCabimentos.issqn));
+        if (services.servicosTecnicos) tableRows.push(createTableRow("Serviços técnicos especializados de assessoria e consultoria jurídica (DF)", customCabimentos.servicosTecnicos));
+  
+        // --- Seções do Documento ---
+        const sections = [];
+  
+        // Página 1: Capa
+        sections.push({
+          properties: { page: { margin: pageMargins } },
+          children: [
+            new Paragraph({
+              alignment: AlignmentType.CENTER,
+              spacing: { after: 6000, before: 200 }, // Espaçamento aumentado
+              children: [new ImageRun({ data: logoBuffer, transformation: { width: 200, height: 60 } })],
+            }),
+            new Paragraph({
+              alignment: AlignmentType.RIGHT,
+              children: [
+                  new Paragraph({ border: { top: { color: "000000", space: 1, style: "single", size: 6 } }, spacing: { after: 400 } }),
+                  new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { after: 100 }, children: [new TextRun({ text: "Proponente:", bold: true, font: defaultFont, size: defaultSize })] }),
+                  new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { after: 200 }, children: [new TextRun({ text: "Cavalcante Reis Advogados", font: defaultFont, size: defaultSize })] }),
+                  new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { after: 100 }, children: [new TextRun({ text: "Destinatário:", bold: true, font: defaultFont, size: defaultSize })] }),
+                  new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { after: 400 }, children: [new TextRun({ text: `Prefeitura Municipal de ${options.municipio || "[Nome do Município]"}`, font: defaultFont, size: defaultSize })] }),
+                  new Paragraph({ border: { top: { color: "000000", space: 1, style: "single", size: 6 } }, spacing: { after: 200 } }),
+                  new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: options.data || "2025", bold: true, font: defaultFont, size: titleSize })] }),
+              ]
+            }),
+          ],
+        });
+  
+        // Página 2: Sumário
+        sections.push({
+          properties: { page: { margin: pageMargins } },
+          children: [
+            headerLogo,
+            new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { after: 400 }, children: [new TextRun({ text: "2 -", font: defaultFont, size: defaultSize })] }),
+            new Paragraph({ spacing: { after: 400 }, children: [new TextRun({ text: "Sumário", bold: true, font: defaultFont, size: 32 })] }),
+            new Paragraph({ spacing: { after: 200 }, indent: { left: 720 }, children: [new TextRun({ text: "1. Objeto da Proposta", font: defaultFont, size: defaultSize })] }),
+            new Paragraph({ spacing: { after: 200 }, indent: { left: 720 }, children: [new TextRun({ text: "2. Análise da Questão", font: defaultFont, size: defaultSize })] }),
+            new Paragraph({ spacing: { after: 200 }, indent: { left: 720 }, children: [new TextRun({ text: "3. Dos Honorários, das Condições de Pagamento e Despesas", font: defaultFont, size: defaultSize })] }),
+            new Paragraph({ spacing: { after: 200 }, indent: { left: 720 }, children: [new TextRun({ text: "4. Prazo e Cronograma de Execução dos Serviços", font: defaultFont, size: defaultSize })] }),
+            new Paragraph({ spacing: { after: 200 }, indent: { left: 720 }, children: [new TextRun({ text: "5. Experiência em atuação em favor de Municípios e da Equipe Responsável", font: defaultFont, size: defaultSize })] }),
+            new Paragraph({ spacing: { after: 200 }, indent: { left: 720 }, children: [new TextRun({ text: "6. Disposições Finais", font: defaultFont, size: defaultSize })] }),
+          ],
+        });
+  
+        // Página 3: Objeto da Proposta
+        sections.push({
+          properties: { page: { margin: pageMargins } },
+          children: [
+            headerLogo,
+            createSectionTitle("1. Objeto da Proposta"),
+            new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: `É objeto do presente contrato o desenvolvimento de serviços advocatícios especializados por parte da Proponente, Cavalcante Reis Advogados, ao Aceitante, Município de ${options.municipio || "[Nome do Município]"}, a fim de prestação de serviços de assessoria técnica e jurídica nas áreas de Direito Público, Tributário, Econômico, Financeiro, Minerário e Previdenciário, atuando perante o Ministério da Fazenda e os seus órgãos administrativos, em especial para alcançar o incremento de receitas, ficando responsável pelo ajuizamento, acompanhamento e eventuais intervenções de terceiro em ações de interesse do Município.`, font: defaultFont, size: defaultSize })] }),
+            new Paragraph({ spacing: { after: 300 }, children: [new TextRun({ text: "A proposta inclui os seguintes objetos:", font: defaultFont, size: defaultSize })] }),
+            new Table({ width: { size: 100, type: "pct" }, rows: tableRows }),
+          ],
+        });
+  
+        // Página 4: Análise da Questão
+        const analiseQuestaoChildren = [headerLogo, createSectionTitle("2. Análise da Questão")];
+        Object.entries(services).forEach(([key, isSelected]) => {
+          if (isSelected && serviceTextDatabase[key]) {
+            analiseQuestaoChildren.push(new Paragraph({ spacing: { before: 400 }, children: [new TextRun({ text: serviceTitles[key], bold: true, font: defaultFont, size: 26 })] }));
+            const paragraphs = serviceTextDatabase[key].replace(/<p>/gi, "").split(/<\/p>/gi).map(p => p.replace(/<[^>]+>/g, ' ').trim()).filter(p => p);
+            paragraphs.forEach(pText => {
+              analiseQuestaoChildren.push(new Paragraph({ spacing: { after: 150 }, children: [new TextRun({ text: pText, font: defaultFont, size: defaultSize })] }));
+            });
+          }
+        });
+        sections.push({ properties: { page: { margin: pageMargins } }, children: analiseQuestaoChildren });
+  
+        // Página 5: Honorários
+        sections.push({
+          properties: { page: { margin: pageMargins } },
+          children: [
+            headerLogo,
+            createSectionTitle("3. Dos Honorários, das Condições de Pagamento e Despesas"),
+            new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: "Os valores levantados a título de incremento são provisórios, baseados em informações preliminares, podendo, ao final, representar valores a maior ou a menor.", font: defaultFont, size: defaultSize })] }),
+            new Paragraph({ bullet: { level: 0 }, children: [new TextRun({ text: "Para todos os demais itens descritos nesta Proposta será efetuado o pagamento de honorários advocatícios à CAVALCANTE REIS ADVOGADOS pela execução dos serviços de recuperação de créditos, ad êxito na ordem de R$ 0,12 para cada R$ 1,00.", font: defaultFont, size: defaultSize })] }),
+            new Paragraph({ bullet: { level: 0 }, children: [new TextRun({ text: "Em caso de valores retroativos recuperados em favor da municipalidade, os honorários também serão cobrados na ordem de R$ 0,12 para cada R$ 1,00 e serão pagos quando da expedição do Precatório ou RPV, ou quando da efetiva compensação dos valores.", font: defaultFont, size: defaultSize })] }),
+            new Paragraph({ bullet: { level: 0 }, children: [new TextRun({ text: "Sendo um contrato AD EXITUM, a CONTRATADA só receberá os honorários quando do êxito da demanda.", font: defaultFont, size: defaultSize })] }),
+          ],
+        });
+  
+        // Página 6: Prazo
+        sections.push({
+          properties: { page: { margin: pageMargins } },
+          children: [
+            headerLogo,
+            createSectionTitle("4. Prazo e Cronograma de Execução dos Serviços"),
+            new Paragraph({ children: [new TextRun({ text: "O prazo de execução será de 24 (vinte e quatro) meses ou pelo tempo que perdurar os processos judiciais, podendo ser prorrogado por interesse das partes.", font: defaultFont, size: defaultSize })] }),
+          ],
+        });
+  
+        // Página 7: Experiência
+        sections.push({
+          properties: { page: { margin: pageMargins } },
+          children: [
+            headerLogo,
+            createSectionTitle("5. Experiência e Equipe Responsável"),
+            new Paragraph({ children: [new TextRun({ text: "No portfólio de serviços executados e/ou em execução, constam diversos Municípios contratantes.", font: defaultFont, size: defaultSize })] }),
+          ],
+        });
+  
+        // Página 8: Disposições Finais
+        sections.push({
+          properties: { page: { margin: pageMargins } },
+          children: [
+            headerLogo,
+            createSectionTitle("6. Disposições Finais"),
+            new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 400 }, children: [new TextRun({ text: `Brasília-DF, ${options.data || "[Data da Proposta]"}.`, font: defaultFont, size: defaultSize })] }),
+            new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 200 }, children: [new TextRun({ text: "Atenciosamente,", bold: true, font: defaultFont, size: defaultSize })] }),
+            new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 150 }, children: [new TextRun({ text: "CAVALCANTE REIS ADVOGADOS", bold: true, font: defaultFont, size: defaultSize })] }),
+          ],
+        });
+  
+        const doc = new Document({ sections });
+  
+        console.log("Documento criado, gerando blob...");
+  
+        const blob = await Packer.toBlob(doc);
+        console.log("Blob gerado, iniciando download...");
+        saveAs(blob, `Proposta-${options.municipio || "Municipio"}-${Date.now()}.docx`);
+        console.log("Download iniciado!");
+  
+        setModal({
+          open: true,
+          title: "Download Concluído",
+          message: "O documento .docx foi gerado com sucesso!",
+          confirmText: "OK",
+          type: "success",
+          onConfirm: () => setModal((m) => ({ ...m, open: false })),
+        });
+      } catch (error) {
+        console.error("Erro ao gerar DOCX:", error);
+        setModal({
+          open: true,
+          title: "Erro ao Gerar Documento",
+          message: `Ocorreu um erro ao gerar o documento: ${error.message}`,
+          confirmText: "OK",
+          type: "error",
+          onConfirm: () => setModal((m) => ({ ...m, open: false })),
+        });
       }
-
-      if (services.pasep) {
-        tableRows.push(createTableRow("Recuperação/ compensação PASEP", customCabimentos.pasep));
-      }
-
-      if (services.rpps) {
-        tableRows.push(createTableRow("RPPS Regime Próprio de Previdência Social", customCabimentos.rpps));
-      }
-
-      if (services.impostoRenda) {
-        tableRows.push(createTableRow("Recuperação/Compensação de Imposto de Renda", customCabimentos.impostoRenda));
-      }
-
-      if (services.cfem) {
-        tableRows.push(
-          createTableRow("Compensação financeira pela exploração de recursos minerais – CFEM", customCabimentos.cfem)
-        );
-      }
-
-      if (services.cfurh) {
-        tableRows.push(
-          createTableRow("Compensação Financeira pela Utilização dos Recursos Hídricos – CFURH", customCabimentos.cfurh)
-        );
-      }
-
-      if (services.tabelaSUS) {
-        tableRows.push(createTableRow("Tabela SUS", customCabimentos.tabelaSUS));
-      }
-
-      if (services.fundef) {
-        tableRows.push(
-          createTableRow("FUNDEF - Atuação em feito para agilizar a tramitação.", customCabimentos.fundef)
-        );
-      }
-
-      if (services.fundeb) {
-        tableRows.push(
-          createTableRow("Recuperação dos valores repassados à menor a título de FUNDEB.", customCabimentos.fundeb)
-        );
-      }
-
-      if (services.energiaEletrica) {
-        tableRows.push(
-          createTableRow("Auditoria e Consultoria do pagamento de Energia Elétrica", customCabimentos.energiaEletrica)
-        );
-      }
-
-      if (services.royaltiesOleoGas) {
-        tableRows.push(
-          createTableRow(
-            "Royalties pela exploração de óleo bruto, xisto betuminoso e gás natural.",
-            customCabimentos.royaltiesOleoGas
-          )
-        );
-      }
-
-      if (services.repassesFPM) {
-        tableRows.push(
-          createTableRow(
-            "Repasses dos recursos de FPM com base na real e efetiva arrecadação do IPI e IR.",
-            customCabimentos.repassesFPM
-          )
-        );
-      }
-
-      if (services.revisaoParcelamento) {
-        tableRows.push(
-          createTableRow("Revisão dos parcelamentos previdenciários", customCabimentos.revisaoParcelamento)
-        );
-      }
-
-      if (services.issqn) {
-        tableRows.push(createTableRow("Recuperação de Créditos de ISSQN", customCabimentos.issqn));
-      }
-
-      if (services.servicosTecnicos) {
-        tableRows.push(
-          createTableRow(
-            "Serviços técnicos especializados de assessoria e consultoria jurídica (DF)",
-            customCabimentos.servicosTecnicos
-          )
-        );
-      }
-
-      const doc = new Document({
-        sections: [
-          // Página 1: Capa
-          {
-            properties: {
-              page: {
-                margin: {
-                  top: 1440,
-                  right: 1440,
-                  bottom: 1440,
-                  left: 1440,
-                },
-              },
-            },
-            children: [
-              // Logo da capa
-              new Paragraph({
-                alignment: AlignmentType.CENTER,
-                spacing: { after: 800, before: 200 },
-                children: [
-                  new ImageRun({
-                    data: logoBuffer,
-                    transformation: {
-                      width: 200,
-                      height: 60,
-                    },
-                  }),
-                ],
-              }),
-              // Linha horizontal superior
-              new Paragraph({
-                border: {
-                  top: {
-                    color: "000000",
-                    space: 1,
-                    style: "single",
-                    size: 6,
-                  },
-                },
-                spacing: { after: 400 },
-              }),
-              // Proponente
-              new Paragraph({
-                alignment: AlignmentType.RIGHT,
-                spacing: { after: 100 },
-                children: [
-                  new TextRun({
-                    text: "Proponente:",
-                    bold: true,
-                    font: "Garamond",
-                    size: 24,
-                  }),
-                ],
-              }),
-              new Paragraph({
-                alignment: AlignmentType.RIGHT,
-                spacing: { after: 200 },
-                children: [
-                  new TextRun({
-                    text: "Cavalcante Reis Advogados",
-                    font: "Garamond",
-                    size: 24,
-                  }),
-                ],
-              }),
-              // Destinatário
-              new Paragraph({
-                alignment: AlignmentType.RIGHT,
-                spacing: { after: 100 },
-                children: [
-                  new TextRun({
-                    text: "Destinatário:",
-                    bold: true,
-                    font: "Garamond",
-                    size: 24,
-                  }),
-                ],
-              }),
-              new Paragraph({
-                alignment: AlignmentType.RIGHT,
-                spacing: { after: 400 },
-                children: [
-                  new TextRun({
-                    text: `Prefeitura Municipal de ${options.municipio || "[Nome do Município]"}`,
-                    font: "Garamond",
-                    size: 24,
-                  }),
-                ],
-              }),
-              // Linha horizontal do meio
-              new Paragraph({
-                border: {
-                  top: {
-                    color: "000000",
-                    space: 1,
-                    style: "single",
-                    size: 6,
-                  },
-                },
-                spacing: { after: 200 },
-              }),
-              // Ano
-              new Paragraph({
-                alignment: AlignmentType.RIGHT,
-                children: [
-                  new TextRun({
-                    text: options.data || "2025",
-                    bold: true,
-                    font: "Garamond",
-                    size: 28,
-                  }),
-                ],
-              }),
-            ],
-          },
-          // Página 2: Sumário
-          {
-            properties: {
-              page: {
-                margin: {
-                  top: 1440,
-                  right: 1440,
-                  bottom: 1440,
-                  left: 1440,
-                },
-              },
-            },
-            children: [
-              // Logo do cabeçalho
-              new Paragraph({
-                alignment: AlignmentType.CENTER,
-                spacing: { after: 100 },
-                children: [
-                  new ImageRun({
-                    data: logoBuffer,
-                    transformation: {
-                      width: 150,
-                      height: 45,
-                    },
-                  }),
-                ],
-              }),
-              // Número da página
-              new Paragraph({
-                alignment: AlignmentType.RIGHT,
-                spacing: { after: 400 },
-                children: [
-                  new TextRun({
-                    text: "2 -",
-                    font: "Garamond",
-                    size: 24,
-                  }),
-                ],
-              }),
-              // Título Sumário
-              new Paragraph({
-                spacing: { after: 400 },
-                children: [
-                  new TextRun({
-                    text: "Sumário",
-                    bold: true,
-                    font: "Garamond",
-                    size: 32,
-                  }),
-                ],
-              }),
-              // Itens do sumário
-              new Paragraph({
-                spacing: { after: 200 },
-                indent: { left: 720 },
-                children: [
-                  new TextRun({
-                    text: "1. Objeto da Proposta",
-                    font: "Garamond",
-                    size: 24,
-                  }),
-                ],
-              }),
-              new Paragraph({
-                spacing: { after: 200 },
-                indent: { left: 720 },
-                children: [
-                  new TextRun({
-                    text: "2. Análise da Questão",
-                    font: "Garamond",
-                    size: 24,
-                  }),
-                ],
-              }),
-              new Paragraph({
-                spacing: { after: 200 },
-                indent: { left: 720 },
-                children: [
-                  new TextRun({
-                    text: "3. Dos Honorários, das Condições de Pagamento e Despesas",
-                    font: "Garamond",
-                    size: 24,
-                  }),
-                ],
-              }),
-              new Paragraph({
-                spacing: { after: 200 },
-                indent: { left: 720 },
-                children: [
-                  new TextRun({
-                    text: "4. Prazo e Cronograma de Execução dos Serviços",
-                    font: "Garamond",
-                    size: 24,
-                  }),
-                ],
-              }),
-              new Paragraph({
-                spacing: { after: 200 },
-                indent: { left: 720 },
-                children: [
-                  new TextRun({
-                    text: "5. Experiência em atuação em favor de Municípios e da Equipe Responsável",
-                    font: "Garamond",
-                    size: 24,
-                  }),
-                ],
-              }),
-              new Paragraph({
-                spacing: { after: 200 },
-                indent: { left: 720 },
-                children: [
-                  new TextRun({
-                    text: "6. Disposições Finais",
-                    font: "Garamond",
-                    size: 24,
-                  }),
-                ],
-              }),
-            ],
-          },
-          // Página 3: Objeto da Proposta
-          {
-            properties: {
-              page: {
-                margin: {
-                  top: 1440,
-                  right: 1440,
-                  bottom: 1440,
-                  left: 1440,
-                },
-              },
-            },
-            children: [
-              // Logo do cabeçalho
-              new Paragraph({
-                alignment: AlignmentType.CENTER,
-                spacing: { after: 100 },
-                children: [
-                  new ImageRun({
-                    data: logoBuffer,
-                    transformation: {
-                      width: 150,
-                      height: 45,
-                    },
-                  }),
-                ],
-              }),
-              // Título
-              new Paragraph({
-                spacing: { after: 300 },
-                border: {
-                  bottom: {
-                    color: "DDDDDD",
-                    space: 1,
-                    style: "single",
-                    size: 6,
-                  },
-                },
-                children: [
-                  new TextRun({
-                    text: "1. Objeto da Proposta",
-                    bold: true,
-                    font: "Garamond",
-                    size: 28,
-                  }),
-                ],
-              }),
-              // Texto introdutório
-              new Paragraph({
-                spacing: { after: 200 },
-                children: [
-                  new TextRun({
-                    text: `É objeto do presente contrato o desenvolvimento de serviços advocatícios especializados por parte da Proponente, Cavalcante Reis Advogados, ao Aceitante, Município de ${
-                      options.municipio || "[Nome do Município]"
-                    }, a fim de prestação de serviços de assessoria técnica e jurídica nas áreas de Direito Público, Tributário, Econômico, Financeiro, Minerário e Previdenciário, atuando perante o Ministério da Fazenda e os seus órgãos administrativos, em especial para alcançar o incremento de receitas, ficando responsável pelo ajuizamento, acompanhamento e eventuais intervenções de terceiro em ações de interesse do Município.`,
-                    font: "Garamond",
-                    size: 24,
-                  }),
-                ],
-              }),
-              new Paragraph({
-                spacing: { after: 300 },
-                children: [
-                  new TextRun({
-                    text: "A proposta inclui os seguintes objetos:",
-                    font: "Garamond",
-                    size: 24,
-                  }),
-                ],
-              }),
-              // Tabela de serviços
-              new Table({
-                width: {
-                  size: 100,
-                  type: "pct",
-                },
-                borders: {
-                  top: { style: "single", size: 24, color: "000000" },
-                  bottom: { style: "single", size: 24, color: "000000" },
-                  left: { style: "single", size: 6, color: "000000" },
-                  right: { style: "single", size: 6, color: "000000" },
-                  insideHorizontal: { style: "single", size: 24, color: "000000" },
-                  insideVertical: { style: "single", size: 12, color: "000000" },
-                },
-                rows: tableRows,
-              }),
-            ],
-          },
-        ],
-      });
-
-      console.log("Documento criado, gerando blob...");
-
-      // Gerar e baixar o arquivo
-      const blob = await Packer.toBlob(doc);
-
-      console.log("Blob gerado, iniciando download...");
-
-      saveAs(blob, `Proposta-${options.municipio || "Municipio"}-${Date.now()}.docx`);
-
-      console.log("Download iniciado!");
-
-      setModal({
-        open: true,
-        title: "Download Concluído",
-        message: "O documento .docx foi gerado com sucesso!",
-        confirmText: "OK",
-        type: "success",
-        onConfirm: () => setModal((m) => ({ ...m, open: false })),
-      });
-    } catch (error) {
-      console.error("Erro ao gerar DOCX:", error);
-      setModal({
-        open: true,
-        title: "Erro ao Gerar Documento",
-        message: `Ocorreu um erro ao gerar o documento: ${error.message}`,
-        confirmText: "OK",
-        type: "error",
-        onConfirm: () => setModal((m) => ({ ...m, open: false })),
-      });
-    }
-  };
+    };
 
   const saveProposal = () => {
     const newProposal = {
