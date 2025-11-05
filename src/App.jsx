@@ -5,25 +5,30 @@ import { Clipboard, Settings, FileText } from "lucide-react";
 import { saveAs } from "file-saver";
 import mammoth from "mammoth";
 import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, AlignmentType, ImageRun } from "docx";
+import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas";
 
 // Paleta baseada nas imagens enviadas
 const colors = {
   light: {
-    background: "#eff0f3",
-    headline: "#0d0d0d",
-    paragraph: "#2a2a2a",
-    button: "#ff8e3c",
-    buttonText: "#0d0d0d",
-    stroke: "#0d0d0d",
-    main: "#eff0f3",
-    highlight: "#ff8e3c",
-    secondary: "#ffffff",
-    tertiary: "#d9376e",
-    docBg: "#ffffff",
-    docText: "#000000",
-    sidebarBg: "#ffffff",
-    sidebarBorder: "#0d0d0d",
-  },
+    background: '#fef6e4',
+    headline: '#001858',
+    paragraph: '#172c66',
+    button: '#f582ae',
+    buttonText: '#001858',
+    stroke: '#001858',
+    main: '#f3d2c1',
+    highlight: '#fef6e4',
+    secondary: '#8bd3dd',
+    tertiary: '#f582ae',
+    docBg: '#ffffff',
+    docText: '#000000',
+    sidebarBg: '#ffffff',
+    sidebarBorder: '#e0e0e0',
+    tableBorder: '#000000', // Alterado para preto para melhor visibilidade e consistência.
+    tableHeaderBg: '#f0f0f0',
+    buttonSecondary: '#8bd3dd', // Botão secundário (PDF)
+  }
 };
 
 // --- Serviços disponíveis e seus nomes completos ---
@@ -147,6 +152,7 @@ const ControlsSidebar = ({
   onImportDocx,
   onSaveProposal,
   onDownloadDocx,
+  onDownloadPdf, // Adicionado
 }) => {
   const themeColors = colors[theme];
 
@@ -314,13 +320,22 @@ const ControlsSidebar = ({
             onClick={onSaveProposal}>
             💾 Salvar Proposta
           </button>
-          <button
-            id="download-docx"
-            className="btn primary"
-            style={{ width: "100%", marginBottom: "8px" }}
-            onClick={onDownloadDocx}>
-            ⬇️ Baixar .docx
-          </button>
+          <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
+            <button
+              id="download-docx"
+              className="btn primary"
+              style={{ flex: 1, marginBottom: "8px" }}
+              onClick={onDownloadDocx}>
+              ⬇️ Baixar .docx
+            </button>
+            <button
+              id="download-pdf"
+              className="btn"
+              style={{ flex: 1, marginBottom: "8px", background: themeColors.buttonSecondary, color: themeColors.buttonText }}
+              onClick={onDownloadPdf}>
+              ⬇️ Baixar PDF
+            </button>
+          </div>
         </div>
       </div>
 
@@ -450,12 +465,25 @@ const ProposalDocument = ({ theme, options, services, customCabimentos }) => {
     // Usar o valor customizado se existir, senão usar o valor padrão
     const finalCabimento = customCabimentos && customCabimentos[serviceKey] ? customCabimentos[serviceKey] : cabimento;
 
+    const cellStyle = {
+        padding: '8px',
+        borderBottom: `1px solid ${themeColors.tableBorder}`,
+        borderRight: `1px solid ${themeColors.tableBorder}`,
+        color: "#000",
+        verticalAlign: 'top'
+    };
+
+    const lastCellStyle = {
+        ...cellStyle,
+        borderRight: 'none'
+    };
+
     return (
-      <tr key={serviceKey} style={{ height: 40, verticalAlign: "top", borderBottom: "4px solid black" }}>
-        <td className="p-2 align-top" style={{ paddingTop: 12, paddingBottom: 12, color: "#000" }}>
+      <tr key={serviceKey}>
+        <td style={cellStyle}>
           {tese}
         </td>
-        <td className="p-2 align-top" style={{ paddingTop: 12, paddingBottom: 12, color: "#000" }}>
+        <td style={lastCellStyle}>
           {finalCabimento}
         </td>
       </tr>
@@ -464,7 +492,7 @@ const ProposalDocument = ({ theme, options, services, customCabimentos }) => {
 
   // Helper para renderizar uma "página"
   const renderPage = (children, showLogo = true) => (
-    <div style={{ pageBreakAfter: "always", paddingBottom: 40 }}>
+    <div className="pdf-page-render" style={{ pageBreakAfter: "always", paddingBottom: 40, background: 'white' }}>
       {showLogo && (
         <div style={{ textAlign: "center", marginBottom: 24 }}>
           <img
@@ -568,25 +596,18 @@ const ProposalDocument = ({ theme, options, services, customCabimentos }) => {
           </p>
           <p className="mb-4">A proposta inclui os seguintes objetos:</p>
           <table
-            className="w-full border-collapse border mb-4"
+            className="w-full"
             style={{
               width: "100%",
-              border: "1px solid #000",
-              borderTop: "4px solid #000",
-              borderBottom: "4px solid #000",
+              borderCollapse: 'collapse',
+              border: `1px solid ${themeColors.tableBorder}`,
             }}>
             <thead>
-              <tr
-                style={{
-                  background: "#f7f7f7",
-                  textAlign: "left",
-                  borderBottom: "4px solid #000",
-                  borderTop: "4px solid #000",
-                }}>
-                <th className="p-2 border-r" style={{ padding: 8, borderRight: "2px solid #000" }}>
+              <tr style={{ background: "#f7f7f7" }}>
+                <th style={{ padding: 8, borderBottom: `2px solid ${themeColors.tableBorder}`, borderRight: `1px solid ${themeColors.tableBorder}`, textAlign: 'left' }}>
                   TESE
                 </th>
-                <th className="p-2" style={{ padding: 8 }}>
+                <th style={{ padding: 8, borderBottom: `2px solid ${themeColors.tableBorder}`, textAlign: 'left' }}>
                   CABIMENTO / PERSPECTIVA
                 </th>
               </tr>
@@ -736,7 +757,6 @@ const ProposalDocument = ({ theme, options, services, customCabimentos }) => {
     </div>
   );
 };
-
 // Componente principal App
 function App() {
   const [theme] = useState("light");
@@ -774,6 +794,45 @@ function App() {
     onConfirm: () => {},
     onCancel: () => {},
   });
+
+  const generatePdf = async () => {
+    console.log("Gerando PDF...");
+    const previewElement = document.getElementById('preview');
+    if (!previewElement) {
+        alert("Elemento de pré-visualização não encontrado.");
+        return;
+    }
+
+    const pageElements = previewElement.querySelectorAll('.pdf-page-render');
+    if (pageElements.length === 0) {
+        alert("Nenhuma página encontrada para gerar o PDF.");
+        return;
+    }
+
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+
+    for (let i = 0; i < pageElements.length; i++) {
+        const pageElement = pageElements[i];
+        const canvas = await html2canvas(pageElement, {
+            scale: 2, // Maior escala para melhor qualidade
+            useCORS: true,
+            backgroundColor: '#ffffff',
+        });
+        
+        const imgData = canvas.toDataURL('image/png');
+        
+        if (i > 0) {
+            pdf.addPage();
+        }
+        
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+    }
+
+    pdf.save(`Proposta-${options.municipio || "Municipio"}.pdf`);
+    console.log("Download do PDF iniciado!");
+  };
 
   // Funções auxiliares
   const generateDocx = async () => {
@@ -1658,6 +1717,7 @@ function App() {
           onImportDocx={importDocx}
           onSaveProposal={saveProposal}
           onDownloadDocx={generateDocx}
+          onDownloadPdf={generatePdf} // Adicionado
         />
         <div className="content">
           <ProposalDocument theme={theme} options={options} services={services} customCabimentos={customCabimentos} />
