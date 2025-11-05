@@ -629,7 +629,7 @@ const ProposalDocument = ({ theme, options, services, customCabimentos }) => {
               <img
                 src="/logo-cavalcante-reis.png"
                 alt="Logo Cavalcante Reis Advogados"
-                style={{ maxWidth: 300, maxHeight: 100, display: "block", margin: "0 auto" }}
+                style={{ width: "166px", height: "87px", display: "block", margin: "0 auto" }}
               />
             </div>
           )}
@@ -655,18 +655,18 @@ const ProposalDocument = ({ theme, options, services, customCabimentos }) => {
             <img
               src="/logo-cavalcante-reis.png"
               alt="Cavalcante Reis Advogados"
-              style={{ width: "250px", height: "auto" }}
+              style={{ width: "166px", height: "87px" }}
             />
           </div>
 
-          <div style={{ marginTop: 40 }}>
+          <div style={{ marginTop: 200 }}>
             <div
               style={{
                 borderTop: "1px solid #000",
                 paddingTop: 25,
                 maxWidth: "55%",
                 marginLeft: "auto",
-                marginRight: 0,
+                marginRight: "auto",
               }}>
               <div style={{ textAlign: "right", marginBottom: 30 }}>
                 <p style={{ margin: "4px 0" }}>
@@ -696,22 +696,22 @@ const ProposalDocument = ({ theme, options, services, customCabimentos }) => {
           <h2 style={{ fontSize: "20px", fontWeight: "bold", marginBottom: 30 }}>Sumário</h2>
           <div style={{ paddingLeft: 40, lineHeight: 2 }}>
             <p style={{ margin: "12px 0" }}>
-              <strong>1.</strong> Objeto da Proposta
+              <strong>1. Objeto da Proposta</strong>
             </p>
             <p style={{ margin: "12px 0" }}>
-              <strong>2.</strong> Análise da Questão
+              <strong>2. Análise da Questão</strong>
             </p>
             <p style={{ margin: "12px 0" }}>
-              <strong>3.</strong> Dos Honorários, das Condições de Pagamento e Despesas
+              <strong>3. Dos Honorários, das Condições de Pagamento e Despesas</strong>
             </p>
             <p style={{ margin: "12px 0" }}>
-              <strong>4.</strong> Prazo e Cronograma de Execução dos Serviços
+              <strong>4. Prazo e Cronograma de Execução dos Serviços</strong>
             </p>
             <p style={{ margin: "12px 0" }}>
-              <strong>5.</strong> Experiência em atuação em favor de Municípios e da Equipe Responsável
+              <strong>5. Experiência em atuação em favor de Municípios e da Equipe Responsável</strong>
             </p>
             <p style={{ margin: "12px 0" }}>
-              <strong>6.</strong> Disposições Finais
+              <strong>6. Disposições Finais</strong>
             </p>
           </div>
         </>,
@@ -1089,19 +1089,28 @@ function App() {
           new Paragraph({
             alignment: AlignmentType.CENTER,
             spacing: { after: 6000, before: 200 }, // Espaçamento aumentado
-            children: [new ImageRun({ data: logoBuffer, transformation: { width: 200, height: 60 } })],
+            children: [new ImageRun({ data: logoBuffer, transformation: { width: 166, height: 87 } })],
           }),
-          new Paragraph({
-            alignment: AlignmentType.RIGHT,
-            children: [
-              new Paragraph({ border: { top: { color: "000000", space: 1, style: "single", size: 6 } }, spacing: { after: 400 } }),
-              new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { after: 100 }, children: [new TextRun({ text: "Proponente:", bold: true, font: defaultFont, size: defaultSize })] }),
-              new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { after: 200 }, children: [new TextRun({ text: "Cavalcante Reis Advogados", font: defaultFont, size: defaultSize })] }),
-              new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { after: 100 }, children: [new TextRun({ text: "Destinatário:", bold: true, font: defaultFont, size: defaultSize })] }),
-              new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { after: 400 }, children: [new TextRun({ text: `Prefeitura Municipal de ${options.municipio || "[Nome do Município]"}`, font: defaultFont, size: defaultSize })] }),
-              new Paragraph({ border: { top: { color: "000000", space: 1, style: "single", size: 6 } }, spacing: { after: 200 } }),
-              new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: options.data || "2025", bold: true, font: defaultFont, size: titleSize })] }),
-            ]
+          new Table({
+            width: { size: 55, type: "pct" },
+            alignment: AlignmentType.CENTER,
+            rows: [
+              new TableRow({
+                children: [
+                  new TableCell({
+                    borders: { top: { style: "single", size: 6, color: "000000" }, bottom: { style: "none" }, left: { style: "none" }, right: { style: "none" } },
+                    children: [
+                      new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { after: 100, before: 200 }, children: [new TextRun({ text: "Proponente:", bold: true, font: defaultFont, size: defaultSize })] }),
+                      new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { after: 200 }, children: [new TextRun({ text: "Cavalcante Reis Advogados", font: defaultFont, size: defaultSize })] }),
+                      new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { after: 100 }, children: [new TextRun({ text: "Destinatário:", bold: true, font: defaultFont, size: defaultSize })] }),
+                      new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { after: 400 }, children: [new TextRun({ text: `Prefeitura Municipal de ${options.municipio || "[Nome do Município]"}`, font: defaultFont, size: defaultSize })] }),
+                      new Paragraph({ border: { top: { color: "000000", space: 1, style: "single", size: 6 } }, spacing: { after: 200 } }),
+                      new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: options.data || "2025", bold: true, font: defaultFont, size: titleSize })] }),
+                    ],
+                  }),
+                ],
+              }),
+            ],
           }),
         ],
       });
