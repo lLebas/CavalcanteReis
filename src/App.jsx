@@ -36,7 +36,6 @@ const allServices = {
   folhaPagamento: "Folha de Pagamento (INSS)",
   pasep: "Recuperação/Compensação PASEP",
   rpps: "RPPS (Regime Próprio)",
-  impostoRenda: "– Imposto de Renda Retido na Fonte incidente sobre fornecimento de bens ou prestação de serviços em geral",
   cfem: "Compensação (Recursos Minerais - CFEM)",
   cfurh: "Compensação (Recursos Hídricos - CFURH)",
   tabelaSUS: "Tabela SUS",
@@ -52,7 +51,7 @@ const allServices = {
 
 // --- Banco de textos oficiais de cada serviço (HTML) ---
 const serviceTextDatabase = {
-  impostoRenda: `
+  pasep: `
 <p>No julgamento do IRDR, ficou estabelecido que a Constituição Federal, através do 
 art. 158, inciso I, que define o direito do Ente municipal ao produto da arrecadação 
 8 -
@@ -196,6 +195,8 @@ const ControlsSidebar = ({
   theme,
   options,
   setOptions,
+  prazo,
+  setPrazo,
   services,
   setServices,
   customCabimentos,
@@ -335,6 +336,17 @@ const ControlsSidebar = ({
           onChange={handleDateChange}
           maxLength={10}
           placeholder="DD/MM/AAAA"
+        />
+      </div>
+
+      <div className="field">
+        <label>Prazo de Execução</label>
+        <input
+          name="prazo"
+          value={prazo}
+          onChange={(e) => setPrazo(e.target.value)}
+          maxLength={100}
+          placeholder="24 (vinte e quatro)"
         />
       </div>
 
@@ -580,7 +592,7 @@ const ControlsSidebar = ({
   );
 };
 
-const ProposalDocument = ({ theme, options, services, customCabimentos, customEstimates, rppsImage }) => {
+const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, customEstimates, rppsImage }) => {
   const themeColors = colors[theme];
 
   const Footer = () => (
@@ -924,7 +936,6 @@ const ProposalDocument = ({ theme, options, services, customCabimentos, customEs
               )}
               {renderTableRow("pasep", "Recuperação/ compensação PASEP", "Cabível")}
               {renderTableRow("rpps", "RPPS Regime Próprio de Previdência Social", "Cabível")}
-              {renderTableRow("impostoRenda", "Recuperação/Compensação de Imposto de Renda", "Cabível")}
               {renderTableRow("cfem", "Compensação financeira pela exploração de recursos minerais – CFEM", "Cabível")}
               {renderTableRow(
                 "cfurh",
@@ -972,31 +983,30 @@ const ProposalDocument = ({ theme, options, services, customCabimentos, customEs
           <h2 className="text-2xl font-bold" style={{ borderBottom: "1px solid #ddd", paddingBottom: 8 }}>
             2. Análise da Questão
           </h2>
-          {renderServiceSection("folhaPagamento", serviceTitles.folhaPagamento, serviceTextDatabase.folhaPagamento)}
-          {renderServiceSection("pasep", serviceTitles.pasep, serviceTextDatabase.pasep)}
-          {renderServiceSection("rpps", serviceTitles.rpps, serviceTextDatabase.rpps)}
-          {renderServiceSection("impostoRenda", serviceTitles.impostoRenda, serviceTextDatabase.impostoRenda)}
-          {renderServiceSection("cfem", serviceTitles.cfem, serviceTextDatabase.cfem)}
-          {renderServiceSection("cfurh", serviceTitles.cfurh, serviceTextDatabase.cfurh)}
-          {renderServiceSection("tabelaSUS", serviceTitles.tabelaSUS, serviceTextDatabase.tabelaSUS)}
-          {renderServiceSection("fundef", serviceTitles.fundef, serviceTextDatabase.fundeb)}
-          {renderServiceSection("fundeb", serviceTitles.fundeb, serviceTextDatabase.fundeb)}
-          {renderServiceSection("energiaEletrica", serviceTitles.energiaEletrica, serviceTextDatabase.energiaEletrica)}
+          {renderServiceSection("folhaPagamento", allServices.folhaPagamento, serviceTextDatabase.folhaPagamento)}
+          {renderServiceSection("pasep", allServices.pasep, serviceTextDatabase.pasep)}
+          {renderServiceSection("rpps", allServices.rpps, serviceTextDatabase.rpps)}
+          {renderServiceSection("cfem", allServices.cfem, serviceTextDatabase.cfem)}
+          {renderServiceSection("cfurh", allServices.cfurh, serviceTextDatabase.cfurh)}
+          {renderServiceSection("tabelaSUS", allServices.tabelaSUS, serviceTextDatabase.tabelaSUS)}
+          {renderServiceSection("fundef", allServices.fundef, serviceTextDatabase.fundeb)}
+          {renderServiceSection("fundeb", allServices.fundeb, serviceTextDatabase.fundeb)}
+          {renderServiceSection("energiaEletrica", allServices.energiaEletrica, serviceTextDatabase.energiaEletrica)}
           {renderServiceSection(
             "royaltiesOleoGas",
-            serviceTitles.royaltiesOleoGas,
+            allServices.royaltiesOleoGas,
             serviceTextDatabase.royaltiesOleoGas
           )}
-          {renderServiceSection("repassesFPM", serviceTitles.repassesFPM, serviceTextDatabase.repassesFPM)}
+          {renderServiceSection("repassesFPM", allServices.repassesFPM, serviceTextDatabase.repassesFPM)}
           {renderServiceSection(
             "revisaoParcelamento",
-            serviceTitles.revisaoParcelamento,
+            allServices.revisaoParcelamento,
             serviceTextDatabase.revisaoParcelamento
           )}
-          {renderServiceSection("issqn", serviceTitles.issqn, serviceTextDatabase.issqn)}
+          {renderServiceSection("issqn", allServices.issqn, serviceTextDatabase.issqn)}
           {renderServiceSection(
             "servicosTecnicos",
-            serviceTitles.servicosTecnicos,
+            allServices.servicosTecnicos,
             serviceTextDatabase.servicosTecnicos
           )}
         </>,
@@ -1025,7 +1035,7 @@ const ProposalDocument = ({ theme, options, services, customCabimentos, customEs
             4. Prazo e Cronograma de Execução dos Serviços
           </h2>
           <p>
-            O prazo de execução será de 24 (vinte e quatro) meses ou pelo tempo que perdurar os processos judiciais,
+            O prazo de execução será de {prazo} meses ou pelo tempo que perdurar os processos judiciais,
             podendo ser prorrogado por interesse das partes.
           </p>
         </>,
@@ -1109,6 +1119,7 @@ const ProposalDocument = ({ theme, options, services, customCabimentos, customEs
 function App() {
   const [theme] = useState("light");
   const [options, setOptions] = useState({ municipio: "", destinatario: "", data: "" });
+  const [prazo, setPrazo] = useState("24 (vinte e quatro)");
   const [services, setServices] = useState(
     Object.keys(allServices).reduce((acc, key) => {
       acc[key] = false;
@@ -1118,7 +1129,6 @@ function App() {
   const [customCabimentos, setCustomCabimentos] = useState({
     pasep: "Cabível",
     rpps: "Cabível",
-    impostoRenda: "Cabível",
     cfem: "Cabível",
     cfurh: "Cabível",
     tabelaSUS: "Cabível",
@@ -1133,7 +1143,6 @@ function App() {
   });
   const [customEstimates, setCustomEstimates] = useState({
     rpps: "R$ 24.020.766,00 (vinte e quatro milhões, vinte mil e setecentos e sessenta e seis reais)",
-    impostoRenda: "R$ 41.040.705,85 (quarenta e um milhões, quarenta mil, setecentos e cinco reais e oitenta e cinco centavos)",
   });
   const [savedProposals, setSavedProposals] = useState([]);
   const [modal, setModal] = useState({
@@ -1274,7 +1283,6 @@ function App() {
       if (services.folhaPagamento) tableRows.push(createTableRow("Folha de pagamento, recuperação de verbas indenizatórias e contribuições previdenciárias (INSS)", "A perspectiva de incremento/recuperação é de aproximadamente o valor referente a até duas folhas de pagamento mensais."));
       if (services.pasep) tableRows.push(createTableRow("Recuperação/ compensação PASEP", customCabimentos.pasep));
       if (services.rpps) tableRows.push(createTableRow("RPPS Regime Próprio de Previdência Social", customCabimentos.rpps));
-      if (services.impostoRenda) tableRows.push(createTableRow("Recuperação/Compensação de Imposto de Renda", customCabimentos.impostoRenda));
       if (services.cfem) tableRows.push(createTableRow("Compensação financeira pela exploração de recursos minerais – CFEM", customCabimentos.cfem));
       if (services.cfurh) tableRows.push(createTableRow("Compensação Financeira pela Utilização dos Recursos Hídricos – CFURH", customCabimentos.cfurh));
       if (services.tabelaSUS) tableRows.push(createTableRow("Tabela SUS", customCabimentos.tabelaSUS));
@@ -1355,7 +1363,7 @@ function App() {
       const analiseQuestaoChildren = [headerLogo, createSectionTitle("2. Análise da Questão")];
       Object.entries(services).forEach(([key, isSelected]) => {
         if (isSelected && serviceTextDatabase[key]) {
-          analiseQuestaoChildren.push(new Paragraph({ spacing: { before: 400 }, children: [new TextRun({ text: serviceTitles[key], bold: true, font: defaultFont, size: 26 })] }));
+          analiseQuestaoChildren.push(new Paragraph({ spacing: { before: 400 }, children: [new TextRun({ text: allServices[key], bold: true, font: defaultFont, size: 26 })] }));
           const paragraphs = serviceTextDatabase[key].replace(/<p>/gi, "").split(/<\/p>/gi).map(p => p.replace(/<[^>]+>/g, ' ').trim()).filter(p => p);
           paragraphs.forEach(pText => {
             analiseQuestaoChildren.push(new Paragraph({ spacing: { after: 150 }, children: [new TextRun({ text: pText, font: defaultFont, size: defaultSize })] }));
@@ -1383,7 +1391,7 @@ function App() {
         children: [
           headerLogo,
           createSectionTitle("4. Prazo e Cronograma de Execução dos Serviços"),
-          new Paragraph({ children: [new TextRun({ text: "O prazo de execução será de 24 (vinte e quatro) meses ou pelo tempo que perdurar os processos judiciais, podendo ser prorrogado por interesse das partes.", font: defaultFont, size: defaultSize })] }),
+          new Paragraph({ children: [new TextRun({ text: `O prazo de execução será de ${prazo} meses ou pelo tempo que perdurar os processos judiciais, podendo ser prorrogado por interesse das partes.`, font: defaultFont, size: defaultSize })] }),
         ],
       });
 
@@ -1725,6 +1733,8 @@ function App() {
           theme={theme}
           options={options}
           setOptions={setOptions}
+          prazo={prazo}
+          setPrazo={setPrazo}
           services={services}
           setServices={setServices}
           customCabimentos={customCabimentos}
@@ -1743,7 +1753,7 @@ function App() {
           onDownloadPdf={generatePdf} // Adicionado
         />
         <div className="content">
-          <ProposalDocument theme={theme} options={options} services={services} customCabimentos={customCabimentos} customEstimates={customEstimates} rppsImage={rppsImage} />
+          <ProposalDocument theme={theme} options={options} prazo={prazo} services={services} customCabimentos={customCabimentos} customEstimates={customEstimates} rppsImage={rppsImage} />
         </div>
         <Modal {...modal} />
       </main>
