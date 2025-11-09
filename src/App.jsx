@@ -33,7 +33,7 @@ const colors = {
 
 // --- Serviços disponíveis e seus nomes completos ---
 const allServices = {
-  folhaPagamento: "Folha de Pagamento (INSS)",
+  folhaPagamento: "Folha de pagamento, recuperação de verbas indenizatórias e contribuições previdenciárias",
   pasep: "Recuperação/Compensação PASEP",
   rpps: "RPPS (Regime Próprio)",
   cfem: "Compensação (Recursos Minerais - CFEM)",
@@ -124,10 +124,19 @@ por meio da capacitação, as orientações sobre as medidas legais e cabíveis 
 <p>Em relação ao objeto desta (INSS – RPPS) o valor estimado de recuperação da 
 receita é de {{rpps_estimate}}.</p>
   `,
-  folhaPagamento: `<p>Realização de auditoria das folhas de pagamento referentes ao Regime Geral, bem como das GFIPS e tabela de incidências do INSS.</p>
-  <p>Há muito se discute acerca da correta base de cálculo das contribuições previdenciárias, especialmente porque há conflitos entre a legislação infraconstitucional e as diretrizes da Constituição Federal.</p>
-  <p>A controvérsia cinge-se quanto à incidência ou não da contribuição previdenciária patronal sobre as verbas de caráter indenizatório, pagas aos servidores públicos municipais, celetistas
-    <p>A tese, portanto, consiste em reaver os valores retidos e não repassados ao Município nos últimos 05 (cinco) anos, bem como garantir os repasses futuros, por via administrativa e/ou judicial.</p>
+  folhaPagamento: `
+    <p>Realização de auditoria das folhas de pagamento referentes ao Regime Geral, bem como das GFIPS e tabela de incidências do INSS.</p>
+    <p>Há muito se discute acerca da correta base de cálculo das contribuições previdenciárias, especialmente porque há conflitos entre a legislação infraconstitucional e as diretrizes da Constituição Federal.</p>
+    <p>Em aspectos gerais, nota-se que alguns elementos são destacados pelos entendimentos jurisprudenciais e pela doutrina, como requisitos a serem observados para definir se um determinado valor deve ou não compor a base de incidência da exação.</p>
+    <p>Tais elementos são: a contraprestabilidade, a habitualidade e o princípio da contrapartida, a partir dos quais sedimentou-se entendimento pela exclusão de algumas rubricas da base de cálculo das contribuições previdenciárias, como é o caso do salário maternidade, dos quinze primeiros dias que antecedem o auxílio doença/acidente, do aviso prévio indenizado, dentre outros.</p>
+    <p>Não obstante, a própria legislação prevê que diversas rubricas não integram a base de incidência das contribuições previdenciárias, como se observa do Art. 28, §9°, da Lei 8.212/91.</p>
+    <p>Além disso, vale destacar que a reforma trabalhista (2017) assentou que outras verbas, como diárias e alimentação (inclusive via tickets, cartões ou cesta básica) igualmente não devem sofrer a incidência do tributo em questão.</p>
+    <p>Sucede-se que o exame e adequação da base de cálculo das contribuições previdenciárias competem ao contribuinte, de modo que, apurando-se valores indevidamente pagos, fará jus ao direito de compensação.</p>
+    <p>A compensação é um direito subjetivo do contribuinte, com expressa previsão legal. Neste sentido, é o que determina o artigo 74 da Lei 9.430/1996.</p>
+    <p>Como determina o parágrafo 2º do Art. 74 da Lei 9.430/1996 (acima colacionado) a homologação da compensação se dá em caráter ulterior, inexistindo normativo que exija procedimento prévio.</p>
+    <p>Isso significa dizer que a Receita Federal pode fiscalizar as contribuições realizadas pelo contribuinte, homologando-as ou não. Caso transcorra cinco anos sem fiscalização, tem-se a chamada homologação tácita.</p>
+    <p>Por tais razões, é importante o trabalho que determina a origem do crédito, consubstanciada no levantamento de valores indevidamente pagos, com indicação de cálculo e fundamentação.</p>
+    <p>Por fim, ressaltamos que, no caso de glosa de compensações, prestamos assessoria e consultoria tanto na fase administrativa quanto na judicial, se houver.</p>
   `,
   cfem: `
     <p>A Compensação Financeira pela Exploração de Recursos Minerais (CFEM) é uma contraprestação paga à União, Estados, Distrito Federal e Municípios pela utilização econômica dos recursos minerais em seus respectivos territórios.</p>
@@ -235,11 +244,11 @@ const ControlsSidebar = ({
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            setRppsImage(reader.result);
-        };
-        reader.readAsDataURL(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setRppsImage(reader.result);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -434,18 +443,18 @@ const ControlsSidebar = ({
                 <div style={{ marginLeft: "24px", marginTop: "4px" }}>
                   <label style={{ fontSize: '12px' }}>Imagem</label>
                   <input
-                      type="file"
-                      id="rpps-image-input"
-                      style={{ display: 'none' }}
-                      accept="image/png, image/jpeg"
-                      onChange={handleImageUpload}
+                    type="file"
+                    id="rpps-image-input"
+                    style={{ display: 'none' }}
+                    accept="image/png, image/jpeg"
+                    onChange={handleImageUpload}
                   />
                   <button
-                      onClick={() => document.getElementById('rpps-image-input').click()}
-                      className="btn"
-                      style={{ width: '100%', marginTop: '4px' }}
+                    onClick={() => document.getElementById('rpps-image-input').click()}
+                    className="btn"
+                    style={{ width: '100%', marginTop: '4px' }}
                   >
-                      Anexar Imagem
+                    Anexar Imagem
                   </button>
                   {rppsImage && <img src={rppsImage} alt="Preview" style={{ width: '100%', marginTop: '8px' }} />}
                 </div>
@@ -596,132 +605,93 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
   const themeColors = colors[theme];
 
   const Footer = () => (
-
     <div style={{
-
       position: 'absolute',
-
-      bottom: '40px',
-
-      left: '40px',
-
-      right: '40px',
-
-      fontSize: '13px',
-
+      bottom: '15mm', // Margem inferior da página
+      left: '20mm',
+      right: '20mm',
+      height: '55mm', // Altura fixa do rodapé
+      fontSize: '10px',
       color: '#555',
-
-      fontFamily: "'EB Garamond', serif"
-
+      fontFamily: "'EB Garamond', serif",
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'flex-end',
+      paddingTop: '8px'
     }}>
-
-      <div style={{ paddingTop: '10px', marginBottom: '10px' }}>
-
-        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '15px', textAlign: 'left' }}>
-
+      <div style={{ paddingTop: '6px', marginBottom: '6px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', textAlign: 'left' }}>
           {/* Rio de Janeiro */}
-
           <div style={{ flex: 1 }}>
-
-            <p style={{ margin: 0, fontWeight: 'bold' }}>Rio de Janeiro - RJ</p>
-
-            <p style={{ margin: 0 }}>AV. DAS AMÉRICAS, 3434 - BL 04</p>
-
-            <p style={{ margin: 0 }}>Sala, 207 Barra Da Tijuca,</p>
-
-            <p style={{ margin: 0 }}>CEP: 22640-102</p>
-
+            <p style={{ margin: 0, fontWeight: 'bold', marginBottom: '3px', fontSize: '10px' }}>Rio de Janeiro - RJ</p>
+            <p style={{ margin: 0, lineHeight: '1.4', fontSize: '9px' }}>AV. DAS AMÉRICAS, 3434 - BL 04</p>
+            <p style={{ margin: 0, lineHeight: '1.4', fontSize: '9px' }}>Sala, 207 Barra Da Tijuca,</p>
+            <p style={{ margin: 0, lineHeight: '1.4', fontSize: '9px' }}>CEP: 22640-102</p>
           </div>
-
           {/* São Paulo */}
-
           <div style={{ flex: 1 }}>
-
-            <p style={{ margin: 0, fontWeight: 'bold' }}>São Paulo - SP</p>
-
-            <p style={{ margin: 0 }}>Rua Fidêncio Ramos, 223,</p>
-
-            <p style={{ margin: 0 }}>Cobertura, Vila Olímpia,</p>
-
-            <p style={{ margin: 0 }}>CEP: 04551-010</p>
-
+            <p style={{ margin: 0, fontWeight: 'bold', marginBottom: '3px', fontSize: '10px' }}>São Paulo - SP</p>
+            <p style={{ margin: 0, lineHeight: '1.4', fontSize: '9px' }}>Rua Fidêncio Ramos, 223,</p>
+            <p style={{ margin: 0, lineHeight: '1.4', fontSize: '9px' }}>Cobertura, Vila Olímpia,</p>
+            <p style={{ margin: 0, lineHeight: '1.4', fontSize: '9px' }}>CEP: 04551-010</p>
           </div>
-
           {/* Brasília */}
-
           <div style={{ flex: 1 }}>
-
-            <p style={{ margin: 0, fontWeight: 'bold' }}>Brasília - DF</p>
-
-            <p style={{ margin: 0 }}>SHIS QL 10, Conj. 06, Casa 19</p>
-
-            <p style={{ margin: 0 }}>Lago Sul,</p>
-
-            <p style={{ margin: 0 }}>CEP: 71630-065</p>
-
+            <p style={{ margin: 0, fontWeight: 'bold', marginBottom: '3px', fontSize: '10px' }}>Brasília - DF</p>
+            <p style={{ margin: 0, lineHeight: '1.4', fontSize: '9px' }}>SHIS QL 10, Conj. 06, Casa 19</p>
+            <p style={{ margin: 0, lineHeight: '1.4', fontSize: '9px' }}>Lago Sul,</p>
+            <p style={{ margin: 0, lineHeight: '1.4', fontSize: '9px' }}>CEP: 71630-065</p>
           </div>
-
           {/* Manaus */}
-
           <div style={{ flex: 1 }}>
-
-            <p style={{ margin: 0, fontWeight: 'bold' }}>Manaus - AM</p>
-
-            <p style={{ margin: 0 }}>Rua Silva Ramos, 78 - Centro</p>
-
-            <p style={{ margin: 0 }}>Manaus, AM</p>
-
-            <p style={{ margin: 0 }}>CEP: 69010-180</p>
-
+            <p style={{ margin: 0, fontWeight: 'bold', marginBottom: '3px', fontSize: '10px' }}>Manaus - AM</p>
+            <p style={{ margin: 0, lineHeight: '1.4', fontSize: '9px' }}>Rua Silva Ramos, 78 - Centro</p>
+            <p style={{ margin: 0, lineHeight: '1.4', fontSize: '9px' }}>Manaus, AM</p>
+            <p style={{ margin: 0, lineHeight: '1.4', fontSize: '9px' }}>CEP: 69010-180</p>
           </div>
-
         </div>
-
       </div>
-
       <div style={{
-
-        padding: '8px 15px',
-
+        padding: '5px 10px',
         border: '1px solid #e0e6f0',
-
-        borderRadius: '20px',
-
-        textAlign: 'center'
-
+        borderRadius: '15px',
+        textAlign: 'center',
+        marginTop: '6px'
       }}>
-
-        <p style={{ margin: 0, letterSpacing: '2px', fontWeight: 'bold', fontSize: '12px' }}>w w w . c a v a l c a n t e r e i s . a d v . b r</p>
-
+        <p style={{ margin: 0, letterSpacing: '1.5px', fontWeight: 'bold', fontSize: '10px' }}>w w w . c a v a l c a n t e r e i s . a d v . b r</p>
       </div>
-
     </div>
-
   );
 
   // Helper para renderizar serviços como componentes React
+
+  // Contador para numeração dinâmica dos serviços na seção 2
+  let serviceCounter = 0;
 
   // Helper para renderizar serviços como componentes React
   const renderServiceSection = (serviceKey, title, content) => {
     if (!services[serviceKey]) return null;
 
+    // Incrementar o contador apenas se o serviço estiver selecionado
+    serviceCounter++;
+
     let processedContent = content;
     if (content) {
-        if (serviceKey === 'rpps' && customEstimates.rpps) {
-            processedContent = content.replace('{{rpps_estimate}}', customEstimates.rpps);
-        }
-        if (serviceKey === 'impostoRenda' && customEstimates.impostoRenda) {
-            processedContent = content.replace('{{impostoRenda_estimate}}', customEstimates.impostoRenda);
-        }
+      if (serviceKey === 'rpps' && customEstimates.rpps) {
+        processedContent = content.replace('{{rpps_estimate}}', customEstimates.rpps);
+      }
+      if (serviceKey === 'impostoRenda' && customEstimates.impostoRenda) {
+        processedContent = content.replace('{{impostoRenda_estimate}}', customEstimates.impostoRenda);
+      }
     } else if (!content) {
-        // Handle missing content
-        return (
-            <>
-                <hr style={{ border: "2px solid black", margin: "24px 0" }} />
-                <h3 className="font-bold text-lg mt-6 mb-2" style={{ color: "#000" }}>{title}</h3>
-                <div className="space-y-4"><p>Conteúdo não disponível.</p></div>
-            </>
-        );
+      // Handle missing content
+      return (
+        <>
+          <hr style={{ border: "2px solid black", margin: "24px 0" }} />
+          <h3 className="font-bold text-lg mt-6 mb-2" style={{ color: "#000" }}>{title}</h3>
+          <div className="space-y-4"><p>Conteúdo não disponível.</p></div>
+        </>
+      );
     }
 
     const tempDiv = document.createElement("div");
@@ -734,25 +704,27 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
       }
       if (el.tagName === 'DIV' && el.classList.contains('image-placeholder')) {
         if (rppsImage) {
-            return <img key={idx} src={rppsImage} style={{ width: '100%', height: 'auto', maxHeight: '600px', objectFit: 'contain', margin: '16px 0' }} />;
+          return <img key={idx} src={rppsImage} style={{ width: '100%', height: 'auto', maxHeight: '600px', objectFit: 'contain', margin: '16px 0' }} />;
         } else {
-            return (
-              <div key={idx} style={{ border: '1px solid #000', height: '400px', width: '80%', margin: '16px auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <p style={{ color: '#888' }}>Espaço para imagem/gráfico</p>
-              </div>
-            );
+          return (
+            <div key={idx} style={{ border: '1px solid #000', height: '400px', width: '80%', margin: '16px auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <p style={{ color: '#888' }}>Espaço para imagem/gráfico</p>
+            </div>
+          );
         }
       }
       return null;
     }).filter(Boolean);
 
+    // Usar o contador dinâmico para a numeração
+    const numberedTitle = `2.${serviceCounter} – ${title}`;
+
     return (
       <>
-        <hr style={{ border: "2px solid black", margin: "24px 0" }} />
         <h3 className="font-bold text-lg mt-6 mb-2" style={{ color: "#000" }}>
-          {title}
+          {numberedTitle}
         </h3>
-        <div className="space-y-4">{elements}</div>
+        <div className="space-y-4 mb-6">{elements}</div>
       </>
     );
   };
@@ -796,27 +768,33 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
       style={{
         pageBreakAfter: isLast ? 'auto' : 'always',
         background: 'white',
-        minHeight: '1123px', // A4 height in pixels at 96dpi for printing
-        position: 'relative', // For footer positioning
-        padding: '40px 40px 200px 40px' // Top, sides, bottom padding to make space for footer
+        width: '210mm', // Largura A4
+        minHeight: '297mm', // Altura mínima A4
+        position: 'relative',
+        padding: '20mm 20mm 75mm 20mm', // Top, sides, bottom (espaço aumentado para rodapé)
+        boxSizing: 'border-box',
+        display: 'flex',
+        flexDirection: 'column',
+        pageBreakInside: 'avoid'
       }}
     >
-      <div>
+      <div style={{ flex: '1 1 auto' }}>
         {showLogo && (
-          <div style={{ textAlign: "center", marginBottom: 24 }}>
+          <div style={{ textAlign: "center", marginBottom: 16, pageBreakInside: 'avoid' }}>
             <img
               src="/logo-cavalcante-reis.png"
               alt="Logo Cavalcante Reis Advogados"
+              crossOrigin="anonymous"
               style={{ width: "166px", height: "87px", display: "block", margin: "0 auto" }}
             />
           </div>
         )}
         {pageNumber && (
-          <div style={{ textAlign: 'right', fontSize: '14px', fontFamily: "'EB Garamond', serif", marginBottom: '24px' }}>
+          <div style={{ textAlign: 'right', fontSize: '14px', fontFamily: "'EB Garamond', serif", marginBottom: '16px', pageBreakInside: 'avoid' }}>
             {pageNumber} -
           </div>
         )}
-        <div style={{ maxWidth: '80%', margin: '0 auto' }}>
+        <div style={{ maxWidth: '100%', margin: '0 auto', paddingBottom: '20px' }}>
           {children}
         </div>
       </div>
@@ -833,6 +811,7 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
             <img
               src="/logo-cavalcante-reis.png"
               alt="Cavalcante Reis Advogados"
+              crossOrigin="anonymous"
               style={{ width: "166px", height: "87px" }}
             />
           </div>
@@ -1017,24 +996,24 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
       {renderPage(
         <>
           {/* Seção 3: Honorários */}
-          <h2 className="text-2xl font-bold" style={{ borderBottom: "1px solid #ddd", paddingBottom: 8 }}>
+          <h2 className="text-2xl font-bold" style={{ borderBottom: "1px solid #ddd", paddingBottom: 8, pageBreakAfter: 'avoid' }}>
             3. Dos Honorários, das Condições de Pagamento e Despesas
           </h2>
-          <p>
+          <p style={{ pageBreakInside: 'avoid' }}>
             Considerando a necessidade de manutenção do equilíbrio econômico-financeiro do contrato administrativo, propõe o escritório CAVALCANTE REIS ADVOGADOS que esta Municipalidade pague ao Proponente da seguinte forma:
           </p>
-          <p>
+          <p style={{ pageBreakInside: 'avoid' }}>
             <strong>3.1.1</strong> <strong>Para todos os demais itens descritos nesta Proposta</strong> será efetuado o pagamento de honorários advocatícios à CAVALCANTE REIS ADVOGADOS pela execução dos serviços de recuperação de créditos, <strong>ad êxito na ordem de R$ 0,20 (vinte centavos) para cada R$ 1,00 (um real)</strong> do montante referente ao incremento financeiro, ou seja, com base nos valores que entrarem nos cofres do CONTRATANTE;
           </p>
-          <p>
+          <p style={{ pageBreakInside: 'avoid' }}>
             <strong>3.1.2</strong> Em caso de valores retroativos recuperados em favor da municipalidade, que consiste nos <strong>valores não repassados em favor do Contratante nos últimos 5 (cinco) anos</strong> (prescrição quinquenal) ou não abarcados pela prescrição, também serão cobrados honorários advocatícios <strong>na ordem de R$ 0,20 (vinte centavos) para cada R$ 1.00 (um real) do montante recuperado aos Cofres Municipais.</strong>
           </p>
 
           {/* Seção 4: Prazo */}
-          <h2 className="text-2xl font-bold" style={{ borderBottom: "1px solid #ddd", paddingBottom: 8, marginTop: 32 }}>
+          <h2 className="text-2xl font-bold" style={{ borderBottom: "1px solid #ddd", paddingBottom: 8, marginTop: 32, pageBreakBefore: 'avoid', pageBreakAfter: 'avoid' }}>
             4. Prazo e Cronograma de Execução dos Serviços
           </h2>
-          <p>
+          <p style={{ pageBreakInside: 'avoid' }}>
             O prazo de execução será de {prazo} meses ou pelo tempo que perdurar os processos judiciais,
             podendo ser prorrogado por interesse das partes.
           </p>
@@ -1046,42 +1025,42 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
       {renderPage(
         <>
           {/* Seção 5: Experiência */}
-          <h2 className="text-2xl font-bold" style={{ borderBottom: "1px solid #ddd", paddingBottom: 8 }}>
+          <h2 className="text-2xl font-bold" style={{ borderBottom: "1px solid #ddd", paddingBottom: 8, marginBottom: 16 }}>
             5. Experiência e Equipe Responsável
           </h2>
-          <p>No portfólio de serviços executados e/ou em execução, constam os seguintes Municípios contratantes:</p>
-          <div style={{ marginTop: 16 }}>
-            <img src="/munincipios01.png" alt="Municípios Contratantes 1" style={{ width: "80%", display: "block", margin: "0 auto" }} />
+          <p style={{ marginBottom: 16 }}>No portfólio de serviços executados e/ou em execução, constam os seguintes Municípios contratantes:</p>
+          <div style={{ marginTop: 12, marginBottom: 8 }}>
+            <img src="/munincipios01.png" alt="Municípios Contratantes 1" crossOrigin="anonymous" style={{ width: "100%", height: "300px", objectFit: "contain", display: "block", margin: "0 auto" }} />
           </div>
-          <div style={{ marginTop: 8 }}>
-            <img src="/Munincipios02.png" alt="Municípios Contratantes 2" style={{ width: "80%", display: "block", margin: "0 auto" }} />
+          <div style={{ marginTop: 8, marginBottom: 16 }}>
+            <img src="/Munincipios02.png" alt="Municípios Contratantes 2" crossOrigin="anonymous" style={{ width: "100%", height: "200px", objectFit: "contain", display: "block", margin: "0 auto" }} />
           </div>
-          <p style={{ marginTop: 16 }}>
+          <p style={{ marginTop: 16, marginBottom: 12 }}>
             Para coordenar os trabalhos de consultoria propostos neste documento, a CAVALCANTE REIS ADVOGADOS alocará os seguintes profissionais:
           </p>
-          <p>
+          <p style={{ marginBottom: 12, textAlign: 'justify' }}>
             <strong>IURI DO LAGO NOGUEIRA CAVALCANTE REIS –</strong> Doutorando em Direito e Mestre em Direito Econômico e Desenvolvimento pelo Instituto Brasileiro de Ensino, Desenvolvimento e Pesquisa (IDP/Brasília). LLM (Master of Laws) em Direito Empresarial pela Fundação Getúlio Vargas (FGV/RJ). Integrante da Comissão de Juristas do Senado Federal criada para consolidar a proposta do novo Código Comercial Brasileiro. Autor e Coautor de livros, pareceres e artigos jurídicos na área do direito público. Sócio-diretor do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: iuri@cavalcantereis.adv.br).
           </p>
-          <p>
+          <p style={{ marginBottom: 12, textAlign: 'justify' }}>
             <strong>PEDRO AFONSO FIGUEIREDO DE SOUZA –</strong> Graduado em Direito pela Pontifícia Universidade Católica de Minas Gerais. Especialista em Direito Penal e Processo Penal pela Academia Brasileira de Direito Constitucional. Mestre em Direito nas Relações Econômicas e Sociais pela Faculdade de Direito Milton Campos. Diretor de Comunicação e Conselheiro Consultivo, Científico e Fiscal do Instituto de Ciências Penais. Autor de artigos e capítulos de livros jurídicos. Advogado associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: pedro@cavalcantereis.adv.br).
           </p>
-          <p>
+          <p style={{ marginBottom: 12, textAlign: 'justify' }}>
             <strong>SÉRGIO RICARDO ALVES DE JESUS FILHO –</strong> Graduado em Direito pelo Centro Universitário de Brasília (UniCEUB). Graduando em Ciências Contábeis pelo Centro Universitário de Brasília (UniCEUB). Pós-graduando em Direito Tributário pelo Instituto Brasileiro de Ensino, Desenvolvimento e Pesquisa (IDP). Membro da Comissão de Assuntos Tributários da OAB/DF. Advogado Associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: sergio@cavalcantereis.adv.br).
           </p>
-          <p>
+          <p style={{ marginBottom: 12, textAlign: 'justify' }}>
             <strong>JOSÉ HUMBERTO DOS SANTOS JÚNIOR –</strong> Graduado em Direito pelo Centro Universitário UniProcessus. Pós-graduando em Direito Penal e Direito Processual Penal aplicados e Execução Penal pela Escola Brasileira de Direito (EBRADI). Advogado Associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: jose.humberto@cavalcantereis.adv.br).
           </p>
-          <p>
+          <p style={{ marginBottom: 12, textAlign: 'justify' }}>
             <strong>GABRIEL SALES RESENDE SALGADO -</strong> Graduado em Direito pela Universidade do Distrito Federal (UDF). Pós-graduando em Direito Tributário pelo Instituto Brasileiro de Estudos Tributários (IBET). Advogado Associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248- 0612 (endereço eletrônico: gabriel@cavalcantereis.adv.br).
           </p>
-          <p>
+          <p style={{ marginBottom: 12, textAlign: 'justify' }}>
             Além desses profissionais, a CAVALCANTE REIS ADVOGADOS alocará uma equipe de profissionais pertencentes ao seu quadro técnico, utilizando, também, caso necessário, o apoio técnico especializado de terceiros, pessoas físicas ou jurídicas, que deverão atuar sob sua orientação, cabendo à CAVALCANTE REIS ADVOGADOS a responsabilidade técnica pela execução das tarefas.
           </p>
           <p>
             Nossa contratação, portanto, devido à altíssima qualificação e experiência, aliada à singularidade do objeto da demanda, bem como os diferenciais já apresentados acima, está inserida dentre as hipóteses do art. 6º, XVIII “e” e art. 74, III, “e”, da Lei n.º 14.133/2021.
           </p>
         </>,
-        { pageNumber: 6 }
+        { pageNumber: 6, showLogo: true }
       )}
 
       {/* Página 6: Disposições Finais */}
@@ -1107,7 +1086,7 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
           </p>
           <div style={{ marginTop: 48, textAlign: "center" }}>
             <p>Atenciosamente,</p>
-            <img src="/Assinatura.png" alt="Assinatura" style={{ width: "200px", margin: "8px auto 0" }} />
+            <img src="/Assinatura.png" alt="Assinatura" crossOrigin="anonymous" style={{ width: "200px", margin: "8px auto 0" }} />
           </div>
         </>,
         { pageNumber: 7, isLast: true }
@@ -1171,32 +1150,80 @@ function App() {
       return;
     }
 
+    // Pré-carregar todas as imagens antes de gerar o PDF
+    const images = previewElement.querySelectorAll('img');
+    const imageLoadPromises = Array.from(images).map(img => {
+      return new Promise((resolve) => {
+        if (img.complete && img.naturalHeight !== 0) {
+          resolve();
+        } else {
+          img.onload = () => resolve();
+          img.onerror = () => resolve(); // Resolve mesmo se houver erro para não bloquear
+          // Força reload se a imagem não estiver carregada
+          if (!img.complete) {
+            const src = img.src;
+            img.src = '';
+            img.src = src;
+          }
+        }
+      });
+    });
+
+    await Promise.all(imageLoadPromises);
+    console.log("Todas as imagens carregadas!");
+
+    // Aguardar um pouco mais para garantir que tudo está renderizado
+    await new Promise(resolve => setTimeout(resolve, 500));
+
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
 
-    const canvasPromises = Array.from(pageElements).map(pageElement =>
-      html2canvas(pageElement, {
-        scale: 2,
+    const canvasPromises = Array.from(pageElements).map((pageElement, index) => {
+      console.log(`Capturando página ${index + 1}...`);
+      return html2canvas(pageElement, {
+        scale: 3, // Aumentado para melhor qualidade
         useCORS: true,
+        allowTaint: false,
         backgroundColor: '#ffffff',
-      })
-    );
+        logging: true, // Ativado para debug
+        imageTimeout: 15000, // 15 segundos de timeout
+        foreignObjectRendering: false,
+        windowWidth: pageElement.scrollWidth,
+        windowHeight: pageElement.scrollHeight,
+        width: pageElement.scrollWidth,
+        height: pageElement.scrollHeight,
+        onclone: (clonedDoc) => {
+          // Garantir que todas as imagens estejam visíveis no clone
+          const clonedImages = clonedDoc.querySelectorAll('img');
+          clonedImages.forEach(img => {
+            img.style.display = 'block';
+            img.style.visibility = 'visible';
+          });
+        }
+      });
+    });
 
     const canvases = await Promise.all(canvasPromises);
+    console.log(`${canvases.length} páginas capturadas!`);
 
     for (let i = 0; i < canvases.length; i++) {
       const canvas = canvases[i];
-      const imgData = canvas.toDataURL('image/png');
-      const imgWidth = canvas.width;
-      const imgHeight = canvas.height;
-      const aspectRatio = imgHeight / imgWidth;
-      const pdfHeight = pdfWidth * aspectRatio;
+      const imgData = canvas.toDataURL('image/png', 1.0);
 
       if (i > 0) {
         pdf.addPage();
       }
 
+      // Ajustar para caber na página A4 mantendo proporção
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+      const width = imgWidth * ratio;
+      const height = imgHeight * ratio;
+
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      console.log(`Página ${i + 1} adicionada ao PDF`);
     }
 
     pdf.save(`Proposta-${options.municipio || "Municipio"}.pdf`);
