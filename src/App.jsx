@@ -4,7 +4,7 @@ import DOMPurify from "dompurify";
 import { Clipboard, Settings, FileText } from "lucide-react";
 import { saveAs } from "file-saver";
 import mammoth from "mammoth";
-import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, AlignmentType, ImageRun } from "docx";
+import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, AlignmentType, ImageRun, Footer } from "docx";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 
@@ -220,6 +220,8 @@ const ControlsSidebar = ({
   setRppsImage,
   footerOffices,
   setFooterOffices,
+  paymentValue,
+  setPaymentValue,
   savedProposals,
   onLoadProposal,
   onDeleteProposal,
@@ -507,16 +509,6 @@ const ControlsSidebar = ({
           <label className="service-item">
             <input
               type="checkbox"
-              checked={footerOffices.sp.enabled}
-              onChange={() => setFooterOffices({ ...footerOffices, sp: { ...footerOffices.sp, enabled: !footerOffices.sp.enabled } })}
-            />
-            <span>São Paulo - SP</span>
-          </label>
-        </div>
-        <div style={{ marginBottom: "12px" }}>
-          <label className="service-item">
-            <input
-              type="checkbox"
               checked={footerOffices.df.enabled}
               onChange={() => setFooterOffices({ ...footerOffices, df: { ...footerOffices.df, enabled: !footerOffices.df.enabled } })}
             />
@@ -532,6 +524,29 @@ const ControlsSidebar = ({
             />
             <span>Manaus - AM</span>
           </label>
+        </div>
+      </div>
+
+      <hr />
+
+      {/* Pagamento e Despesas */}
+      <div className="service-section">
+        <h3 style={{ marginBottom: "12px", fontSize: "14px" }}>Pagamento e Despesas</h3>
+        <div className="service-item">
+          <label style={{ display: "block", marginBottom: "8px", fontSize: "13px" }}>Valor do Pagamento:</label>
+          <input
+            type="text"
+            value={paymentValue}
+            onChange={(e) => setPaymentValue(e.target.value)}
+            placeholder="Ex: R$ 0,20 (vinte centavos)"
+            style={{
+              width: "100%",
+              padding: "8px",
+              border: "1px solid #ccc",
+              borderRadius: "4px",
+              fontSize: "13px"
+            }}
+          />
         </div>
       </div>
 
@@ -655,24 +670,42 @@ const ControlsSidebar = ({
   );
 };
 
-const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, customEstimates, rppsImage, footerOffices }) => {
+const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, customEstimates, rppsImage, footerOffices, paymentValue }) => {
   const themeColors = colors[theme];
+
+  // Função para formatar data com nome do mês por extenso
+  const formatDateWithMonthName = (dateString) => {
+    if (!dateString) return "17 de janeiro de 2025";
+
+    const monthNames = {
+      "01": "janeiro", "02": "fevereiro", "03": "março", "04": "abril",
+      "05": "maio", "06": "junho", "07": "julho", "08": "agosto",
+      "09": "setembro", "10": "outubro", "11": "novembro", "12": "dezembro"
+    };
+
+    // Tentar detectar o formato da data (dd/mm/yyyy ou mm/dd/yyyy)
+    const parts = dateString.split('/');
+    if (parts.length === 3) {
+      const day = parts[0];
+      const month = parts[1];
+      const year = parts[2];
+      const monthName = monthNames[month] || monthNames[parts[0]];
+      return `${day} de ${monthName} de ${year}`;
+    }
+
+    return dateString;
+  };
 
   const Footer = () => {
     // Filtrar apenas os escritórios habilitados
     const enabledOffices = [];
     if (footerOffices.rj.enabled) enabledOffices.push(footerOffices.rj);
-    if (footerOffices.sp.enabled) enabledOffices.push(footerOffices.sp);
     if (footerOffices.df.enabled) enabledOffices.push(footerOffices.df);
     if (footerOffices.am.enabled) enabledOffices.push(footerOffices.am);
 
     return (
       <div style={{
-        position: 'absolute',
-        bottom: '15mm',
-        left: '20mm',
-        right: '20mm',
-        height: '55mm',
+        marginTop: '24px',
         fontSize: '10px',
         color: '#555',
         fontFamily: "'EB Garamond', serif",
@@ -681,26 +714,25 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
         justifyContent: 'flex-end',
         paddingTop: '8px'
       }}>
-        <div style={{ paddingTop: '6px', marginBottom: '6px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', textAlign: 'center' }}>
+        <div style={{ paddingTop: '6px', marginBottom: '5px' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', textAlign: 'center' }}>
             {enabledOffices.map((office, index) => (
-              <div key={index} style={{ flex: 1 }}>
-                <p style={{ margin: 0, fontWeight: 'bold', marginBottom: '3px', fontSize: '10px' }}>{office.cidade}</p>
-                <p style={{ margin: 0, lineHeight: '1.4', fontSize: '9px' }}>{office.linha1}</p>
-                <p style={{ margin: 0, lineHeight: '1.4', fontSize: '9px' }}>{office.linha2}</p>
-                <p style={{ margin: 0, lineHeight: '1.4', fontSize: '9px' }}>{office.linha3}</p>
+              <div key={index}>
+                <p style={{ margin: 0, fontWeight: 'bold', marginBottom: '1.2px', fontSize: '10px', color: '#000000' }}>{office.cidade}</p>
+                <p style={{ margin: 0, lineHeight: '1.3', fontSize: '9px', color: '#000000' }}>{office.linha1}</p>
+                <p style={{ margin: 0, lineHeight: '1.3', fontSize: '9px', color: '#000000' }}>{office.linha2}</p>
+                <p style={{ margin: 0, lineHeight: '1.3', fontSize: '9px', color: '#000000' }}>{office.linha3}</p>
               </div>
             ))}
           </div>
         </div>
         <div style={{
-          padding: '5px 10px',
-          border: '1px solid #e0e6f0',
-          borderRadius: '15px',
-          textAlign: 'center',
-          marginTop: '6px'
+          marginLeft: '-20mm',
+          marginRight: '-20mm',
+          padding: '8px 10px',
+          textAlign: 'center'
         }}>
-          <p style={{ margin: 0, letterSpacing: '1.5px', fontWeight: 'bold', fontSize: '10px' }}>w w w . c a v a l c a n t e r e i s . a d v . b r</p>
+          <p style={{ margin: 0, letterSpacing: '1.5px', fontWeight: 'bold', fontSize: '9px' }}>w w w . c a v a l c a n t e r e i s . a d v . b r</p>
         </div>
       </div>
     );
@@ -789,7 +821,8 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
 
     const lastCellStyle = {
       ...cellStyle,
-      borderRight: 'none'
+      borderRight: 'none',
+      textAlign: 'center'
     };
 
     return (
@@ -798,7 +831,7 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
           <strong>{tese}</strong>
         </td>
         <td style={lastCellStyle}>
-          {finalCabimento}
+          <strong>{finalCabimento}</strong>
         </td>
       </tr>
     );
@@ -812,9 +845,9 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
         pageBreakAfter: isLast ? 'auto' : 'always',
         background: 'white',
         width: '210mm', // Largura A4
-        minHeight: '297mm', // Altura mínima A4
+        minHeight: isLast ? 'auto' : '297mm', // Altura mínima A4, auto para última página
         position: 'relative',
-        padding: '20mm 20mm 75mm 20mm', // Top, sides, bottom (espaço aumentado para rodapé)
+        padding: isLast ? '20mm 20mm 20mm 20mm' : '20mm 20mm 75mm 20mm', // Sem espaço extra para rodapé na última página
         boxSizing: 'border-box',
         display: 'flex',
         flexDirection: 'column',
@@ -841,7 +874,7 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
           {children}
         </div>
       </div>
-      <Footer />
+      {!isLast && <Footer />}
     </div>
   );
 
@@ -943,10 +976,10 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
             <thead>
               <tr style={{ background: "#f7f7f7" }}>
                 <th style={{ padding: 8, borderBottom: `2px solid ${themeColors.tableBorder}`, borderRight: `1px solid ${themeColors.tableBorder}`, textAlign: 'left' }}>
-                  TESE
+                  <strong>TESE</strong>
                 </th>
-                <th style={{ padding: 8, borderBottom: `2px solid ${themeColors.tableBorder}`, textAlign: 'left' }}>
-                  CABIMENTO
+                <th style={{ padding: 8, borderBottom: `2px solid ${themeColors.tableBorder}`, textAlign: 'center' }}>
+                  <strong>CABIMENTO</strong>
                 </th>
               </tr>
             </thead>
@@ -1056,10 +1089,10 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
             Considerando a necessidade de manutenção do equilíbrio econômico-financeiro do contrato administrativo, propõe o escritório CAVALCANTE REIS ADVOGADOS que esta Municipalidade pague ao Proponente da seguinte forma:
           </p>
           <p style={{ pageBreakInside: 'avoid' }}>
-            <strong>3.1.1</strong> <strong>Para todos os demais itens descritos nesta Proposta</strong> será efetuado o pagamento de honorários advocatícios à CAVALCANTE REIS ADVOGADOS pela execução dos serviços de recuperação de créditos, <strong>ad êxito na ordem de R$ 0,20 (vinte centavos) para cada R$ 1,00 (um real)</strong> do montante referente ao incremento financeiro, ou seja, com base nos valores que entrarem nos cofres do CONTRATANTE;
+            <strong>3.1.1</strong> <strong>Para todos os demais itens descritos nesta Proposta</strong> será efetuado o pagamento de honorários advocatícios à CAVALCANTE REIS ADVOGADOS pela execução dos serviços de recuperação de créditos, <strong>ad êxito na ordem de {paymentValue} para cada R$ 1,00 (um real)</strong> do montante referente ao incremento financeiro, ou seja, com base nos valores que entrarem nos cofres do CONTRATANTE;
           </p>
           <p style={{ pageBreakInside: 'avoid' }}>
-            <strong>3.1.2</strong> Em caso de valores retroativos recuperados em favor da municipalidade, que consiste nos <strong>valores não repassados em favor do Contratante nos últimos 5 (cinco) anos</strong> (prescrição quinquenal) ou não abarcados pela prescrição, também serão cobrados honorários advocatícios <strong>na ordem de R$ 0,20 (vinte centavos) para cada R$ 1.00 (um real) do montante recuperado aos Cofres Municipais.</strong>
+            <strong>3.1.2</strong> Em caso de valores retroativos recuperados em favor da municipalidade, que consiste nos <strong>valores não repassados em favor do Contratante nos últimos 5 (cinco) anos</strong> (prescrição quinquenal) ou não abarcados pela prescrição, também serão cobrados honorários advocatícios <strong>na ordem de {paymentValue} para cada R$ 1.00 (um real) do montante recuperado aos Cofres Municipais.</strong>
           </p>
 
           {/* Seção 4: Prazo */}
@@ -1134,13 +1167,15 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
               Sendo o que se apresenta para o momento, aguardamos posicionamento da parte de V. Exa., colocando-nos, desde já, à inteira disposição para dirimir quaisquer dúvidas eventualmente existentes.
             </p>
           </div>
-          <p style={{ marginTop: 16 }}>
-            Brasília-DF, 17 de janeiro de 2025.
+          <p style={{ marginTop: 16, marginBottom: 8, textAlign: "center" }}>
+            Brasília-DF, {formatDateWithMonthName(options.data)}.
           </p>
-          <div style={{ marginTop: 48, textAlign: "center" }}>
+          <div style={{ marginTop: 8, textAlign: "center" }}>
             <p>Atenciosamente,</p>
             <img src="/Assinatura.png" alt="Assinatura" crossOrigin="anonymous" style={{ width: "200px", margin: "8px auto 0" }} />
+            <h3 style={{ fontWeight: "bold", marginTop: "8px" }}>CAVALCANTE REIS ADVOGADOS</h3>
           </div>
+          <Footer />
         </>,
         { pageNumber: 7, isLast: true }
       )}
@@ -1186,13 +1221,6 @@ function App() {
       linha2: "Sala, 207 Barra Da Tijuca,",
       linha3: "CEP: 22640-102"
     },
-    sp: {
-      enabled: true,
-      cidade: "São Paulo - SP",
-      linha1: "Rua Fidêncio Ramos, 223,",
-      linha2: "Cobertura, Vila Olímpia,",
-      linha3: "CEP: 04551-010"
-    },
     df: {
       enabled: true,
       cidade: "Brasília - DF",
@@ -1210,6 +1238,7 @@ function App() {
   });
 
   const [rppsImage, setRppsImage] = useState(null);
+  const [paymentValue, setPaymentValue] = useState("R$ 0,20 (vinte centavos)");
 
   const [savedProposals, setSavedProposals] = useState([]);
   const [modal, setModal] = useState({
@@ -1341,21 +1370,61 @@ function App() {
       const logoBlob = await logoResponse.blob();
       const logoBuffer = await logoBlob.arrayBuffer();
 
-      const pageMargins = { top: 1440, right: 1440, bottom: 1440, left: 1440 };
-      const defaultFont = "Garamond";
-      const defaultSize = 24;
-      const titleSize = 28;
+      // Carregar imagens dos municípios
+      const municipios01Response = await fetch("/munincipios01.png");
+      const municipios01Blob = await municipios01Response.blob();
+      const municipios01Buffer = await municipios01Blob.arrayBuffer();
 
-      const headerLogo = new Paragraph({
-        alignment: AlignmentType.CENTER,
-        spacing: { after: 100 },
-        children: [
-          new ImageRun({
-            data: logoBuffer,
-            transformation: { width: 166, height: 87 },
-          }),
-        ],
-      });
+      const municipios02Response = await fetch("/Munincipios02.png");
+      const municipios02Blob = await municipios02Response.blob();
+      const municipios02Buffer = await municipios02Blob.arrayBuffer();
+
+      // Carregar imagem da assinatura
+      const assinaturaResponse = await fetch("/Assinatura.png");
+      const assinaturaBlob = await assinaturaResponse.blob();
+      const assinaturaBuffer = await assinaturaBlob.arrayBuffer();
+
+      const pageMargins = { top: 720, right: 1440, bottom: 1440, left: 1440 }; // Margem top reduzida para logo mais no topo
+      const defaultFont = "Garamond";
+      const defaultSize = 26; // 13pt (26/2 = 13pt)
+      const titleSize = 32; // 16pt para títulos
+
+      // Criar rodapé com escritórios habilitados
+      const createFooter = () => {
+        const enabledOffices = [];
+        if (footerOffices.rj.enabled) enabledOffices.push(footerOffices.rj);
+        if (footerOffices.df.enabled) enabledOffices.push(footerOffices.df);
+        if (footerOffices.am.enabled) enabledOffices.push(footerOffices.am);
+
+        const footerCells = enabledOffices.map(office =>
+          new TableCell({
+            borders: { top: { style: "none" }, bottom: { style: "none" }, left: { style: "none" }, right: { style: "none" } },
+            children: [
+              new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 20 }, children: [new TextRun({ text: office.cidade, bold: true, font: defaultFont, size: 18 })] }),
+              new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 10 }, children: [new TextRun({ text: office.linha1, font: defaultFont, size: 16 })] }),
+              new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 10 }, children: [new TextRun({ text: office.linha2, font: defaultFont, size: 16 })] }),
+              new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: office.linha3, font: defaultFont, size: 16 })] }),
+            ],
+          })
+        );
+
+        return new Footer({
+          children: [
+            new Table({
+              width: { size: 100, type: "pct" },
+              borders: { top: { style: "none" }, bottom: { style: "none" }, left: { style: "none" }, right: { style: "none" }, insideVertical: { style: "none" }, insideHorizontal: { style: "none" } },
+              rows: [new TableRow({ children: footerCells })],
+            }),
+            new Paragraph({
+              alignment: AlignmentType.CENTER,
+              spacing: { before: 200, after: 50 },
+              indent: { left: 720, right: 720 },
+              border: { top: { color: "D0D0D0", space: 2, style: "single", size: 6 }, bottom: { color: "D0D0D0", space: 2, style: "single", size: 6 }, left: { color: "D0D0D0", space: 2, style: "single", size: 6 }, right: { color: "D0D0D0", space: 2, style: "single", size: 6 } },
+              children: [new TextRun({ text: "w w w . c a v a l c a n t e r e i s . a d v . b r", bold: true, font: defaultFont, size: 16, color: "555555" })],
+            }),
+          ],
+        });
+      };
 
       const createSectionTitle = (text) =>
         new Paragraph({
@@ -1369,10 +1438,10 @@ function App() {
         return new TableRow({
           children: [
             new TableCell({
-              children: [new Paragraph({ children: [new TextRun({ text: teseText, font: defaultFont, size: 26 })] })],
+              children: [new Paragraph({ children: [new TextRun({ text: teseText, font: defaultFont, size: 26, bold: true })] })],
             }),
             new TableCell({
-              children: [new Paragraph({ children: [new TextRun({ text: cabimentoText, font: defaultFont, size: 26 })] })],
+              children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: cabimentoText, font: defaultFont, size: 26, bold: true })] })],
             }),
           ],
         });
@@ -1388,7 +1457,7 @@ function App() {
             }),
             new TableCell({
               shading: { fill: "F7F7F7" },
-              children: [new Paragraph({ children: [new TextRun({ text: "CABIMENTO", bold: true, font: defaultFont, size: 26 })] })],
+              children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "CABIMENTO", bold: true, font: defaultFont, size: 26 })] })],
             }),
           ],
         }),
@@ -1413,35 +1482,64 @@ function App() {
       // --- Seções do Documento ---
       const sections = [];
 
+      const footerConfig = createFooter();
+
+      const headerLogo = new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 100 },
+        children: [
+          new ImageRun({
+            data: logoBuffer,
+            transformation: { width: 166, height: 87 },
+          }),
+        ],
+      });
+
       // Página 1: Capa
       sections.push({
         properties: { page: { margin: pageMargins } },
+        footers: { default: footerConfig },
         children: [
           new Paragraph({
             alignment: AlignmentType.CENTER,
-            spacing: { after: 6000, before: 200 }, // Espaçamento aumentado
+            spacing: { after: 4000, before: 200 },
             children: [new ImageRun({ data: logoBuffer, transformation: { width: 166, height: 87 } })],
           }),
-          new Table({
-            width: { size: 55, type: "pct" },
-            alignment: AlignmentType.CENTER,
-            rows: [
-              new TableRow({
-                children: [
-                  new TableCell({
-                    borders: { top: { style: "single", size: 6, color: "000000" }, bottom: { style: "none" }, left: { style: "none" }, right: { style: "none" } },
-                    children: [
-                      new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { after: 100, before: 200 }, children: [new TextRun({ text: "Proponente:", bold: true, font: defaultFont, size: defaultSize })] }),
-                      new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { after: 200 }, children: [new TextRun({ text: "Cavalcante Reis Advogados", font: defaultFont, size: defaultSize })] }),
-                      new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { after: 100 }, children: [new TextRun({ text: "Destinatário:", bold: true, font: defaultFont, size: defaultSize })] }),
-                      new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { after: 400 }, children: [new TextRun({ text: `Prefeitura Municipal de ${options.municipio || "[Nome do Município]"}`, font: defaultFont, size: defaultSize })] }),
-                      new Paragraph({ border: { top: { color: "000000", space: 1, style: "single", size: 6 } }, spacing: { after: 200 } }),
-                      new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: options.data || "2025", bold: true, font: defaultFont, size: titleSize })] }),
-                    ],
-                  }),
-                ],
-              }),
-            ],
+          // Linha horizontal superior
+          new Paragraph({
+            alignment: AlignmentType.RIGHT,
+            border: { top: { color: "000000", space: 1, style: "single", size: 1 } },
+            spacing: { before: 200, after: 100 },
+            children: [],
+          }),
+          // Proponente
+          new Paragraph({
+            alignment: AlignmentType.RIGHT,
+            spacing: { after: 50 },
+            children: [new TextRun({ text: "Proponente:", bold: true, font: defaultFont, size: defaultSize })]
+          }),
+          new Paragraph({
+            alignment: AlignmentType.RIGHT,
+            spacing: { after: 200 },
+            children: [new TextRun({ text: "Cavalcante Reis Advogados", font: defaultFont, size: defaultSize })]
+          }),
+          // Destinatário
+          new Paragraph({
+            alignment: AlignmentType.RIGHT,
+            spacing: { after: 50 },
+            children: [new TextRun({ text: "Destinatário:", bold: true, font: defaultFont, size: defaultSize })]
+          }),
+          new Paragraph({
+            alignment: AlignmentType.RIGHT,
+            spacing: { after: 300 },
+            children: [new TextRun({ text: `Prefeitura Municipal de ${options.municipio || "[Nome do Município]"}`, font: defaultFont, size: defaultSize })]
+          }),
+          // Linha horizontal intermediária + Data
+          new Paragraph({
+            alignment: AlignmentType.RIGHT,
+            border: { top: { color: "000000", space: 1, style: "single", size: 1 } },
+            spacing: { before: 300, after: 200 },
+            children: [new TextRun({ text: options.data || "2025", bold: true, font: defaultFont, size: titleSize })]
           }),
         ],
       });
@@ -1449,22 +1547,24 @@ function App() {
       // Página 2: Sumário
       sections.push({
         properties: { page: { margin: pageMargins } },
+        footers: { default: footerConfig },
         children: [
           headerLogo,
           new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { after: 400 }, children: [new TextRun({ text: "2 -", font: defaultFont, size: defaultSize })] }),
           new Paragraph({ spacing: { after: 400 }, children: [new TextRun({ text: "Sumário", bold: true, font: defaultFont, size: 32 })] }),
-          new Paragraph({ spacing: { after: 200 }, indent: { left: 720 }, children: [new TextRun({ text: "1. Objeto da Proposta", font: defaultFont, size: defaultSize })] }),
-          new Paragraph({ spacing: { after: 200 }, indent: { left: 720 }, children: [new TextRun({ text: "2. Análise da Questão", font: defaultFont, size: defaultSize })] }),
-          new Paragraph({ spacing: { after: 200 }, indent: { left: 720 }, children: [new TextRun({ text: "3. Dos Honorários, das Condições de Pagamento e Despesas", font: defaultFont, size: defaultSize })] }),
-          new Paragraph({ spacing: { after: 200 }, indent: { left: 720 }, children: [new TextRun({ text: "4. Prazo e Cronograma de Execução dos Serviços", font: defaultFont, size: defaultSize })] }),
-          new Paragraph({ spacing: { after: 200 }, indent: { left: 720 }, children: [new TextRun({ text: "5. Experiência em atuação em favor de Municípios e da Equipe Responsável", font: defaultFont, size: defaultSize })] }),
-          new Paragraph({ spacing: { after: 200 }, indent: { left: 720 }, children: [new TextRun({ text: "6. Disposições Finais", font: defaultFont, size: defaultSize })] }),
+          new Paragraph({ spacing: { after: 200 }, indent: { left: 720 }, children: [new TextRun({ text: "1. Objeto da Proposta", bold: true, font: defaultFont, size: defaultSize })] }),
+          new Paragraph({ spacing: { after: 200 }, indent: { left: 720 }, children: [new TextRun({ text: "2. Análise da Questão", bold: true, font: defaultFont, size: defaultSize })] }),
+          new Paragraph({ spacing: { after: 200 }, indent: { left: 720 }, children: [new TextRun({ text: "3. Dos Honorários, das Condições de Pagamento e Despesas", bold: true, font: defaultFont, size: defaultSize })] }),
+          new Paragraph({ spacing: { after: 200 }, indent: { left: 720 }, children: [new TextRun({ text: "4. Prazo e Cronograma de Execução dos Serviços", bold: true, font: defaultFont, size: defaultSize })] }),
+          new Paragraph({ spacing: { after: 200 }, indent: { left: 720 }, children: [new TextRun({ text: "5. Experiência em atuação em favor de Municípios e da Equipe Responsável", bold: true, font: defaultFont, size: defaultSize })] }),
+          new Paragraph({ spacing: { after: 200 }, indent: { left: 720 }, children: [new TextRun({ text: "6. Disposições Finais", bold: true, font: defaultFont, size: defaultSize })] }),
         ],
       });
 
       // Página 3: Objeto da Proposta
       sections.push({
         properties: { page: { margin: pageMargins } },
+        footers: { default: footerConfig },
         children: [
           headerLogo,
           createSectionTitle("1. Objeto da Proposta"),
@@ -1476,59 +1576,114 @@ function App() {
 
       // Página 4: Análise da Questão
       const analiseQuestaoChildren = [headerLogo, createSectionTitle("2. Análise da Questão")];
+      let teseCounter = 1;
       Object.entries(services).forEach(([key, isSelected]) => {
         if (isSelected && serviceTextDatabase[key]) {
-          analiseQuestaoChildren.push(new Paragraph({ spacing: { before: 400 }, children: [new TextRun({ text: allServices[key], bold: true, font: defaultFont, size: 26 })] }));
+          analiseQuestaoChildren.push(new Paragraph({ spacing: { before: 400 }, children: [new TextRun({ text: `2.${teseCounter} ${allServices[key]}`, bold: true, font: defaultFont, size: 26 })] }));
+          teseCounter++;
           const paragraphs = serviceTextDatabase[key].replace(/<p>/gi, "").split(/<\/p>/gi).map(p => p.replace(/<[^>]+>/g, ' ').trim()).filter(p => p);
           paragraphs.forEach(pText => {
             analiseQuestaoChildren.push(new Paragraph({ spacing: { after: 150 }, children: [new TextRun({ text: pText, font: defaultFont, size: defaultSize })] }));
           });
         }
       });
-      sections.push({ properties: { page: { margin: pageMargins } }, children: analiseQuestaoChildren });
+      sections.push({ properties: { page: { margin: pageMargins } }, footers: { default: footerConfig }, children: analiseQuestaoChildren });
 
-      // Página 5: Honorários
+      // Página 5: Honorários e Prazo (juntos na mesma página)
       sections.push({
         properties: { page: { margin: pageMargins } },
+        footers: { default: footerConfig },
         children: [
           headerLogo,
           createSectionTitle("3. Dos Honorários, das Condições de Pagamento e Despesas"),
-          new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: "Os valores levantados a título de incremento são provisórios, baseados em informações preliminares, podendo, ao final, representar valores a maior ou a menor.", font: defaultFont, size: defaultSize })] }),
-          new Paragraph({ bullet: { level: 0 }, children: [new TextRun({ text: "Para todos os demais itens descritos nesta Proposta será efetuado o pagamento de honorários advocatícios à CAVALCANTE REIS ADVOGADOS pela execução dos serviços de recuperação de créditos, ad êxito na ordem de R$ 0,12 para cada R$ 1,00.", font: defaultFont, size: defaultSize })] }),
-          new Paragraph({ bullet: { level: 0 }, children: [new TextRun({ text: "Em caso de valores retroativos recuperados em favor da municipalidade, os honorários também serão cobrados na ordem de R$ 0,12 para cada R$ 1,00 e serão pagos quando da expedição do Precatório ou RPV, ou quando da efetiva compensação dos valores.", font: defaultFont, size: defaultSize })] }),
-          new Paragraph({ bullet: { level: 0 }, children: [new TextRun({ text: "Sendo um contrato AD EXITUM, a CONTRATADA só receberá os honorários quando do êxito da demanda.", font: defaultFont, size: defaultSize })] }),
-        ],
-      });
-
-      // Página 6: Prazo
-      sections.push({
-        properties: { page: { margin: pageMargins } },
-        children: [
-          headerLogo,
+          new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: "Considerando a necessidade de manutenção do equilíbrio econômico-financeiro do contrato administrativo, propõe o escritório CAVALCANTE REIS ADVOGADOS que esta Municipalidade pague ao Proponente da seguinte forma:", font: defaultFont, size: defaultSize })] }),
+          new Paragraph({
+            spacing: { after: 200 },
+            children: [
+              new TextRun({ text: "3.1.1 ", bold: true, font: defaultFont, size: defaultSize }),
+              new TextRun({ text: "Para todos os demais itens descritos nesta Proposta", bold: true, font: defaultFont, size: defaultSize }),
+              new TextRun({ text: " será efetuado o pagamento de honorários advocatícios à CAVALCANTE REIS ADVOGADOS pela execução dos serviços de recuperação de créditos, ", font: defaultFont, size: defaultSize }),
+              new TextRun({ text: `ad êxito na ordem de ${paymentValue} para cada R$ 1,00 (um real)`, bold: true, font: defaultFont, size: defaultSize }),
+              new TextRun({ text: " do montante referente ao incremento financeiro, ou seja, com base nos valores que entrarem nos cofres do CONTRATANTE;", font: defaultFont, size: defaultSize }),
+            ]
+          }),
+          new Paragraph({
+            spacing: { after: 400 },
+            children: [
+              new TextRun({ text: "3.1.2 ", bold: true, font: defaultFont, size: defaultSize }),
+              new TextRun({ text: "Em caso de valores retroativos recuperados em favor da municipalidade, que consiste nos ", font: defaultFont, size: defaultSize }),
+              new TextRun({ text: "valores não repassados em favor do Contratante nos últimos 5 (cinco) anos", bold: true, font: defaultFont, size: defaultSize }),
+              new TextRun({ text: " (prescrição quinquenal) ou não abarcados pela prescrição, também serão cobrados honorários advocatícios ", font: defaultFont, size: defaultSize }),
+              new TextRun({ text: `na ordem de ${paymentValue} para cada R$ 1.00 (um real) do montante recuperado aos Cofres Municipais.`, bold: true, font: defaultFont, size: defaultSize }),
+            ]
+          }),
           createSectionTitle("4. Prazo e Cronograma de Execução dos Serviços"),
           new Paragraph({ children: [new TextRun({ text: `O prazo de execução será de ${prazo} meses ou pelo tempo que perdurar os processos judiciais, podendo ser prorrogado por interesse das partes.`, font: defaultFont, size: defaultSize })] }),
         ],
       });
 
-      // Página 7: Experiência
+      // Página 6: Experiência
       sections.push({
         properties: { page: { margin: pageMargins } },
+        footers: { default: footerConfig },
         children: [
           headerLogo,
           createSectionTitle("5. Experiência e Equipe Responsável"),
-          new Paragraph({ children: [new TextRun({ text: "No portfólio de serviços executados e/ou em execução, constam diversos Municípios contratantes.", font: defaultFont, size: defaultSize })] }),
+          new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: "No portfólio de serviços executados e/ou em execução, constam os seguintes Municípios contratantes:", font: defaultFont, size: defaultSize })] }),
+          new Paragraph({
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 200 },
+            children: [
+              new ImageRun({
+                data: municipios01Buffer,
+                transformation: { width: 500, height: 300 },
+              }),
+            ],
+          }),
+          new Paragraph({
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 300 },
+            children: [
+              new ImageRun({
+                data: municipios02Buffer,
+                transformation: { width: 500, height: 200 },
+              }),
+            ],
+          }),
+          new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: "Para coordenar os trabalhos de consultoria propostos neste documento, a CAVALCANTE REIS ADVOGADOS alocará os seguintes profissionais:", font: defaultFont, size: defaultSize })] }),
+          new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: "IURI DO LAGO NOGUEIRA CAVALCANTE REIS", font: defaultFont, size: defaultSize, bold: true }), new TextRun({ text: " – Doutorando em Direito e Mestre em Direito Econômico e Desenvolvimento pelo Instituto Brasileiro de Ensino, Desenvolvimento e Pesquisa (IDP/Brasília). LLM (Master of Laws) em Direito Empresarial pela Fundação Getúlio Vargas (FGV/RJ). Integrante da Comissão de Juristas do Senado Federal criada para consolidar a proposta do novo Código Comercial Brasileiro. Autor e Coautor de livros, pareceres e artigos jurídicos na área do direito público. Sócio-diretor do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: iuri@cavalcantereis.adv.br).", font: defaultFont, size: defaultSize })] }),
+          new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: "PEDRO AFONSO FIGUEIREDO DE SOUZA", font: defaultFont, size: defaultSize, bold: true }), new TextRun({ text: " – Graduado em Direito pela Pontifícia Universidade Católica de Minas Gerais. Especialista em Direito Penal e Processo Penal pela Academia Brasileira de Direito Constitucional. Mestre em Direito nas Relações Econômicas e Sociais pela Faculdade de Direito Milton Campos. Diretor de Comunicação e Conselheiro Consultivo, Científico e Fiscal do Instituto de Ciências Penais. Autor de artigos e capítulos de livros jurídicos. Advogado associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: pedro@cavalcantereis.adv.br).", font: defaultFont, size: defaultSize })] }),
+          new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: "SÉRGIO RICARDO ALVES DE JESUS FILHO", font: defaultFont, size: defaultSize, bold: true }), new TextRun({ text: " – Graduado em Direito pelo Centro Universitário de Brasília (UniCEUB). Graduando em Ciências Contábeis pelo Centro Universitário de Brasília (UniCEUB). Pós-graduando em Direito Tributário pelo Instituto Brasileiro de Ensino, Desenvolvimento e Pesquisa (IDP). Membro da Comissão de Assuntos Tributários da OAB/DF. Advogado Associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: sergio@cavalcantereis.adv.br).", font: defaultFont, size: defaultSize })] }),
+          new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: "JOSÉ HUMBERTO DOS SANTOS JÚNIOR", font: defaultFont, size: defaultSize, bold: true }), new TextRun({ text: " – Graduado em Direito pelo Centro Universitário UniProcessus. Pós-graduando em Direito Penal e Direito Processual Penal aplicados e Execução Penal pela Escola Brasileira de Direito (EBRADI). Advogado Associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: jose.humberto@cavalcantereis.adv.br).", font: defaultFont, size: defaultSize })] }),
+          new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: "GABRIEL SALES RESENDE SALGADO", font: defaultFont, size: defaultSize, bold: true }), new TextRun({ text: " - Graduado em Direito pela Universidade do Distrito Federal (UDF). Pós-graduando em Direito Tributário pelo Instituto Brasileiro de Estudos Tributários (IBET). Advogado Associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248- 0612 (endereço eletrônico: gabriel@cavalcantereis.adv.br).", font: defaultFont, size: defaultSize })] }),
+          new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: "Além desses profissionais, a CAVALCANTE REIS ADVOGADOS alocará uma equipe de profissionais pertencentes ao seu quadro técnico, utilizando, também, caso necessário, o apoio técnico especializado de terceiros, pessoas físicas ou jurídicas, que deverão atuar sob sua orientação, cabendo à CAVALCANTE REIS ADVOGADOS a responsabilidade técnica pela execução das tarefas.", font: defaultFont, size: defaultSize })] }),
+          new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: 'Nossa contratação, portanto, devido à altíssima qualificação e experiência, aliada à singularidade do objeto da demanda, bem como os diferenciais já apresentados acima, está inserida dentre as hipóteses do art. 6º, XVIII "e" e art. 74, III, "e", da Lei n.º 14.133/2021.', font: defaultFont, size: defaultSize })] }),
         ],
       });
 
-      // Página 8: Disposições Finais
+      // Página 7: Disposições Finais
       sections.push({
         properties: { page: { margin: pageMargins } },
+        footers: { default: footerConfig },
         children: [
           headerLogo,
           createSectionTitle("6. Disposições Finais"),
-          new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 400 }, children: [new TextRun({ text: `Brasília-DF, ${options.data || "[Data da Proposta]"}.`, font: defaultFont, size: defaultSize })] }),
-          new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 200 }, children: [new TextRun({ text: "Atenciosamente,", bold: true, font: defaultFont, size: defaultSize })] }),
-          new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 150 }, children: [new TextRun({ text: "CAVALCANTE REIS ADVOGADOS", bold: true, font: defaultFont, size: defaultSize })] }),
+          new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: 'Nesse sentido, ficamos no aguardo da manifestação deste Município para promover os ajustes contratuais que entenderem necessários, sendo mantida a mesma forma de remuneração aqui proposta, com fundamento no art. 6º, XVIII, "e" e art. 74, III, "e", da Lei n.º 14.133/2021.', font: defaultFont, size: defaultSize })] }),
+          new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: "A presente proposta tem validade de 60 (sessenta) dias.", font: defaultFont, size: defaultSize })] }),
+          new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: "Sendo o que se apresenta para o momento, aguardamos posicionamento da parte de V. Exa., colocando-nos, desde já, à inteira disposição para dirimir quaisquer dúvidas eventualmente existentes.", font: defaultFont, size: defaultSize })] }),
+          new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 100 }, children: [new TextRun({ text: `Brasília-DF, ${options.data || "17 de janeiro de 2025"}.`, font: defaultFont, size: defaultSize })] }),
+          new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 100 }, children: [new TextRun({ text: "Atenciosamente,", bold: true, font: defaultFont, size: defaultSize })] }),
+          new Paragraph({
+            alignment: AlignmentType.CENTER,
+            spacing: { before: 150, after: 100 },
+            children: [
+              new ImageRun({
+                data: assinaturaBuffer,
+                transformation: { width: 200, height: 100 },
+              }),
+            ],
+          }),
+          new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 50 }, children: [new TextRun({ text: "CAVALCANTE REIS ADVOGADOS", bold: true, font: defaultFont, size: defaultSize })] }),
         ],
       });
 
@@ -1861,6 +2016,8 @@ function App() {
           setRppsImage={setRppsImage}
           footerOffices={footerOffices}
           setFooterOffices={setFooterOffices}
+          paymentValue={paymentValue}
+          setPaymentValue={setPaymentValue}
           savedProposals={savedProposals || []}
           onLoadProposal={loadProposal}
           onDeleteProposal={deleteProposal}
@@ -1871,7 +2028,7 @@ function App() {
           onDownloadPdf={generatePdf} // Adicionado
         />
         <div className="content">
-          <ProposalDocument theme={theme} options={options} prazo={prazo} services={services} customCabimentos={customCabimentos} customEstimates={customEstimates} rppsImage={rppsImage} footerOffices={footerOffices} />
+          <ProposalDocument theme={theme} options={options} prazo={prazo} services={services} customCabimentos={customCabimentos} customEstimates={customEstimates} rppsImage={rppsImage} footerOffices={footerOffices} paymentValue={paymentValue} />
         </div>
         <Modal {...modal} />
       </main>
