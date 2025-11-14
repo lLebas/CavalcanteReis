@@ -38,9 +38,9 @@ const allServices = {
   rpps: "RPPS – Regime Próprio de Previdência Social",
   cfem: "Compensação (Recursos Minerais - CFEM)",
   cfurh: "Compensação (Recursos Hídricos - CFURH)",
-  tabelaSUS: "Tabela SUS",
-  fundef: "Recuperação FUNDEF",
-  fundeb: "Recuperação FUNDEB",
+  tabelaSUS: "Tabela do SUS – Aplicação da Tabela TUNEP, ou o IVR, ou outra tabela que venha a ser utilizada pela ANS",
+  fundef: "Recuperação dos valores repassados à menor pela União Federal a título de FUNDEF",
+  fundeb: "Recuperação dos valores repassado à menor pela União Federal a título de FUNDEB. Reajuste do Valor Mínimo Anual por Aluno – VMAA",
   energiaEletrica: "Auditoria e Consultoria no pagamento das faturas de energia elétrica",
   royaltiesOleoGas: "Royalties (Óleo, Xisto e Gás)",
   repassesFPM: "Repasses de Recursos do FPM (IPI/IR)",
@@ -148,19 +148,39 @@ receita é de {{rpps_estimate}}.</p>
     <p>A tese consiste na recuperação de valores devidos aos Municípios que são afetados por usinas hidrelétricas, seja pela área alagada, seja pela localização da usina, e que não receberam a devida compensação ou a receberam em valor inferior ao legalmente estabelecido.</p>
   `,
   tabelaSUS: `
-    <p>Auditoria e análise dos repasses federais referentes aos procedimentos de Média e Alta Complexidade (MAC) da Tabela de Procedimentos, Medicamentos, Órteses, Próteses e Materiais Especiais (OPM) do Sistema Único de Saúde (SUS).</p>
-    <p>Muitos Municípios arcam com custos de procedimentos de saúde que deveriam ser financiados pela União, ou recebem valores defasados que não cobrem os custos reais dos serviços prestados.</p>
-    <p>A tese visa identificar e recuperar valores não repassados ou repassados a menor pelo Ministério da Saúde, bem como pleitear a atualização dos valores de referência da Tabela SUS, garantindo o equilíbrio financeiro da saúde municipal.</p>
+    <p>A ação discute aspectos do FUNDEB, especificamente os valores equivocados de 
+cotas por aluno que foram fixados pela União e o montante da complementação de 
+recursos repassados desde a sua criação em 2007.</p>
+<p>Desde a criação do FUNDEB a complementação dos recursos a cargo da União, 
+conforme artigo 4º da Lei nº 11.494/2007, vem sendo realizada de forma equivocada 
+em grave prejuízo à educação do Município.</p>
+<p>Nesse contexto, a falta de complementação da União nos valores propostos pela 
+CF/88 trouxe danos a várias comunidades, com reflexo principalmente para suas 
+crianças e adolescentes que são, em última análise, a própria sociedade brasileira em 
+construção.</p>
+<p>Isso porque, a falta de recursos conforme determina a Lei no setor da educação gera 
+desigualdades sociais, atraso no desenvolvimento do país, ignorância e favorece a 
+marginalização das pessoas. O clichê da educação ser a única solução para um país, 
+ao que parece, não ecoou para a União.</p>
+<p>Nesse sentido, existe a necessidade de se reaver os valores repassados à menor pela 
+União Federal, sendo condenada a pagar a diferença do valor anual mínimo por aluno 
+nacionalmente definido para as séries iniciais do ensino fundamental urbano e para 
+todas as demais categorias estudantis a ela atreladas pelas ponderações legais, relativos 
+aos últimos cinco anos, respeitando-se a prescrição quinquenal, e por todos os anos 
+em que persistir e repercutir a ilegalidade, a ser apurado em sede de liquidação de 
+sentença, caso a parte contrária não apresente os dados consolidados.</p>
   `,
   fundef: `
-    <p>Na vigência da Lei nº 9.424/96, instituidora do Fundo de Manutenção e Desenvolvimento do Ensino Fundamental e de Valorização do Magistério – FUNDEF, a União descumpriu preceito contido no art. 6º, §1º desta lei, deixando de complementar o valor do Fundo em diversos exercícios financeiros.</p>
-    <p>A União, ao fixar o Valor Mínimo Anual por Aluno (VMAA), utilizou-se de dados equivocados, o que gerou repasses inferiores aos devidos a diversos Municípios.</p>
-    <p>O Supremo Tribunal Federal (STF), no julgamento do RE 630.934/DF, reconheceu o direito dos Municípios a receberem as diferenças não repassadas pela União. A tese consiste na atuação processual para agilizar a tramitação e expedição dos precatórios referentes a esses valores.</p>
+<p>Na vigência da Lei n°9.424/96, instituidora do Fundo de Manutenção e Desenvolvimento do Ensino Fundamental e de Valorização do Magistério — FUNDEF, a União descumpriu preceito contido no art. 6°, § 1° desta lei, no que diz respeito ao respectivo repasse que deveria ser atribuído às municipalidades.</p>
+<p>Tal fato se deu com a utilização de critérios distintos do previsto em lei quando do cálculo do Valor Mínimo Anual por Aluno — VMAA a ser praticado e que serviria de parâmetro para chegar ao valor que a União deveria transferir a título de complementação ao FUNDEF de cada ente que não atingisse, com recursos próprios, o valor considerado necessário à implementação das metas para desenvolvimento da educação fundamental.</p>
+<p>A matéria cognitiva (de mérito) necessária ao reconhecimento do direito aos Municípios prejudicados por tal prática, que já chegou a ser resolvida de forma definitiva em diversas ações ordinárias ajuizadas individualmente pelos entes municipais de todo o território brasileiro, reconhecendo a defasagem na metodologia de cálculo aplicada pela União Federal, causando diversos prejuízos às educações municipais.</p>
   `,
   fundeb: `
     <p>A ação discute aspectos do FUNDEB, especificamente os valores equivocados de cotas por aluno que foram fixados pela União e o montante da complementação de recursos repassados desde a sua criação em 2007.</p>
-    <p>Assim como no FUNDEF, a União utilizou parâmetros incorretos para o cálculo do Valor Mínimo Anual por Aluno (VMAA), resultando em prejuízos significativos para os Municípios, que deixaram de receber vultosas quantias anuais.</p>
-    <p>A tese tem por objeto a revisão judicial dos cálculos e a recuperação dos valores que não foram repassados corretamente pela União ao Município nos últimos anos, acrescidos de juros e correção monetária.</p>
+    <p>Desde a criação do FUNDEB a complementação dos recursos a cargo da União, conforme artigo 4º da Lei nº 11.494/2007, vem sendo realizada de forma equivocada em grave prejuízo à educação do Município.</p>
+    <p>Nesse contexto, a falta de complementação da União nos valores propostos pela CF/88 trouxe danos a várias comunidades, com reflexo principalmente para suas crianças e adolescentes que são, em última análise, a própria sociedade brasileira em construção.</p>
+    <p>Isso porque, a falta de recursos conforme determina a Lei no setor da educação gera desigualdades sociais, atraso no desenvolvimento do país, ignorância e favorece a marginalização das pessoas. O clichê da educação ser a única solução para um país, ao que parece, não ecoou para a União.</p>
+    <p>Nesse sentido, existe a necessidade de se reaver os valores repassados à menor pela União Federal, sendo condenada a pagar a diferença do valor anual mínimo por aluno nacionalmente definido para as séries iniciais do ensino fundamental urbano e para todas as demais categorias estudantis a ela atreladas pelas ponderações legais, relativos aos últimos cinco anos, respeitando-se a prescrição quinquenal, e por todos os anos em que persistir e repercutir a ilegalidade, a ser apurado em sede de liquidação de sentença, caso a parte contrária não apresente os dados consolidados.</p>
   `,
   energiaEletrica: `
     <p>A execução de serviços técnicos especializados de auditoria e consultoria energética.</p>
