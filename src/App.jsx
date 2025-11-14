@@ -35,7 +35,7 @@ const colors = {
 const allServices = {
   folhaPagamento: "Folha de pagamento, recuperação de verbas indenizatórias e contribuições previdenciárias",
   pasep: "Recuperação/Compensação PASEP",
-  rpps: "RPPS (Regime Próprio)",
+  rpps: "RPPS – Regime Próprio de Previdência Social",
   cfem: "Compensação (Recursos Minerais - CFEM)",
   cfurh: "Compensação (Recursos Hídricos - CFURH)",
   tabelaSUS: "Tabela SUS",
@@ -47,6 +47,7 @@ const allServices = {
   revisaoParcelamento: "Revisão dos Parcelamentos Previdenciários",
   issqn: "Recuperação de Créditos de ISSQN",
   servicosTecnicos: "Serviços Técnicos (DF)",
+  demaisTeses: "Demais teses",
 };
 
 // --- Banco de textos oficiais de cada serviço (HTML) ---
@@ -189,6 +190,9 @@ receita é de {{rpps_estimate}}.</p>
     <p>O desenvolvimento de todos os atos necessários, administrativos e judiciais, em qualquer instância, serviços técnicos especializados de assessoria e consultoria jurídica na área de Direito Financeiro, Econômico, Administrativo e Tributário perante os Tribunais Superiores no Distrito Federal.</p>
     <p>Atuação em processos estratégicos de interesse do Município que tramitam em Brasília-DF, perante o Supremo Tribunal Federal (STF), Superior Tribunal de Justiça (STJ), Tribunal de Contas da União (TCU) e demais órgãos federais, garantindo um acompanhamento processual célere e especializado.</p>
   `,
+  demaisTeses: `
+    <p>Demais teses consiste na prestação de serviços de assessoria técnica e jurídica nas áreas de Direito Público, Tributário, Econômico, Financeiro, previdenciário e Minerário, atuando perante o Ministério da Fazenda e os seus órgãos administrativos.</p>
+  `,
 };
 
 const Header = ({ theme }) => (
@@ -214,6 +218,8 @@ const ControlsSidebar = ({
   setCustomEstimates,
   rppsImage,
   setRppsImage,
+  footerOffices,
+  setFooterOffices,
   savedProposals,
   onLoadProposal,
   onDeleteProposal,
@@ -481,31 +487,79 @@ const ControlsSidebar = ({
             </div>
           );
         })}
+      </div>
 
-        <div className="actions">
+      <hr />
+
+      <h3>Informações do Rodapé</h3>
+      <div className="services">
+        <div style={{ marginBottom: "12px" }}>
+          <label className="service-item">
+            <input
+              type="checkbox"
+              checked={footerOffices.rj.enabled}
+              onChange={() => setFooterOffices({ ...footerOffices, rj: { ...footerOffices.rj, enabled: !footerOffices.rj.enabled } })}
+            />
+            <span>Rio de Janeiro - RJ</span>
+          </label>
+        </div>
+        <div style={{ marginBottom: "12px" }}>
+          <label className="service-item">
+            <input
+              type="checkbox"
+              checked={footerOffices.sp.enabled}
+              onChange={() => setFooterOffices({ ...footerOffices, sp: { ...footerOffices.sp, enabled: !footerOffices.sp.enabled } })}
+            />
+            <span>São Paulo - SP</span>
+          </label>
+        </div>
+        <div style={{ marginBottom: "12px" }}>
+          <label className="service-item">
+            <input
+              type="checkbox"
+              checked={footerOffices.df.enabled}
+              onChange={() => setFooterOffices({ ...footerOffices, df: { ...footerOffices.df, enabled: !footerOffices.df.enabled } })}
+            />
+            <span>Brasília - DF</span>
+          </label>
+        </div>
+        <div style={{ marginBottom: "12px" }}>
+          <label className="service-item">
+            <input
+              type="checkbox"
+              checked={footerOffices.am.enabled}
+              onChange={() => setFooterOffices({ ...footerOffices, am: { ...footerOffices.am, enabled: !footerOffices.am.enabled } })}
+            />
+            <span>Manaus - AM</span>
+          </label>
+        </div>
+      </div>
+
+      <hr />
+
+      <div className="actions">
+        <button
+          id="save-proposal"
+          className="btn primary"
+          style={{ width: "100%", marginBottom: "8px" }}
+          onClick={onSaveProposal}>
+          💾 Salvar Proposta
+        </button>
+        <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
           <button
-            id="save-proposal"
+            id="download-docx"
             className="btn primary"
-            style={{ width: "100%", marginBottom: "8px" }}
-            onClick={onSaveProposal}>
-            💾 Salvar Proposta
+            style={{ flex: 1, marginBottom: "8px" }}
+            onClick={onDownloadDocx}>
+            ⬇️ Baixar .docx
           </button>
-          <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
-            <button
-              id="download-docx"
-              className="btn primary"
-              style={{ flex: 1, marginBottom: "8px" }}
-              onClick={onDownloadDocx}>
-              ⬇️ Baixar .docx
-            </button>
-            <button
-              id="download-pdf"
-              className="btn primary"
-              style={{ flex: 1, marginBottom: "8px" }}
-              onClick={onDownloadPdf}>
-              ⬇️ Baixar PDF
-            </button>
-          </div>
+          <button
+            id="download-pdf"
+            className="btn primary"
+            style={{ flex: 1, marginBottom: "8px" }}
+            onClick={onDownloadPdf}>
+            ⬇️ Baixar PDF
+          </button>
         </div>
       </div>
 
@@ -601,67 +655,56 @@ const ControlsSidebar = ({
   );
 };
 
-const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, customEstimates, rppsImage }) => {
+const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, customEstimates, rppsImage, footerOffices }) => {
   const themeColors = colors[theme];
 
-  const Footer = () => (
-    <div style={{
-      position: 'absolute',
-      bottom: '15mm', // Margem inferior da página
-      left: '20mm',
-      right: '20mm',
-      height: '55mm', // Altura fixa do rodapé
-      fontSize: '10px',
-      color: '#555',
-      fontFamily: "'EB Garamond', serif",
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'flex-end',
-      paddingTop: '8px'
-    }}>
-      <div style={{ paddingTop: '6px', marginBottom: '6px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', textAlign: 'left' }}>
-          {/* Rio de Janeiro */}
-          <div style={{ flex: 1 }}>
-            <p style={{ margin: 0, fontWeight: 'bold', marginBottom: '3px', fontSize: '10px' }}>Rio de Janeiro - RJ</p>
-            <p style={{ margin: 0, lineHeight: '1.4', fontSize: '9px' }}>AV. DAS AMÉRICAS, 3434 - BL 04</p>
-            <p style={{ margin: 0, lineHeight: '1.4', fontSize: '9px' }}>Sala, 207 Barra Da Tijuca,</p>
-            <p style={{ margin: 0, lineHeight: '1.4', fontSize: '9px' }}>CEP: 22640-102</p>
-          </div>
-          {/* São Paulo */}
-          <div style={{ flex: 1 }}>
-            <p style={{ margin: 0, fontWeight: 'bold', marginBottom: '3px', fontSize: '10px' }}>São Paulo - SP</p>
-            <p style={{ margin: 0, lineHeight: '1.4', fontSize: '9px' }}>Rua Fidêncio Ramos, 223,</p>
-            <p style={{ margin: 0, lineHeight: '1.4', fontSize: '9px' }}>Cobertura, Vila Olímpia,</p>
-            <p style={{ margin: 0, lineHeight: '1.4', fontSize: '9px' }}>CEP: 04551-010</p>
-          </div>
-          {/* Brasília */}
-          <div style={{ flex: 1 }}>
-            <p style={{ margin: 0, fontWeight: 'bold', marginBottom: '3px', fontSize: '10px' }}>Brasília - DF</p>
-            <p style={{ margin: 0, lineHeight: '1.4', fontSize: '9px' }}>SHIS QL 10, Conj. 06, Casa 19</p>
-            <p style={{ margin: 0, lineHeight: '1.4', fontSize: '9px' }}>Lago Sul,</p>
-            <p style={{ margin: 0, lineHeight: '1.4', fontSize: '9px' }}>CEP: 71630-065</p>
-          </div>
-          {/* Manaus */}
-          <div style={{ flex: 1 }}>
-            <p style={{ margin: 0, fontWeight: 'bold', marginBottom: '3px', fontSize: '10px' }}>Manaus - AM</p>
-            <p style={{ margin: 0, lineHeight: '1.4', fontSize: '9px' }}>Rua Silva Ramos, 78 - Centro</p>
-            <p style={{ margin: 0, lineHeight: '1.4', fontSize: '9px' }}>Manaus, AM</p>
-            <p style={{ margin: 0, lineHeight: '1.4', fontSize: '9px' }}>CEP: 69010-180</p>
+  const Footer = () => {
+    // Filtrar apenas os escritórios habilitados
+    const enabledOffices = [];
+    if (footerOffices.rj.enabled) enabledOffices.push(footerOffices.rj);
+    if (footerOffices.sp.enabled) enabledOffices.push(footerOffices.sp);
+    if (footerOffices.df.enabled) enabledOffices.push(footerOffices.df);
+    if (footerOffices.am.enabled) enabledOffices.push(footerOffices.am);
+
+    return (
+      <div style={{
+        position: 'absolute',
+        bottom: '15mm',
+        left: '20mm',
+        right: '20mm',
+        height: '55mm',
+        fontSize: '10px',
+        color: '#555',
+        fontFamily: "'EB Garamond', serif",
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'flex-end',
+        paddingTop: '8px'
+      }}>
+        <div style={{ paddingTop: '6px', marginBottom: '6px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', textAlign: 'center' }}>
+            {enabledOffices.map((office, index) => (
+              <div key={index} style={{ flex: 1 }}>
+                <p style={{ margin: 0, fontWeight: 'bold', marginBottom: '3px', fontSize: '10px' }}>{office.cidade}</p>
+                <p style={{ margin: 0, lineHeight: '1.4', fontSize: '9px' }}>{office.linha1}</p>
+                <p style={{ margin: 0, lineHeight: '1.4', fontSize: '9px' }}>{office.linha2}</p>
+                <p style={{ margin: 0, lineHeight: '1.4', fontSize: '9px' }}>{office.linha3}</p>
+              </div>
+            ))}
           </div>
         </div>
+        <div style={{
+          padding: '5px 10px',
+          border: '1px solid #e0e6f0',
+          borderRadius: '15px',
+          textAlign: 'center',
+          marginTop: '6px'
+        }}>
+          <p style={{ margin: 0, letterSpacing: '1.5px', fontWeight: 'bold', fontSize: '10px' }}>w w w . c a v a l c a n t e r e i s . a d v . b r</p>
+        </div>
       </div>
-      <div style={{
-        padding: '5px 10px',
-        border: '1px solid #e0e6f0',
-        borderRadius: '15px',
-        textAlign: 'center',
-        marginTop: '6px'
-      }}>
-        <p style={{ margin: 0, letterSpacing: '1.5px', fontWeight: 'bold', fontSize: '10px' }}>w w w . c a v a l c a n t e r e i s . a d v . b r</p>
-      </div>
-    </div>
-  );
+    );
+  };
 
   // Helper para renderizar serviços como componentes React
 
@@ -903,7 +946,7 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
                   TESE
                 </th>
                 <th style={{ padding: 8, borderBottom: `2px solid ${themeColors.tableBorder}`, textAlign: 'left' }}>
-                  CABIMENTO / PERSPECTIVA
+                  CABIMENTO
                 </th>
               </tr>
             </thead>
@@ -922,7 +965,7 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
                 "Cabível"
               )}
               {renderTableRow("tabelaSUS", "Tabela SUS", "Cabível")}
-              {renderTableRow("fundef", "FUNDEF - Atuação em feito para agilizar a tramitação.", "Cabível")}
+              {renderTableRow("fundef", "FUNDEF - Possível atuação no feito para agilizar a tramitação, a fim de efetivar o incremento financeiro, com a consequente expedição do precatório.", "Cabível")}
               {renderTableRow("fundeb", "Recuperação dos valores repassados à menor a título de FUNDEB.", "Cabível")}
               {renderTableRow("energiaEletrica", "Auditoria e Consultoria do pagamento de Energia Elétrica", "Cabível")}
               {renderTableRow(
@@ -940,6 +983,11 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
               {renderTableRow(
                 "servicosTecnicos",
                 "Serviços técnicos especializados de assessoria e consultoria jurídica (DF)",
+                "Cabível"
+              )}
+              {renderTableRow(
+                "demaisTeses",
+                "Demais teses consiste na prestação de serviços de assessoria técnica e jurídica nas áreas de Direito Público, Tributário, Econômico, Financeiro, previdenciário e Minerário, atuando perante o Ministério da Fazenda e os seus órgãos administrativos.",
                 "Cabível"
               )}
             </tbody>
@@ -987,6 +1035,11 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
             "servicosTecnicos",
             allServices.servicosTecnicos,
             serviceTextDatabase.servicosTecnicos
+          )}
+          {renderServiceSection(
+            "demaisTeses",
+            allServices.demaisTeses,
+            serviceTextDatabase.demaisTeses
           )}
         </>,
         { pageNumber: 4 }
@@ -1119,10 +1172,45 @@ function App() {
     revisaoParcelamento: "Cabível",
     issqn: "Cabível",
     servicosTecnicos: "Cabível",
+    demaisTeses: "Cabível",
   });
   const [customEstimates, setCustomEstimates] = useState({
     rpps: "R$ 24.020.766,00 (vinte e quatro milhões, vinte mil e setecentos e sessenta e seis reais)",
   });
+
+  const [footerOffices, setFooterOffices] = useState({
+    rj: {
+      enabled: true,
+      cidade: "Rio de Janeiro - RJ",
+      linha1: "AV. DAS AMÉRICAS, 3434 - BL 04",
+      linha2: "Sala, 207 Barra Da Tijuca,",
+      linha3: "CEP: 22640-102"
+    },
+    sp: {
+      enabled: true,
+      cidade: "São Paulo - SP",
+      linha1: "Rua Fidêncio Ramos, 223,",
+      linha2: "Cobertura, Vila Olímpia,",
+      linha3: "CEP: 04551-010"
+    },
+    df: {
+      enabled: true,
+      cidade: "Brasília - DF",
+      linha1: "SHIS QL 10, Conj. 06, Casa 19",
+      linha2: "Lago Sul,",
+      linha3: "CEP: 71630-065"
+    },
+    am: {
+      enabled: true,
+      cidade: "Manaus - AM",
+      linha1: "Rua Silva Ramos, 78 - Centro",
+      linha2: "Manaus, AM",
+      linha3: "CEP: 69010-180"
+    }
+  });
+
+  const [rppsImage, setRppsImage] = useState(null);
+
   const [savedProposals, setSavedProposals] = useState([]);
   const [modal, setModal] = useState({
     open: false,
@@ -1134,7 +1222,6 @@ function App() {
     onConfirm: () => { },
     onCancel: () => { },
   });
-  const [rppsImage, setRppsImage] = useState(null);
 
   const generatePdf = async () => {
     console.log("Gerando PDF...");
@@ -1301,7 +1388,7 @@ function App() {
             }),
             new TableCell({
               shading: { fill: "F7F7F7" },
-              children: [new Paragraph({ children: [new TextRun({ text: "CABIMENTO / PERSPECTIVA", bold: true, font: defaultFont, size: 26 })] })],
+              children: [new Paragraph({ children: [new TextRun({ text: "CABIMENTO", bold: true, font: defaultFont, size: 26 })] })],
             }),
           ],
         }),
@@ -1309,11 +1396,11 @@ function App() {
 
       if (services.folhaPagamento) tableRows.push(createTableRow("Folha de pagamento, recuperação de verbas indenizatórias e contribuições previdenciárias (INSS)", "A perspectiva de incremento/recuperação é de aproximadamente o valor referente a até duas folhas de pagamento mensais."));
       if (services.pasep) tableRows.push(createTableRow("Recuperação/ compensação PASEP", customCabimentos.pasep));
-      if (services.rpps) tableRows.push(createTableRow("RPPS Regime Próprio de Previdência Social", customCabimentos.rpps));
+      if (services.rpps) tableRows.push(createTableRow("RPPS - Regime Próprio de Previdência Social", customCabimentos.rpps));
       if (services.cfem) tableRows.push(createTableRow("Compensação financeira pela exploração de recursos minerais – CFEM", customCabimentos.cfem));
       if (services.cfurh) tableRows.push(createTableRow("Compensação Financeira pela Utilização dos Recursos Hídricos – CFURH", customCabimentos.cfurh));
       if (services.tabelaSUS) tableRows.push(createTableRow("Tabela SUS", customCabimentos.tabelaSUS));
-      if (services.fundef) tableRows.push(createTableRow("FUNDEF - Atuação em feito para agilizar a tramitação.", customCabimentos.fundef));
+      if (services.fundef) tableRows.push(createTableRow("FUNDEF - Possível atuação no feito para agilizar a tramitação, a fim de efetivar o incremento financeiro, com a consequente expedição do precatório.", customCabimentos.fundef));
       if (services.fundeb) tableRows.push(createTableRow("Recuperação dos valores repassados à menor a título de FUNDEB.", customCabimentos.fundeb));
       if (services.energiaEletrica) tableRows.push(createTableRow("Auditoria e Consultoria do pagamento de Energia Elétrica", customCabimentos.energiaEletrica));
       if (services.royaltiesOleoGas) tableRows.push(createTableRow("Royalties pela exploração de óleo bruto, xisto betuminoso e gás natural.", customCabimentos.royaltiesOleoGas));
@@ -1321,6 +1408,7 @@ function App() {
       if (services.revisaoParcelamento) tableRows.push(createTableRow("Revisão dos parcelamentos previdenciários", customCabimentos.revisaoParcelamento));
       if (services.issqn) tableRows.push(createTableRow("Recuperação de Créditos de ISSQN", customCabimentos.issqn));
       if (services.servicosTecnicos) tableRows.push(createTableRow("Serviços técnicos especializados de assessoria e consultoria jurídica (DF)", customCabimentos.servicosTecnicos));
+      if (services.demaisTeses) tableRows.push(createTableRow("Demais teses consiste na prestação de serviços de assessoria técnica e jurídica nas áreas de Direito Público, Tributário, Econômico, Financeiro, previdenciário e Minerário, atuando perante o Ministério da Fazenda e os seus órgãos administrativos.", customCabimentos.demaisTeses));
 
       // --- Seções do Documento ---
       const sections = [];
@@ -1615,6 +1703,7 @@ function App() {
           revisaoParcelamento: "Cabível",
           issqn: "Cabível",
           servicosTecnicos: "Cabível",
+          demaisTeses: "Cabível",
         });
         setModal({
           open: false,
@@ -1770,6 +1859,8 @@ function App() {
           setCustomEstimates={setCustomEstimates}
           rppsImage={rppsImage}
           setRppsImage={setRppsImage}
+          footerOffices={footerOffices}
+          setFooterOffices={setFooterOffices}
           savedProposals={savedProposals || []}
           onLoadProposal={loadProposal}
           onDeleteProposal={deleteProposal}
@@ -1780,7 +1871,7 @@ function App() {
           onDownloadPdf={generatePdf} // Adicionado
         />
         <div className="content">
-          <ProposalDocument theme={theme} options={options} prazo={prazo} services={services} customCabimentos={customCabimentos} customEstimates={customEstimates} rppsImage={rppsImage} />
+          <ProposalDocument theme={theme} options={options} prazo={prazo} services={services} customCabimentos={customCabimentos} customEstimates={customEstimates} rppsImage={rppsImage} footerOffices={footerOffices} />
         </div>
         <Modal {...modal} />
       </main>
