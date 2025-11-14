@@ -41,7 +41,7 @@ const allServices = {
   tabelaSUS: "Tabela SUS",
   fundef: "Recuperação FUNDEF",
   fundeb: "Recuperação FUNDEB",
-  energiaEletrica: "Auditoria de Energia Elétrica",
+  energiaEletrica: "Auditoria e Consultoria no pagamento das faturas de energia elétrica",
   royaltiesOleoGas: "Royalties (Óleo, Xisto e Gás)",
   repassesFPM: "Repasses de Recursos do FPM (IPI/IR)",
   revisaoParcelamento: "Revisão dos Parcelamentos Previdenciários",
@@ -164,8 +164,30 @@ receita é de {{rpps_estimate}}.</p>
   `,
   energiaEletrica: `
     <p>A execução de serviços técnicos especializados de auditoria e consultoria energética.</p>
-    <p>Os serviços propostos são consistentes no levantamento de dados, preparação, encaminhamento e acompanhamento da recuperação financeira dos valores pagos ou cobrados indevidamente à Concessionária/Distribuidora de energia elétrica do Estado.</p>
-    <p>Isso inclui a análise de faturas de energia elétrica (Demanda Contratada, Ultrapassagem, reativa, etc.), a verificação da incidência indevida de ICMS sobre a Tarifa de Uso do Sistema de Distribuição (TUSD) e Tarifa de Uso do Sistema de Transmissão (TUST), e a recuperação de valores pagos a maior nos últimos 05 (cinco) anos.</p>
+    <p>Os serviços propostos são consistentes no levantamento de dados, preparação, 
+encaminhamento e acompanhamento da recuperação financeira dos valores pagos ou 
+cobrados indevidamente à Concessionária/Distribuidora de energia elétrica do 
+Estado.</p>
+    <p>Com a realização da auditoria e demais serviços técnicos especializados, o município, 
+por intermédio da Proponente, e, ainda, através de pleitos administrativos ou judiciais:</p>
+    <p>a) Promoverá a revisão de toda classificação dos lançamentos das cobranças nas 
+faturas de energia elétrica;</p>
+    <p>b) Identificará as falhas na classificação tarifária;</p>
+    <p>c) Apurará os valores realmente devidos a título de consumo de energia elétrica;</p>
+    <p>d) Recuperará os valores atinente aos indébitos identificados;</p>
+    <p>e) Reduzirá o valor das faturas futuras de energia elétrica;</p>
+    <p>f) Estabelecerá os mecanismos de auditoria permanente, de forma a não sofrer 
+mais qualquer tipo de lesão ao seu direito de consumidor de energia elétrica;</p>
+    <p>g) Elaborará estudos e levantamentos para propor o incremento na arrecadação 
+da CIP/COSIP;</p>
+    <p>h) Auditará o lançamento e arrecadação da CIP/COSIP - Contribuição para 
+Custeio da Iluminação Pública de forma a coibir a Distribuidora de 
+lançamentos errados e consequentemente arrecadação e repasse com erro, 
+analisará a lei municipal de criação do referido tributo e fará propostas de 
+mudanças com uma tributação justa e suficiente para custear todas as despesas 
+com iluminação pública;</p>
+    <p>i) Verificação de todos os tributos devidos e relacionados as operações de 
+energia elétrica da Distribuidora do Estado com relação ao município.</p>
   `,
   royaltiesOleoGas: `
     <p>Os Royalties são uma compensação financeira devida pelas empresas que exploram petróleo e gás natural em território nacional, destinada aos Estados e Municípios produtores ou afetados pela atividade.</p>
