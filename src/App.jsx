@@ -271,7 +271,9 @@ const ControlsSidebar = ({
   onImportDocx,
   onSaveProposal,
   onDownloadDocx,
-  onDownloadPdf, // Adicionado
+  onDownloadPdf,
+  loadingPdf,
+  loadingDocx,
 }) => {
   const themeColors = colors[theme];
 
@@ -561,6 +563,16 @@ const ControlsSidebar = ({
           <label className="service-item">
             <input
               type="checkbox"
+              checked={footerOffices.sp.enabled}
+              onChange={() => setFooterOffices({ ...footerOffices, sp: { ...footerOffices.sp, enabled: !footerOffices.sp.enabled } })}
+            />
+            <span>São Paulo - SP</span>
+          </label>
+        </div>
+        <div style={{ marginBottom: "12px" }}>
+          <label className="service-item">
+            <input
+              type="checkbox"
               checked={footerOffices.am.enabled}
               onChange={() => setFooterOffices({ ...footerOffices, am: { ...footerOffices.am, enabled: !footerOffices.am.enabled } })}
             />
@@ -607,15 +619,17 @@ const ControlsSidebar = ({
             id="download-docx"
             className="btn primary"
             style={{ flex: 1, marginBottom: "8px" }}
-            onClick={onDownloadDocx}>
-            ⬇️ Baixar .docx
+            onClick={onDownloadDocx}
+            disabled={loadingDocx}>
+            {loadingDocx ? "⏳ Gerando..." : "⬇️ Baixar .docx"}
           </button>
           <button
             id="download-pdf"
             className="btn primary"
             style={{ flex: 1, marginBottom: "8px" }}
-            onClick={onDownloadPdf}>
-            ⬇️ Baixar PDF
+            onClick={onDownloadPdf}
+            disabled={loadingPdf}>
+            {loadingPdf ? "⏳ Gerando..." : "⬇️ Baixar PDF"}
           </button>
         </div>
       </div>
@@ -743,6 +757,7 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
     const enabledOffices = [];
     if (footerOffices.rj.enabled) enabledOffices.push(footerOffices.rj);
     if (footerOffices.df.enabled) enabledOffices.push(footerOffices.df);
+    if (footerOffices.sp.enabled) enabledOffices.push(footerOffices.sp);
     if (footerOffices.am.enabled) enabledOffices.push(footerOffices.am);
 
     return (
@@ -1276,7 +1291,14 @@ function App() {
       linha1: "Rua Silva Ramos, 78 - Centro",
       linha2: "Manaus, AM",
       linha3: "CEP: 69010-180"
-    }
+    },
+    sp: {
+      enabled: true,
+      cidade: "São Paulo - SP",
+      linha1: "Rua Fidêncio Ramos, 223,",
+      linha2: "Cobertura, Vila Olimpia,",
+      linha3: "CEP: 04551-010"
+    },
   });
 
   const [rppsImage, setRppsImage] = useState(null);
@@ -1294,17 +1316,23 @@ function App() {
     onCancel: () => { },
   });
 
+  const [loadingPdf, setLoadingPdf] = useState(false);
+  const [loadingDocx, setLoadingDocx] = useState(false);
+
   const generatePdf = async () => {
+    setLoadingPdf(true);
     console.log("Gerando PDF...");
     const previewElement = document.getElementById('preview');
     if (!previewElement) {
       alert("Elemento de pré-visualização não encontrado.");
+      setLoadingPdf(false);
       return;
     }
 
     const pageElements = previewElement.querySelectorAll('.pdf-page-render');
     if (pageElements.length === 0) {
       alert("Nenhuma página encontrada para gerar o PDF.");
+      setLoadingPdf(false);
       return;
     }
 
@@ -1340,19 +1368,16 @@ function App() {
     const canvasPromises = Array.from(pageElements).map((pageElement, index) => {
       console.log(`Capturando página ${index + 1}...`);
       return html2canvas(pageElement, {
-        scale: 3, // Aumentado para melhor qualidade
+        scale: 2,
         useCORS: true,
         allowTaint: false,
         backgroundColor: '#ffffff',
-        logging: true, // Ativado para debug
-        imageTimeout: 15000, // 15 segundos de timeout
+        logging: false,
+        imageTimeout: 15000,
         foreignObjectRendering: false,
-        windowWidth: pageElement.scrollWidth,
-        windowHeight: pageElement.scrollHeight,
-        width: pageElement.scrollWidth,
-        height: pageElement.scrollHeight,
+        width: 794,
+        height: 1123,
         onclone: (clonedDoc) => {
-          // Garantir que todas as imagens estejam visíveis no clone
           const clonedImages = clonedDoc.querySelectorAll('img');
           clonedImages.forEach(img => {
             img.style.display = 'block';
@@ -1386,10 +1411,12 @@ function App() {
 
     pdf.save(`Proposta-${options.municipio || "Municipio"}.pdf`);
     console.log("Download do PDF iniciado!");
+    setLoadingPdf(false);
   };
 
   // Funções auxiliares
   const generateDocx = async () => {
+    setLoadingDocx(true);
     console.log("Gerando DOCX...");
 
     // Validar campos obrigatórios
@@ -1403,6 +1430,7 @@ function App() {
         type: "warning",
         onConfirm: () => setModal((m) => ({ ...m, open: false })),
       });
+      setLoadingDocx(false);
       return;
     }
 
@@ -1436,6 +1464,7 @@ function App() {
         const enabledOffices = [];
         if (footerOffices.rj.enabled) enabledOffices.push(footerOffices.rj);
         if (footerOffices.df.enabled) enabledOffices.push(footerOffices.df);
+        if (footerOffices.sp.enabled) enabledOffices.push(footerOffices.sp);
         if (footerOffices.am.enabled) enabledOffices.push(footerOffices.am);
 
         const footerCells = enabledOffices.map(office =>
@@ -1746,6 +1775,7 @@ function App() {
         type: "success",
         onConfirm: () => setModal((m) => ({ ...m, open: false })),
       });
+      setLoadingDocx(false);
     } catch (error) {
       console.error("Erro ao gerar DOCX:", error);
       setModal({
@@ -1756,6 +1786,7 @@ function App() {
         type: "error",
         onConfirm: () => setModal((m) => ({ ...m, open: false })),
       });
+      setLoadingDocx(false);
     }
   };
 
@@ -2067,7 +2098,9 @@ function App() {
           onImportDocx={importDocx}
           onSaveProposal={saveProposal}
           onDownloadDocx={generateDocx}
-          onDownloadPdf={generatePdf} // Adicionado
+          onDownloadPdf={generatePdf}
+          loadingPdf={loadingPdf}
+          loadingDocx={loadingDocx}
         />
         <div className="content">
           <ProposalDocument theme={theme} options={options} prazo={prazo} services={services} customCabimentos={customCabimentos} customEstimates={customEstimates} rppsImage={rppsImage} footerOffices={footerOffices} paymentValue={paymentValue} />

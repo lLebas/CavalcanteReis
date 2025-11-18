@@ -310,6 +310,7 @@ html,
   overflow-y: auto;
   display: flex;
   justify-content: center;
+  background: #227056;
 }
 
 .preview {
