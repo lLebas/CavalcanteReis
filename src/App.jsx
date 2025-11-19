@@ -789,7 +789,17 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
           padding: '8px 10px',
           textAlign: 'center'
         }}>
-          <p style={{ margin: 0, letterSpacing: '1.5px', fontWeight: 'bold', fontSize: '9px' }}>w w w . c a v a l c a n t e r e i s . a d v . b r</p>
+          <p style={{
+            margin: 0,
+            letterSpacing: '1.1px',
+            fontWeight: 'bold',
+            fontSize: '10px',
+            border: '1px solid #eee2e2c2',
+            borderRadius: '10px',
+            padding: '1px 200px',
+            display: 'inline-block',
+            color: '#686666ff'
+          }}>w w w . c a v a l c a n t e r e i s . a d v . b r</p>
         </div>
       </div>
     );
@@ -902,13 +912,16 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
         pageBreakAfter: isLast ? 'auto' : 'always',
         background: 'white',
         width: '210mm', // Largura A4
-        minHeight: isLast ? 'auto' : '297mm', // Altura mínima A4, auto para última página
+        height: '297mm', // Altura exata A4
         position: 'relative',
-        padding: isLast ? '20mm 20mm 20mm 20mm' : '20mm 20mm 75mm 20mm', // Sem espaço extra para rodapé na última página
+        padding: '25.4mm 31.7mm 25.4mm 31.7mm', // Margens padrão Word: superior/inferior 2.54cm (25.4mm), esquerda/direita 3.17cm (31.7mm)
         boxSizing: 'border-box',
         display: 'flex',
         flexDirection: 'column',
-        pageBreakInside: 'avoid'
+        pageBreakInside: 'avoid',
+        marginBottom: '20px',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+        overflow: 'hidden'
       }}
     >
       <div style={{ flex: '1 1 auto' }}>
@@ -1454,7 +1467,7 @@ function App() {
       const assinaturaBlob = await assinaturaResponse.blob();
       const assinaturaBuffer = await assinaturaBlob.arrayBuffer();
 
-      const pageMargins = { top: 720, right: 1440, bottom: 1440, left: 1440 }; // Margem top reduzida para logo mais no topo
+      const pageMargins = { top: 720, right: 900, bottom: 720, left: 900 }; // Margens Word padrão: 2.54cm (720 twips) superior/inferior, 3.17cm (900 twips) esquerda/direita
       const defaultFont = "Garamond";
       const defaultSize = 26; // 13pt (26/2 = 13pt)
       const titleSize = 32; // 16pt para títulos
@@ -2103,7 +2116,10 @@ function App() {
           loadingDocx={loadingDocx}
         />
         <div className="content">
-          <ProposalDocument theme={theme} options={options} prazo={prazo} services={services} customCabimentos={customCabimentos} customEstimates={customEstimates} rppsImage={rppsImage} footerOffices={footerOffices} paymentValue={paymentValue} />
+          <div style={{ width: '100%', maxWidth: '210mm', margin: '0 auto' }}>
+            <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '20px', textAlign: 'center', color: '#ffffff', fontFamily: "'EB Garamond', serif" }}>Prévia</h2>
+            <ProposalDocument theme={theme} options={options} prazo={prazo} services={services} customCabimentos={customCabimentos} customEstimates={customEstimates} rppsImage={rppsImage} footerOffices={footerOffices} paymentValue={paymentValue} />
+          </div>
         </div>
         <Modal {...modal} />
       </main>
