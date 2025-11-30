@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Modal from "./Modal";
 import DOMPurify from "dompurify";
 import { Clipboard, Settings, FileText, Eye, X } from "lucide-react";
@@ -53,40 +53,40 @@ const allServices = {
 // --- Banco de textos oficiais de cada serviço (HTML) ---
 const serviceTextDatabase = {
   pasep: `
-<p>No julgamento do IRDR, ficou estabelecido que a Constituição Federal, através do 
+<p style="margin: 2px 0; text-align: justify;">No julgamento do IRDR, ficou estabelecido que a Constituição Federal, através do 
 art. 158, inciso I, que define o direito do Ente municipal ao produto da arrecadação 
 8 -
 do imposto de renda retido na fonte.</p>
-<p>No julgamento no STF, foi negado provimento ao Recurso Extraordinário da União 
+<p style="margin: 2px 0; text-align: justify;">No julgamento no STF, foi negado provimento ao Recurso Extraordinário da União 
 para estabelecer a seguinte tese em sede de repercussão geral:</p>
-<p>Pertence ao Município, aos Estados e ao Distrito Federal a titularidade das 
+<p style="margin: 2px 0; text-align: justify;">Pertence ao Município, aos Estados e ao Distrito Federal a titularidade das 
 receitas arrecadadas a título de imposto de renda retido na fonte incidente sobre 
 valores pagos por eles, suas autarquias e fundações a pessoas físicas ou jurídicas 
 contratadas para a prestação de bens ou serviços, conforme disposto nos arts. 
 158, I, e 157, I, da Constituição Federal.</p>
-<p>Portanto, é direito de os Estados e Municípios se apropriarem do IRRF sobre seus 
+<p style="margin: 2px 0; text-align: justify;">Portanto, é direito de os Estados e Municípios se apropriarem do IRRF sobre seus 
 pagamentos, o STF determinou que as regras aplicáveis a tais entes fossem aquelas 
 previstas na legislação editada para os órgãos e entidades da União. Um detalhe ainda 
 não comentado diz respeito ao histórico processual após as decisões de outubro de 
 2021.</p>
-<p>Tanto na ação que tratou do direito dos Municípios (RE nº 1.293.453/RS), como 
+<p style="margin: 2px 0; text-align: justify;">Tanto na ação que tratou do direito dos Municípios (RE nº 1.293.453/RS), como 
 também naquela que discutiu a mesma tese em prol dos Estados (ACO nº 2.897/AL), 
 houve a oposição de Embargos de Declaração por parte da União.</p>
-<p>Apesar do uso de argumentos razoáveis em relação ao pedido de modulação dos 
+<p style="margin: 2px 0; text-align: justify;">Apesar do uso de argumentos razoáveis em relação ao pedido de modulação dos 
 efeitos, os ministros do STF não levaram em conta qualquer consideração nesse 
 sentido e, ao negar acolhimento aos Embargos de Declaração, afastou qualquer 
 possibilidade de aplicação restrita do julgado. Inclusive, a leitura da decisão aponta e 
 existência de um único parágrafo fundamentando a negativa, cuja redação afirma:</p>
-<p>“Relativamente ao pedido de modulação dos efeitos do julgado, não merece ser 
+<p style="margin: 2px 0; text-align: justify;">“Relativamente ao pedido de modulação dos efeitos do julgado, não merece ser 
 atendido, pois não se encontram presentes os requisitos do § 3º do art. 927 do 
 Código de Processo Civil de 2015”.</p>
-<p>Entretanto, isso não afasta a legitimidade dos entes federativos, os quais devem se 
+<p style="margin: 2px 0; text-align: justify;">Entretanto, isso não afasta a legitimidade dos entes federativos, os quais devem se 
 pautar nas regras a serem adotadas a partir dos julgados do STF para apurar os valores 
 que se deixou de arrecadar, buscando inclusive ferramentas e profissionais que 
 possuam a expertise necessária para tanto, inclusive para otimizar o processo de 
 apuração da quantia com o uso de tecnologia que reduza a análise manual das 
 informações.</p>
-<p>Em relação ao objeto desta (Recuperação/ compensação IR) o valor estimado de 
+<p style="margin: 2px 0; text-align: justify;">Em relação ao objeto desta (Recuperação/ compensação IR) o valor estimado de 
 recuperação da receita é de {{impostoRenda_estimate}}.</p>
   `,
 
@@ -236,15 +236,6 @@ energia elétrica da Distribuidora do Estado com relação ao município.</p>
     <p>Demais teses consiste na prestação de serviços de assessoria técnica e jurídica nas áreas de Direito Público, Tributário, Econômico, Financeiro, previdenciário e Minerário, atuando perante o Ministério da Fazenda e os seus órgãos administrativos.</p>
   `,
 };
-
-const Header = ({ theme }) => (
-  <header className={`header ${theme}`}>
-    <div className="left">
-      <FileText size={28} />
-      <h1>Gerador de Propostas</h1>
-    </div>
-  </header>
-);
 
 const ControlsSidebar = ({
   theme,
@@ -762,7 +753,7 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
 
     return (
       <div style={{
-        marginTop: '24px',
+        marginTop: '18px',
         fontSize: '10px',
         color: '#555',
         fontFamily: "'EB Garamond', serif",
@@ -784,8 +775,8 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
           </div>
         </div>
         <div style={{
-          marginLeft: '-20mm',
-          marginRight: '-20mm',
+          marginLeft: '-30mm',
+          marginRight: '-30mm',
           padding: '8px 10px',
           textAlign: 'center'
         }}>
@@ -842,15 +833,15 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
     // Use querySelectorAll to select only the elements I want to render.
     const elements = Array.from(tempDiv.querySelectorAll("p, div.image-placeholder")).map((el, idx) => {
       if (el.tagName === 'P') {
-        return <p key={idx} style={{ margin: "8px 0" }}>{el.textContent}</p>;
+        return <p key={idx} style={{ margin: "4px 0", textAlign: "justify", fontSize: "11px" }}>{el.textContent}</p>;
       }
       if (el.tagName === 'DIV' && el.classList.contains('image-placeholder')) {
         if (rppsImage) {
-          return <img key={idx} src={rppsImage} style={{ width: '100%', height: 'auto', maxHeight: '600px', objectFit: 'contain', margin: '16px 0' }} />;
+          return <img key={idx} src={rppsImage} style={{ width: '100%', height: 'auto', maxHeight: '400px', objectFit: 'contain', margin: '8px 0' }} />;
         } else {
           return (
-            <div key={idx} style={{ border: '1px solid #000', height: '400px', width: '80%', margin: '16px auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <p style={{ color: '#888' }}>Espaço para imagem/gráfico</p>
+            <div key={idx} style={{ border: '1px solid #000', height: '300px', width: '80%', margin: '8px auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <p style={{ color: '#888', fontSize: "10px" }}>Espaço para imagem/gráfico</p>
             </div>
           );
         }
@@ -863,10 +854,10 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
 
     return (
       <>
-        <h3 className="font-bold text-lg mt-6 mb-2" style={{ color: "#000" }}>
+        <h3 style={{ fontWeight: "bold", fontSize: "12px", marginTop: "12px", marginBottom: "6px", color: "#000" }}>
           {numberedTitle}
         </h3>
-        <div className="space-y-4 mb-6">{elements}</div>
+        <div style={{ marginBottom: "12px" }}>{elements}</div>
       </>
     );
   };
@@ -879,11 +870,12 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
     const finalCabimento = customCabimentos && customCabimentos[serviceKey] ? customCabimentos[serviceKey] : cabimento;
 
     const cellStyle = {
-      padding: '8px',
+      padding: '4px',
       borderBottom: `1px solid #000`,
       borderRight: `1px solid #000`,
       color: "#000",
-      verticalAlign: 'top'
+      verticalAlign: 'top',
+      fontSize: "10px"
     };
 
     const lastCellStyle = {
@@ -905,70 +897,75 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
   };
 
   // Helper para renderizar uma "página" com cabeçalho e rodapé
-  const renderPage = (children, { showLogo = true, pageNumber = null, isLast = false, isCoverPage = false } = {}) => (
-    <div
-      className="pdf-page-render"
-      style={{
-        pageBreakAfter: isLast ? 'auto' : 'always',
-        background: 'white',
-        width: '210mm', // Largura A4
-        minHeight: '297mm', // Altura A4
-        position: 'relative',
-        padding: '25.4mm 31.7mm 25.4mm 31.7mm', // Margens Word padrão
-        boxSizing: 'border-box',
-        display: 'flex',
-        flexDirection: 'column',
-        marginBottom: '297mm', // Espaço entre páginas
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        justifyContent: isLast ? 'flex-start' : 'space-between' // Última página sem espaçamento forçado
-      }}
-    >
-      {/* Cabeçalho - Logo em TODAS as páginas (exceto capa) */}
-      {!isCoverPage && showLogo && (
+  const renderPage = (children, { pageNumber = null, isCoverPage = false, showLogo = false } = {}) => (
+    <div style={{ position: 'relative' }}>
+      <div
+        className="pdf-page-render"
+        style={{
+          pageBreakAfter: 'always',
+          background: 'white',
+          width: '210mm',
+          minHeight: '297mm',
+          position: 'relative',
+          padding: '20mm 30mm 20mm 30mm',
+          boxSizing: 'border-box',
+          display: 'flex',
+          flexDirection: 'column',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+          marginBottom: '20mm'
+        }}
+      >
+        {/* Logo APENAS quando showLogo=true */}
+        {showLogo && !isCoverPage && (
+          <div style={{
+            textAlign: "center",
+            marginBottom: 16,
+            marginTop: 8
+          }}>
+            <img
+              src="/logo-cavalcante-reis.png"
+              alt="Logo Cavalcante Reis Advogados"
+              crossOrigin="anonymous"
+              style={{ width: "140px", height: "auto", display: "block", margin: "0 auto" }}
+            />
+          </div>
+        )}
+
+        {/* Conteúdo principal */}
+        <div style={{ flex: '1 1 auto' }}>
+          {children}
+        </div>
+
+        {/* Rodapé - em TODAS as páginas incluindo capa */}
+        <div style={{ marginTop: 'auto', paddingTop: '12px', borderTop: isCoverPage ? 'none' : '1px solid #e0e0e0' }}>
+          <Footer />
+        </div>
+      </div>
+      {/* Número da página fora do container branco, no background verde */}
+      {pageNumber && (
         <div style={{
-          textAlign: "center",
-          marginBottom: 16
+          position: 'absolute',
+          bottom: '-15mm',
+          right: '10mm',
+          color: '#ffffff',
+          fontSize: '12px',
+          fontWeight: 'bold',
+          backgroundColor: 'rgba(0,0,0,0.2)',
+          padding: '4px 8px',
+          borderRadius: '4px'
         }}>
-          <img
-            src="/logo-cavalcante-reis.png"
-            alt="Logo Cavalcante Reis Advogados"
-            crossOrigin="anonymous"
-            style={{ width: "166px", height: "87px", display: "block", margin: "0 auto" }}
-          />
+          {pageNumber}
         </div>
       )}
-
-      {/* Número da página (se tiver) */}
-      {pageNumber && !isCoverPage && (
-        <div style={{
-          textAlign: 'right',
-          fontSize: '14px',
-          fontFamily: "'EB Garamond', serif",
-          marginBottom: '16px',
-          color: '#666'
-        }}>
-          Página {pageNumber}
-        </div>
-      )}
-
-      {/* Conteúdo principal */}
-      <div style={{ flex: isLast ? '0 0 auto' : '1 1 auto', paddingBottom: '20px' }}>
-        {children}
-      </div>
-
-      {/* Rodapé - em TODAS as páginas (incluindo capa) */}
-      <div style={{ marginTop: isLast ? '20px' : 'auto' }}>
-        <Footer />
-      </div>
     </div>
   );
 
   return (
-    <div id="preview" className="preview" style={{ fontFamily: "'EB Garamond', serif", fontSize: "13px", color: "#222" }}>
+    <div id="preview" className="preview" style={{ fontFamily: "'EB Garamond', serif", fontSize: "11px", color: "#000", lineHeight: "1.4" }}>
       {/* Página 1: Capa */}
       {renderPage(
         <>
-          <div style={{ textAlign: "center", marginTop: 60, marginBottom: 200 }}>
+          <div style={{ textAlign: "center", marginTop: 80, marginBottom: 120 }}>
             <img
               src="/logo-cavalcante-reis.png"
               alt="Cavalcante Reis Advogados"
@@ -977,7 +974,7 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
             />
           </div>
 
-          <div style={{ marginTop: 350, textAlign: "center" }}>
+          <div style={{ marginTop: 180, textAlign: "center" }}>
             <div
               style={{
                 borderTop: "1px solid #000",
@@ -1009,39 +1006,38 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
       {/* Página 2: Sumário */}
       {renderPage(
         <>
-
-          <h2 style={{ fontSize: "20px", fontWeight: "bold", marginBottom: 30 }}>Sumário</h2>
-          <div style={{ paddingLeft: 40, lineHeight: 2 }}>
-            <p style={{ margin: "12px 0" }}>
+          <h2 style={{ fontSize: "16px", fontWeight: "bold", marginBottom: 12 }}>Sumário</h2>
+          <div style={{ paddingLeft: 20, lineHeight: 1.6 }}>
+            <p style={{ margin: "6px 0" }}>
               <strong>1. Objeto da Proposta</strong>
             </p>
-            <p style={{ margin: "12px 0" }}>
+            <p style={{ margin: "6px 0" }}>
               <strong>2. Análise da Questão</strong>
             </p>
-            <p style={{ margin: "12px 0" }}>
+            <p style={{ margin: "6px 0" }}>
               <strong>3. Dos Honorários, das Condições de Pagamento e Despesas</strong>
             </p>
-            <p style={{ margin: "12px 0" }}>
+            <p style={{ margin: "6px 0" }}>
               <strong>4. Prazo e Cronograma de Execução dos Serviços</strong>
             </p>
-            <p style={{ margin: "12px 0" }}>
+            <p style={{ margin: "6px 0" }}>
               <strong>5. Experiência em atuação em favor de Municípios e da Equipe Responsável</strong>
             </p>
-            <p style={{ margin: "12px 0" }}>
+            <p style={{ margin: "6px 0" }}>
               <strong>6. Disposições Finais</strong>
             </p>
           </div>
         </>,
-        { pageNumber: 2 }
+        { pageNumber: 2, showLogo: false }
       )}
 
       {/* Página 3: Objeto da Proposta */}
       {renderPage(
         <>
-          <h2 className="text-2xl font-bold" style={{ borderBottom: "1px solid #ddd", paddingBottom: 8 }}>
+          <h2 style={{ fontSize: '14px', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: 4, marginBottom: 8 }}>
             1. Objeto da Proposta
           </h2>
-          <p style={{ margin: "8px 0" }}>
+          <p style={{ margin: "4px 0", textAlign: "justify" }}>
             É objeto do presente contrato o desenvolvimento de serviços advocatícios especializados por parte da
             Proponente, Cavalcante Reis Advogados, ao Aceitante, Município de{" "}
             {options.municipio || "[Nome do Município]"}, a fim de prestação de serviços de assessoria técnica e
@@ -1050,20 +1046,22 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
             incremento de receitas, ficando responsável pelo ajuizamento, acompanhamento e eventuais intervenções de
             terceiro em ações de interesse do Município.
           </p>
-          <p className="mb-4">A proposta inclui os seguintes objetos:</p>
+          <p style={{ margin: "4px 0 8px 0", textAlign: "justify" }}>A proposta inclui os seguintes objetos:</p>
           <table
             className="w-full"
             style={{
               width: "100%",
               borderCollapse: 'collapse',
               border: `1px solid #000`,
+              fontSize: "10px",
+              marginTop: "8px"
             }}>
             <thead>
               <tr style={{ background: "#f7f7f7" }}>
-                <th style={{ padding: 8, borderBottom: `2px solid #000`, borderRight: `1px solid #000`, textAlign: 'left' }}>
+                <th style={{ padding: 4, borderBottom: `2px solid #000`, borderRight: `1px solid #000`, textAlign: 'center', fontSize: "10px" }}>
                   <strong>TESE</strong>
                 </th>
-                <th style={{ padding: 8, borderBottom: `2px solid #000`, textAlign: 'center' }}>
+                <th style={{ padding: 4, borderBottom: `2px solid #000`, textAlign: 'center', fontSize: "10px" }}>
                   <strong>CABIMENTO</strong>
                 </th>
               </tr>
@@ -1119,13 +1117,13 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
           <p><strong>(iv)</strong> Acompanhamento processual completo, até o trânsito em Julgado da Sentença administrativa e/ou judicial;</p>
           <p><strong>(v)</strong> Acompanhamento do cumprimento das medidas administrativas e/ou judiciais junto aos órgãos administrativos.</p>
         </>,
-        { pageNumber: 3 }
+        { pageNumber: 3, showLogo: false }
       )}
 
       {/* Página 4: Análise da Questão */}
       {renderPage(
         <>
-          <h2 className="text-2xl font-bold" style={{ borderBottom: "1px solid #ddd", paddingBottom: 8 }}>
+          <h2 style={{ fontSize: '14px', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: 4, marginBottom: 8 }}>
             2. Análise da Questão
           </h2>
           {renderServiceSection("folhaPagamento", allServices.folhaPagamento, serviceTextDatabase.folhaPagamento)}
@@ -1160,53 +1158,53 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
             serviceTextDatabase.demaisTeses
           )}
         </>,
-        { pageNumber: 4 }
+        { pageNumber: 4, showLogo: false }
       )}
 
       {/* Página 4: Honorários e Prazo */}
       {renderPage(
         <>
           {/* Seção 3: Honorários */}
-          <h2 className="text-2xl font-bold" style={{ borderBottom: "1px solid #ddd", paddingBottom: 8, pageBreakAfter: 'avoid' }}>
+          <h2 style={{ fontSize: '14px', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: 4, marginBottom: 6, marginTop: 8 }}>
             3. Dos Honorários, das Condições de Pagamento e Despesas
           </h2>
-          <p>
+          <p style={{ margin: "2px 0", textAlign: "justify", fontSize: "11px" }}>
             Considerando a necessidade de manutenção do equilíbrio econômico-financeiro do contrato administrativo, propõe o escritório CAVALCANTE REIS ADVOGADOS que esta Municipalidade pague ao Proponente da seguinte forma:
           </p>
-          <p>
+          <p style={{ margin: "2px 0", textAlign: "justify", fontSize: "11px" }}>
             <strong>3.1.1</strong> <strong>Para todos os demais itens descritos nesta Proposta</strong> será efetuado o pagamento de honorários advocatícios à CAVALCANTE REIS ADVOGADOS pela execução dos serviços de recuperação de créditos, <strong>ad êxito na ordem de {paymentValue} para cada R$ 1,00 (um real)</strong> do montante referente ao incremento financeiro, ou seja, com base nos valores que entrarem nos cofres do CONTRATANTE;
           </p>
-          <p>
+          <p style={{ margin: "2px 0", textAlign: "justify", fontSize: "11px" }}>
             <strong>3.1.2</strong> Em caso de valores retroativos recuperados em favor da municipalidade, que consiste nos <strong>valores não repassados em favor do Contratante nos últimos 5 (cinco) anos</strong> (prescrição quinquenal) ou não abarcados pela prescrição, também serão cobrados honorários advocatícios <strong>na ordem de {paymentValue} para cada R$ 1.00 (um real) do montante recuperado aos Cofres Municipais.</strong>
           </p>
 
           {/* Seção 4: Prazo */}
-          <h2 className="text-2xl font-bold" style={{ borderBottom: "1px solid #ddd", paddingBottom: 8, marginTop: 32 }}>
+          <h2 style={{ fontSize: '14px', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: 4, marginBottom: 6, marginTop: 12 }}>
             4. Prazo e Cronograma de Execução dos Serviços
           </h2>
-          <p>
+          <p style={{ margin: "2px 0", textAlign: "justify", fontSize: "11px" }}>
             O prazo de execução será de {prazo} meses ou pelo tempo que perdurar os processos judiciais,
             podendo ser prorrogado por interesse das partes.
           </p>
         </>,
-        { pageNumber: 5 }
+        { pageNumber: 5, showLogo: false }
       )}
 
       {/* Página 5: Experiência */}
       {renderPage(
         <>
           {/* Seção 5: Experiência */}
-          <h2 className="text-2xl font-bold" style={{ borderBottom: "1px solid #ddd", paddingBottom: 8, marginBottom: 16 }}>
+          <h2 style={{ fontSize: '14px', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: 4, marginBottom: 12 }}>
             5. Experiência e Equipe Responsável
           </h2>
-          <p style={{ marginBottom: 16 }}>No portfólio de serviços executados e/ou em execução, constam os seguintes Municípios contratantes:</p>
-          <div style={{ marginTop: 12, marginBottom: 8 }}>
-            <img src="/munincipios01.png" alt="Municípios Contratantes 1" crossOrigin="anonymous" style={{ width: "100%", height: "300px", objectFit: "contain", display: "block", margin: "0 auto" }} />
+          <p style={{ marginBottom: 8, fontSize: "11px", textAlign: "justify" }}>No portfólio de serviços executados e/ou em execução, constam os seguintes Municípios contratantes:</p>
+          <div style={{ marginTop: 8, marginBottom: 6 }}>
+            <img src="/munincipios01.png" alt="Municípios Contratantes 1" crossOrigin="anonymous" style={{ width: "100%", height: "250px", objectFit: "contain", display: "block", margin: "0 auto" }} />
           </div>
-          <div style={{ marginTop: 8, marginBottom: 16 }}>
-            <img src="/Munincipios02.png" alt="Municípios Contratantes 2" crossOrigin="anonymous" style={{ width: "100%", height: "200px", objectFit: "contain", display: "block", margin: "0 auto" }} />
+          <div style={{ marginTop: 6, marginBottom: 12 }}>
+            <img src="/Munincipios02.png" alt="Municípios Contratantes 2" crossOrigin="anonymous" style={{ width: "100%", height: "180px", objectFit: "contain", display: "block", margin: "0 auto" }} />
           </div>
-          <p style={{ marginTop: 16, marginBottom: 12 }}>
+          <p style={{ marginTop: 12, marginBottom: 8, fontSize: "11px", textAlign: "justify" }}>
             Para coordenar os trabalhos de consultoria propostos neste documento, a CAVALCANTE REIS ADVOGADOS alocará os seguintes profissionais:
           </p>
           <p style={{ marginBottom: 12, textAlign: 'justify' }}>
@@ -1231,37 +1229,37 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
             Nossa contratação, portanto, devido à altíssima qualificação e experiência, aliada à singularidade do objeto da demanda, bem como os diferenciais já apresentados acima, está inserida dentre as hipóteses do art. 6º, XVIII “e” e art. 74, III, “e”, da Lei n.º 14.133/2021.
           </p>
         </>,
-        { pageNumber: 6, showLogo: true }
+        { pageNumber: 6, showLogo: false }
       )}
 
       {/* Página 7: Disposições Finais */}
       {renderPage(
         <>
           {/* Seção 6: Disposições Finais */}
-          <h2 className="text-2xl font-bold" style={{ borderBottom: "1px solid #ddd", paddingBottom: 8 }}>
+          <h2 style={{ fontSize: '14px', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: 4, marginBottom: 6 }}>
             6. Disposições Finais
           </h2>
-          <div style={{ textAlign: 'left' }}>
-            <p>
+          <div style={{ textAlign: 'left', fontSize: "11px" }}>
+            <p style={{ margin: "2px 0", textAlign: "justify" }}>
               Nesse sentido, ficamos no aguardo da manifestação deste Município para promover os ajustes contratuais que entenderem necessários, sendo mantida a mesma forma de remuneração aqui proposta, com fundamento no art. 6º, XVIII, “e” e art. 74, III, “e”, da Lei n.º 14.133/2021.
             </p>
-            <p>
+            <p style={{ margin: "2px 0", textAlign: "justify" }}>
               A presente proposta tem validade de 60 (sessenta) dias.
             </p>
-            <p>
+            <p style={{ margin: "2px 0", textAlign: "justify" }}>
               Sendo o que se apresenta para o momento, aguardamos posicionamento da parte de V. Exa., colocando-nos, desde já, à inteira disposição para dirimir quaisquer dúvidas eventualmente existentes.
             </p>
           </div>
-          <p style={{ marginTop: 16, marginBottom: 8, textAlign: "center" }}>
+          <p style={{ marginTop: 12, marginBottom: 6, textAlign: "center", fontSize: "11px" }}>
             Brasília-DF, {formatDateWithMonthName(options.data)}.
           </p>
-          <div style={{ marginTop: 8, textAlign: "center" }}>
-            <p>Atenciosamente,</p>
-            <img src="/Assinatura.png" alt="Assinatura" crossOrigin="anonymous" style={{ width: "200px", margin: "8px auto 0" }} />
-            <h3 style={{ fontWeight: "bold", marginTop: "8px" }}>CAVALCANTE REIS ADVOGADOS</h3>
+          <div style={{ marginTop: 6, textAlign: "center" }}>
+            <p style={{ fontSize: "11px" }}>Atenciosamente,</p>
+            <img src="/Assinatura.png" alt="Assinatura" crossOrigin="anonymous" style={{ width: "180px", margin: "6px auto 0" }} />
+            <h3 style={{ fontWeight: "bold", marginTop: "6px", fontSize: "12px" }}>CAVALCANTE REIS ADVOGADOS</h3>
           </div>
         </>,
-        { pageNumber: 7, isLast: true }
+        { pageNumber: 7, showLogo: false }
       )}
     </div>
   );
@@ -1272,6 +1270,11 @@ function App() {
   const [showPreview, setShowPreview] = useState(false);
   const [options, setOptions] = useState({ municipio: "", destinatario: "", data: "" });
   const [prazo, setPrazo] = useState("24 (vinte e quatro)");
+
+  useEffect(() => {
+    document.title = 'Gerador de Propostas - Sistema Cavalcante Reis';
+  }, []);
+
   const [services, setServices] = useState(
     Object.keys(allServices).reduce((acc, key) => {
       acc[key] = false;
@@ -1346,6 +1349,10 @@ function App() {
 
   const [loadingPdf, setLoadingPdf] = useState(false);
   const [loadingDocx, setLoadingDocx] = useState(false);
+
+  // Estados para zoom touch na prévia mobile
+  const [previewScale, setPreviewScale] = useState(0.4);
+  const [previewTranslate, setPreviewTranslate] = useState({ x: 0, y: 0 });
 
   const generatePdf = async () => {
     setLoadingPdf(true);
@@ -2063,8 +2070,7 @@ function App() {
 
   return (
     <div className={`app ${theme}`} style={{ backgroundColor: colors[theme].background }}>
-      <Header theme={theme} />
-      <main className="main">
+      <main className="main" style={{ paddingTop: 0 }}>
         {/* Versão Desktop - Sidebar sempre visível */}
         <div className="desktop-layout">
           <ControlsSidebar
@@ -2096,7 +2102,11 @@ function App() {
             loadingPdf={loadingPdf}
             loadingDocx={loadingDocx}
           />
-          <div className="content">
+          <div className="content" style={{
+            background: '#227056',
+            padding: '20px 0',
+            minHeight: '100vh'
+          }}>
             <div style={{ width: '100%', maxWidth: '210mm', margin: '0 auto' }}>
               <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '20px', textAlign: 'center', color: '#ffffff', fontFamily: "'EB Garamond', serif" }}>Prévia</h2>
               <ProposalDocument theme={theme} options={options} prazo={prazo} services={services} customCabimentos={customCabimentos} customEstimates={customEstimates} rppsImage={rppsImage} footerOffices={footerOffices} paymentValue={paymentValue} />
@@ -2141,11 +2151,15 @@ function App() {
             </div>
           )}
 
-          {/* Preview Modal Mobile */}
+          {/* Preview Modal Mobile com Zoom Touch */}
           {showPreview && (
             <div className="mobile-preview">
               <button
-                onClick={() => setShowPreview(false)}
+                onClick={() => {
+                  setShowPreview(false);
+                  setPreviewScale(0.4);
+                  setPreviewTranslate({ x: 0, y: 0 });
+                }}
                 className="mobile-close-preview"
                 style={{
                   position: 'fixed',
@@ -2168,8 +2182,86 @@ function App() {
               >
                 <X size={24} />
               </button>
-              <div style={{ padding: '80px 16px 20px', overflowY: 'auto', height: '100vh' }}>
-                <ProposalDocument theme={theme} options={options} prazo={prazo} services={services} customCabimentos={customCabimentos} customEstimates={customEstimates} rppsImage={rppsImage} footerOffices={footerOffices} paymentValue={paymentValue} />
+
+              {/* Indicador de zoom */}
+              <div style={{
+                position: 'fixed',
+                top: '20px',
+                right: '20px',
+                zIndex: 10000,
+                background: 'rgba(34, 112, 86, 0.9)',
+                color: 'white',
+                padding: '8px 16px',
+                borderRadius: '20px',
+                fontSize: '14px',
+                fontWeight: '600'
+              }}>
+                {Math.round(previewScale * 100)}%
+              </div>
+
+              <div
+                id="mobile-preview-container"
+                style={{
+                  padding: '80px 0 20px',
+                  overflowY: 'auto',
+                  overflowX: 'auto',
+                  height: '100vh',
+                  touchAction: 'pan-x pan-y pinch-zoom',
+                  WebkitOverflowScrolling: 'touch'
+                }}
+                onTouchStart={(e) => {
+                  if (e.touches.length === 2) {
+                    const touch1 = e.touches[0];
+                    const touch2 = e.touches[1];
+                    const distance = Math.hypot(
+                      touch2.clientX - touch1.clientX,
+                      touch2.clientY - touch1.clientY
+                    );
+                    e.currentTarget.dataset.initialDistance = distance;
+                    e.currentTarget.dataset.initialScale = previewScale;
+                  }
+                }}
+                onTouchMove={(e) => {
+                  if (e.touches.length === 2) {
+                    e.preventDefault();
+                    const touch1 = e.touches[0];
+                    const touch2 = e.touches[1];
+                    const distance = Math.hypot(
+                      touch2.clientX - touch1.clientX,
+                      touch2.clientY - touch1.clientY
+                    );
+                    const initialDistance = parseFloat(e.currentTarget.dataset.initialDistance);
+                    const initialScale = parseFloat(e.currentTarget.dataset.initialScale);
+
+                    if (initialDistance && initialScale) {
+                      const scale = (distance / initialDistance) * initialScale;
+                      const clampedScale = Math.min(Math.max(scale, 0.2), 3);
+                      setPreviewScale(clampedScale);
+                    }
+                  }
+                }}
+              >
+                <div style={{
+                  transform: `scale(${previewScale})`,
+                  transformOrigin: 'top center',
+                  transition: 'transform 0.1s ease-out',
+                  width: '100%',
+                  display: 'inline-block',
+                  background: '#227056',
+                  padding: '20px 0'
+                }}>
+                  <ProposalDocument
+                    theme={theme}
+                    options={options}
+                    prazo={prazo}
+                    services={services}
+                    customCabimentos={customCabimentos}
+                    customEstimates={customEstimates}
+                    rppsImage={rppsImage}
+                    footerOffices={footerOffices}
+                    paymentValue={paymentValue}
+                  />
+                </div>
               </div>
             </div>
           )}

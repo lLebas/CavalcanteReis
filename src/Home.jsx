@@ -1,7 +1,13 @@
-import React from 'react';
-import { FileText, Box, Settings, Users } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { FileText, Box, Settings, Users, LogOut, Sparkles, X } from 'lucide-react';
 
-function Home({ onNavigate }) {
+function Home({ onNavigate, onLogout }) {
+  const [showComingSoonModal, setShowComingSoonModal] = useState(false);
+
+  useEffect(() => {
+    document.title = 'Home - Sistema Cavalcante Reis';
+  }, []);
+
   const cards = [
     {
       id: 'gerador-propostas',
@@ -17,7 +23,7 @@ function Home({ onNavigate }) {
       description: 'Funcionalidade em desenvolvimento',
       icon: Box,
       color: '#3498db',
-      action: () => alert('Em breve!')
+      action: () => setShowComingSoonModal(true)
     },
     {
       id: 'exemplo-3',
@@ -25,7 +31,7 @@ function Home({ onNavigate }) {
       description: 'Funcionalidade em desenvolvimento',
       icon: Settings,
       color: '#e74c3c',
-      action: () => alert('Em breve!')
+      action: () => setShowComingSoonModal(true)
     },
     {
       id: 'exemplo-4',
@@ -33,7 +39,7 @@ function Home({ onNavigate }) {
       description: 'Funcionalidade em desenvolvimento',
       icon: Users,
       color: '#f39c12',
-      action: () => alert('Em breve!')
+      action: () => setShowComingSoonModal(true)
     }
   ];
 
@@ -43,6 +49,125 @@ function Home({ onNavigate }) {
       background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
       fontFamily: "'EB Garamond', serif"
     }}>
+      {/* Modal "Em Breve" */}
+      {showComingSoonModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          backdropFilter: 'blur(8px)',
+          animation: 'fadeIn 0.3s ease'
+        }}>
+          <div style={{
+            background: 'white',
+            borderRadius: '20px',
+            padding: '40px',
+            maxWidth: '450px',
+            width: '90%',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+            position: 'relative',
+            animation: 'slideUp 0.4s ease',
+            textAlign: 'center'
+          }}>
+            <button
+              onClick={() => setShowComingSoonModal(false)}
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                color: '#999',
+                padding: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'color 0.2s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.color = '#227056'}
+              onMouseLeave={(e) => e.currentTarget.style.color = '#999'}
+            >
+              <X size={24} />
+            </button>
+
+            <div style={{
+              width: '100px',
+              height: '100px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #227056 0%, #3498db 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 24px',
+              animation: 'pulse 2s ease infinite'
+            }}>
+              <Sparkles size={50} color="white" />
+            </div>
+
+            <h2 style={{
+              fontSize: '28px',
+              color: '#227056',
+              margin: '0 0 16px',
+              fontWeight: '600'
+            }}>
+              Em Breve!
+            </h2>
+
+            <p style={{
+              fontSize: '18px',
+              color: '#666',
+              lineHeight: '1.6',
+              margin: '0 0 24px'
+            }}>
+              <strong style={{ color: '#227056' }}>Novas funções</strong> e <strong style={{ color: '#3498db' }}>geradores incríveis</strong> estão a caminho!
+            </p>
+
+            <p style={{
+              fontSize: '16px',
+              color: '#999',
+              margin: '0 0 32px'
+            }}>
+              Fique atento às atualizações do sistema.
+            </p>
+
+            <button
+              onClick={() => setShowComingSoonModal(false)}
+              style={{
+                width: '100%',
+                padding: '14px',
+                background: 'linear-gradient(135deg, #227056 0%, #1a5642 100%)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '10px',
+                fontSize: '16px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                boxShadow: '0 4px 12px rgba(34, 112, 86, 0.3)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 6px 20px rgba(34, 112, 86, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(34, 112, 86, 0.3)';
+              }}
+            >
+              Entendi
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <header style={{
         background: 'white',
@@ -68,8 +193,11 @@ function Home({ onNavigate }) {
           </div>
         </div>
         <button
-          onClick={() => window.location.reload()}
+          onClick={onLogout}
           style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
             padding: '10px 20px',
             background: '#227056',
             color: 'white',
@@ -77,9 +205,19 @@ function Home({ onNavigate }) {
             borderRadius: '6px',
             cursor: 'pointer',
             fontSize: '14px',
-            fontWeight: '500'
+            fontWeight: '500',
+            transition: 'all 0.2s'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = '#1a5642';
+            e.currentTarget.style.transform = 'scale(1.05)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = '#227056';
+            e.currentTarget.style.transform = 'scale(1)';
           }}
         >
+          <LogOut size={18} />
           Sair
         </button>
       </header>
@@ -172,6 +310,24 @@ function Home({ onNavigate }) {
       </main>
 
       <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes slideUp {
+          from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+        }
         @media (max-width: 768px) {
           main {
             padding: 40px 20px !important;
