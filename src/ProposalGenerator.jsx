@@ -905,12 +905,12 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
           pageBreakAfter: 'always',
           background: 'white',
           width: '210mm',
-          minHeight: '297mm',
+          minHeight: isCoverPage ? '297mm' : 'auto',
           position: 'relative',
           padding: '20mm 30mm 20mm 30mm',
           boxSizing: 'border-box',
-          display: 'flex',
-          flexDirection: 'column',
+          display: isCoverPage ? 'flex' : 'block',
+          flexDirection: isCoverPage ? 'column' : 'initial',
           boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
           marginBottom: '20mm'
         }}
@@ -932,12 +932,12 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
         )}
 
         {/* Conteúdo principal */}
-        <div style={{ flex: '1 1 auto' }}>
+        <div style={{ flex: isCoverPage ? '1 1 auto' : 'initial' }}>
           {children}
         </div>
 
         {/* Rodapé - em TODAS as páginas incluindo capa */}
-        <div style={{ marginTop: 'auto', paddingTop: '12px', borderTop: isCoverPage ? 'none' : '1px solid #e0e0e0' }}>
+        <div style={{ marginTop: isCoverPage ? 'auto' : '24px', paddingTop: '12px' }}>
           <Footer />
         </div>
       </div>
@@ -1108,14 +1108,14 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
               )}
             </tbody>
           </table>
-          <p style={{ marginTop: 16 }}>
+          <p style={{ marginTop: 16, textAlign: "justify" }}>
             Além disso, a proposta também tem como objeto:
           </p>
-          <p><strong>(i)</strong> Análise do caso concreto, com a elaboração dos estudos pertinentes ao Município de Manacapuru, Estado do Amazonas;</p>
-          <p><strong>(ii)</strong> Ingresso de medida administrativa e/ou judicial, com posterior acompanhamento do processo durante sua tramitação, com realização de defesas, diligências, manifestação em razão de intimações, produção de provas, recursos e demais atos necessários ao deslinde dos feitos;</p>
-          <p><strong>(iii)</strong> Atuação perante a Justiça Federal seja na condição de recorrente ou recorrido, bem como interposição de recursos ou apresentação de contrarrazões aos Tribunais Superiores, se necessário for;</p>
-          <p><strong>(iv)</strong> Acompanhamento processual completo, até o trânsito em Julgado da Sentença administrativa e/ou judicial;</p>
-          <p><strong>(v)</strong> Acompanhamento do cumprimento das medidas administrativas e/ou judiciais junto aos órgãos administrativos.</p>
+          <p style={{ textAlign: "justify" }}><strong>(i)</strong> Análise do caso concreto, com a elaboração dos estudos pertinentes ao Município de Manacapuru, Estado do Amazonas;</p>
+          <p style={{ textAlign: "justify" }}><strong>(ii)</strong> Ingresso de medida administrativa e/ou judicial, com posterior acompanhamento do processo durante sua tramitação, com realização de defesas, diligências, manifestação em razão de intimações, produção de provas, recursos e demais atos necessários ao deslinde dos feitos;</p>
+          <p style={{ textAlign: "justify" }}><strong>(iii)</strong> Atuação perante a Justiça Federal seja na condição de recorrente ou recorrido, bem como interposição de recursos ou apresentação de contrarrazões aos Tribunais Superiores, se necessário for;</p>
+          <p style={{ textAlign: "justify" }}><strong>(iv)</strong> Acompanhamento processual completo, até o trânsito em Julgado da Sentença administrativa e/ou judicial;</p>
+          <p style={{ textAlign: "justify" }}><strong>(v)</strong> Acompanhamento do cumprimento das medidas administrativas e/ou judiciais junto aos órgãos administrativos.</p>
         </>,
         { pageNumber: 3, showLogo: false }
       )}
@@ -1159,9 +1159,7 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
           )}
         </>,
         { pageNumber: 4, showLogo: false }
-      )}
-
-      {/* Página 4: Honorários e Prazo */}
+      )}      {/* Página 4: Honorários e Prazo */}
       {renderPage(
         <>
           {/* Seção 3: Honorários */}
@@ -2304,6 +2302,41 @@ function App() {
       </main>
 
       <style>{`
+        /* Estilos para quebra automática de página */
+        .pdf-page-render {
+          page-break-after: always;
+          page-break-inside: auto;
+        }
+        
+        .pdf-page-render h2,
+        .pdf-page-render h3 {
+          page-break-after: avoid;
+          break-after: avoid;
+        }
+        
+        .pdf-page-render p {
+          orphans: 2;
+          widows: 2;
+        }
+        
+        /* Impressão / PDF */
+        @media print {
+          .pdf-page-render {
+            page-break-after: always;
+            min-height: 0 !important;
+          }
+          
+          body {
+            margin: 0;
+            padding: 0;
+          }
+          
+          @page {
+            size: A4;
+            margin: 0;
+          }
+        }
+
         .desktop-layout {
           display: flex;
           width: 100%;
