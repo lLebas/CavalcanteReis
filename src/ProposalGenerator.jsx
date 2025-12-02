@@ -900,7 +900,7 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
   const Page = ({ children, pageNumber, showLogo = true, isCoverPage = false, FooterComponent }) => {
     // A capa e páginas sem conteúdo explícito não devem mostrar o logo no cabeçalho.
     const displayLogo = showLogo && !isCoverPage;
-  
+
     return (
       <div className="pdf-page-render" style={{
         pageBreakAfter: 'always',
@@ -927,19 +927,19 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
             />
           </div>
         )}
-  
+
         {/* CONTEÚDO */}
         <div className="page-content" style={{ flexGrow: 1 }}>
           {children}
         </div>
-  
+
         {/* RODAPÉ */}
         {!isCoverPage && (
-            <div className="page-footer" style={{ flexShrink: 0, marginTop: '24px', paddingTop: '12px' }}>
-                <FooterComponent />
-            </div>
+          <div className="page-footer" style={{ flexShrink: 0, marginTop: '24px', paddingTop: '12px' }}>
+            <FooterComponent />
+          </div>
         )}
-        
+
         {/* NÚMERO DA PÁGINA (OPCIONAL) */}
         {pageNumber && (
           <div style={{
@@ -956,304 +956,305 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
     );
   };
 
-    // --- Lógica de Paginação Dinâmica para a Seção "Análise da Questão" ---
-    const analysisServicesOrder = [
-      "folhaPagamento", "pasep", "rpps", "cfem", "cfurh", "tabelaSUS",
-      "fundef", "fundeb", "energiaEletrica", "royaltiesOleoGas",
-      "repassesFPM", "revisaoParcelamento", "issqn", "servicosTecnicos", "demaisTeses"
-    ];
-    const activeAnalysisServices = analysisServicesOrder.filter(key => services[key]);
-    const servicesPerPage = 4;
-    const servicePages = [];
-    if (activeAnalysisServices.length > 0) {
-      for (let i = 0; i < activeAnalysisServices.length; i += servicesPerPage) {
-        servicePages.push(activeAnalysisServices.slice(i, i + servicesPerPage));
-      }
+  // --- Lógica de Paginação Dinâmica para a Seção "Análise da Questão" ---
+  const analysisServicesOrder = [
+    "folhaPagamento", "pasep", "rpps", "cfem", "cfurh", "tabelaSUS",
+    "fundef", "fundeb", "energiaEletrica", "royaltiesOleoGas",
+    "repassesFPM", "revisaoParcelamento", "issqn", "servicosTecnicos", "demaisTeses"
+  ];
+  const activeAnalysisServices = analysisServicesOrder.filter(key => services[key]);
+  const servicesPerPage = 4;
+  const servicePages = [];
+  if (activeAnalysisServices.length > 0) {
+    for (let i = 0; i < activeAnalysisServices.length; i += servicesPerPage) {
+      servicePages.push(activeAnalysisServices.slice(i, i + servicesPerPage));
     }
+  }
 
-    const analysisSectionPages = servicePages.map((pageServices, index) => {
-      if (pageServices.length === 0) return null;
-      const pageContent = (
-        <>
-          {index === 0 && (
-            <h2 style={{ fontSize: '14px', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: 4, marginBottom: 8 }}>
-              2. Análise da Questão
-            </h2>
-          )}
-          {pageServices.map(serviceKey =>
-            renderServiceSection(serviceKey, allServices[serviceKey], serviceTextDatabase[serviceKey])
-          )}
-        </>
-      );
-      // A numeração começa na página 4
-      const currentPageNumber = 4 + index;
-      return (
-        <Page key={`analysis-page-${index}`} pageNumber={currentPageNumber} showLogo={true} FooterComponent={Footer}>
-          {pageContent}
-        </Page>
-      );
-    }).filter(Boolean); // Filtra páginas nulas
+  const analysisSectionPages = servicePages.map((pageServices, index) => {
+    if (pageServices.length === 0) return null;
+    const pageContent = (
+      <>
+        {index === 0 && (
+          <h2 style={{ fontSize: '14px', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: 4, marginBottom: 8 }}>
+            2. Análise da Questão
+          </h2>
+        )}
+        {pageServices.map(serviceKey => (
+          <React.Fragment key={serviceKey}>
+            {renderServiceSection(serviceKey, allServices[serviceKey], serviceTextDatabase[serviceKey])}
+          </React.Fragment>
+        ))}      </>
+    );
+    // A numeração começa na página 4
+    const currentPageNumber = 4 + index;
+    return (
+      <Page key={`analysis-page-${index}`} pageNumber={currentPageNumber} showLogo={true} FooterComponent={Footer}>
+        {pageContent}
+      </Page>
+    );
+  }).filter(Boolean); // Filtra páginas nulas
 
-    // Calcula o número da próxima página a ser renderizada
-    const nextPageAfterAnalysis = 4 + analysisSectionPages.length;
+  // Calcula o número da próxima página a ser renderizada
+  const nextPageAfterAnalysis = 4 + analysisSectionPages.length;
 
 
   return (
     <div id="preview" className="preview" style={{ fontFamily: "'EB Garamond', serif", fontSize: "11px", color: "#000", lineHeight: "1.4" }}>
       {/* Página 1: Capa */}
       <Page isCoverPage={true} FooterComponent={Footer}>
-          <div style={{ textAlign: "center", marginTop: 80, marginBottom: 120 }}>
-            <img
-              src="/logo-cavalcante-reis.png"
-              alt="Cavalcante Reis Advogados"
-              crossOrigin="anonymous"
-              style={{ width: "166px", height: "87px", display: "block", margin: "0 auto" }}
-            />
-          </div>
+        <div style={{ textAlign: "center", marginTop: 80, marginBottom: 120 }}>
+          <img
+            src="/logo-cavalcante-reis.png"
+            alt="Cavalcante Reis Advogados"
+            crossOrigin="anonymous"
+            style={{ width: "166px", height: "87px", display: "block", margin: "0 auto" }}
+          />
+        </div>
 
-          <div style={{ marginTop: 180, textAlign: "center" }}>
-            <div
-              style={{
-                borderTop: "1px solid #000",
-                paddingTop: 25,
-                maxWidth: "52%",
-                marginLeft: "38%",
-              }}>
-              <div style={{ textAlign: "right", marginBottom: 30 }}>
-                <p style={{ margin: "4px 0" }}>
-                  <strong>Proponente:</strong>
-                </p>
-                <p style={{ margin: "4px 0" }}>Cavalcante Reis Advogados</p>
+        <div style={{ marginTop: 180, textAlign: "center" }}>
+          <div
+            style={{
+              borderTop: "1px solid #000",
+              paddingTop: 25,
+              maxWidth: "52%",
+              marginLeft: "38%",
+            }}>
+            <div style={{ textAlign: "right", marginBottom: 30 }}>
+              <p style={{ margin: "4px 0" }}>
+                <strong>Proponente:</strong>
+              </p>
+              <p style={{ margin: "4px 0" }}>Cavalcante Reis Advogados</p>
 
-                <p style={{ margin: "16px 0 4px 0" }}>
-                  <strong>Destinatário:</strong>
-                </p>
-                <p style={{ margin: "4px 0" }}>Prefeitura Municipal de {options.municipio || "[Nome do Município]"}</p>
-              </div>
+              <p style={{ margin: "16px 0 4px 0" }}>
+                <strong>Destinatário:</strong>
+              </p>
+              <p style={{ margin: "4px 0" }}>Prefeitura Municipal de {options.municipio || "[Nome do Município]"}</p>
+            </div>
 
-              <div style={{ borderTop: "1px solid #000", paddingTop: 12, textAlign: "right" }}>
-                <p style={{ fontSize: "16px", fontWeight: "bold" }}>{options.data || "2025"}</p>
-              </div>
+            <div style={{ borderTop: "1px solid #000", paddingTop: 12, textAlign: "right" }}>
+              <p style={{ fontSize: "16px", fontWeight: "bold" }}>{options.data || "2025"}</p>
             </div>
           </div>
-        </Page>
+        </div>
+      </Page>
 
       {/* Página 2: Sumário */}
       <Page pageNumber={2} showLogo={true} FooterComponent={Footer}>
-          <h2 style={{ fontSize: "16px", fontWeight: "bold", marginBottom: 12 }}>Sumário</h2>
-          <div style={{ paddingLeft: 20, lineHeight: 1.6 }}>
-            <p style={{ margin: "6px 0" }}>
-              <strong>1. Objeto da Proposta</strong>
-            </p>
-            <p style={{ margin: "6px 0" }}>
-              <strong>2. Análise da Questão</strong>
-            </p>
-            <p style={{ margin: "6px 0" }}>
-              <strong>3. Dos Honorários, das Condições de Pagamento e Despesas</strong>
-            </p>
-            <p style={{ margin: "6px 0" }}>
-              <strong>4. Prazo e Cronograma de Execução dos Serviços</strong>
-            </p>
-            <p style={{ margin: "6px 0" }}>
-              <strong>5. Experiência em atuação em favor de Municípios e da Equipe Responsável</strong>
-            </p>
-            <p style={{ margin: "6px 0" }}>
-              <strong>6. Disposições Finais</strong>
-            </p>
-          </div>
-        </Page>
+        <h2 style={{ fontSize: "16px", fontWeight: "bold", marginBottom: 12 }}>Sumário</h2>
+        <div style={{ paddingLeft: 20, lineHeight: 1.6 }}>
+          <p style={{ margin: "6px 0" }}>
+            <strong>1. Objeto da Proposta</strong>
+          </p>
+          <p style={{ margin: "6px 0" }}>
+            <strong>2. Análise da Questão</strong>
+          </p>
+          <p style={{ margin: "6px 0" }}>
+            <strong>3. Dos Honorários, das Condições de Pagamento e Despesas</strong>
+          </p>
+          <p style={{ margin: "6px 0" }}>
+            <strong>4. Prazo e Cronograma de Execução dos Serviços</strong>
+          </p>
+          <p style={{ margin: "6px 0" }}>
+            <strong>5. Experiência em atuação em favor de Municípios e da Equipe Responsável</strong>
+          </p>
+          <p style={{ margin: "6px 0" }}>
+            <strong>6. Disposições Finais</strong>
+          </p>
+        </div>
+      </Page>
 
       {/* Página 3: Objeto da Proposta */}
       <Page pageNumber={3} showLogo={true} FooterComponent={Footer}>
-          <h2 style={{ fontSize: '14px', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: 4, marginBottom: 8 }}>
-            1. Objeto da Proposta
-          </h2>
-          <div className="page-content-body">
-            <p style={{ margin: "4px 0", textAlign: "justify" }}>
-              É objeto do presente contrato o desenvolvimento de serviços advocatícios especializados por parte da
-              Proponente, Cavalcante Reis Advogados, ao Aceitante, Município de{" "}
-              {options.municipio || "[Nome do Município]"}, a fim de prestação de serviços de assessoria técnica e
-              jurídica nas <strong>áreas de Direito Público, Tributário, Econômico, Financeiro, Minerário e Previdenciário,</strong>
-              atuando perante o Ministério da Fazenda e os seus órgãos administrativos, em especial para alcançar o
-              incremento de receitas, ficando responsável pelo ajuizamento, acompanhamento e eventuais intervenções de
-              terceiro em ações de interesse do Município.
-            </p>
-            <p style={{ margin: "4px 0 8px 0", textAlign: "justify" }}>A proposta inclui os seguintes objetos:</p>
-          </div>
-          <table
-            className="w-full"
-            style={{
-              width: "100%",
-              borderCollapse: 'collapse',
-              border: `1px solid #000`,
-              fontSize: "10px",
-              marginTop: "8px"
-            }}>
-            <thead>
-              <tr style={{ background: "#f7f7f7" }}>
-                <th style={{ padding: 4, borderBottom: `2px solid #000`, borderRight: `1px solid #000`, textAlign: 'center', fontSize: "10px" }}>
-                  <strong>TESE</strong>
-                </th>
-                <th style={{ padding: 4, borderBottom: `2px solid #000`, textAlign: 'center', fontSize: "10px" }}>
-                  <strong>CABIMENTO</strong>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {renderTableRow(
-                "folhaPagamento",
-                "Folha de pagamento, recuperação de verbas indenizatórias e contribuições previdenciárias (INSS)",
-                "A perspectiva de incremento/recuperação é de aproximadamente o valor referente a até duas folhas de pagamento mensais."
-              )}
-              {renderTableRow("pasep", "Recuperação/ compensação PASEP", "Cabível")}
-              {renderTableRow("rpps", "RPPS Regime Próprio de Previdência Social", "Cabível")}
-              {renderTableRow("cfem", "Compensação financeira pela exploração de recursos minerais – CFEM", "Cabível")}
-              {renderTableRow(
-                "cfurh",
-                "Compensação Financeira pela Utilização dos Recursos Hídricos – CFURH",
-                "Cabível"
-              )}
-              {renderTableRow("tabelaSUS", "Tabela SUS", "Cabível")}
-              {renderTableRow("fundef", "FUNDEF - Possível atuação no feito para agilizar a tramitação, a fim de efetivar o incremento financeiro, com a consequente expedição do precatório.", "Cabível")}
-              {renderTableRow("fundeb", "Recuperação dos valores repassados à menor a título de FUNDEB.", "Cabível")}
-              {renderTableRow("energiaEletrica", "Auditoria e Consultoria do pagamento de Energia Elétrica", "Cabível")}
-              {renderTableRow(
-                "royaltiesOleoGas",
-                "Royalties pela exploração de óleo bruto, xisto betuminoso e gás natural.",
-                "Cabível"
-              )}
-              {renderTableRow(
-                "repassesFPM",
-                "Repasses dos recursos de FPM com base na real e efetiva arrecadação do IPI e IR.",
-                "Cabível"
-              )}
-              {renderTableRow("revisaoParcelamento", "Revisão dos parcelamentos previdenciários", "Cabível")}
-              {renderTableRow("issqn", "Recuperação de Créditos de ISSQN", "Cabível")}
-              {renderTableRow(
-                "servicosTecnicos",
-                "Serviços técnicos especializados de assessoria e consultoria jurídica (DF)",
-                "Cabível"
-              )}
-              {renderTableRow(
-                "demaisTeses",
-                "Demais teses consiste na prestação de serviços de assessoria técnica e jurídica nas áreas de Direito Público, Tributário, Econômico, Financeiro, previdenciário e Minerário, atuando perante o Ministério da Fazenda e os seus órgãos administrativos.",
-                "Cabível"
-              )}
-            </tbody>
-          </table>
-          <p style={{ marginTop: 16, textAlign: "justify" }}>
-            Além disso, a proposta também tem como objeto:
+        <h2 style={{ fontSize: '14px', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: 4, marginBottom: 8 }}>
+          1. Objeto da Proposta
+        </h2>
+        <div className="page-content-body">
+          <p style={{ margin: "4px 0", textAlign: "justify" }}>
+            É objeto do presente contrato o desenvolvimento de serviços advocatícios especializados por parte da
+            Proponente, Cavalcante Reis Advogados, ao Aceitante, Município de{" "}
+            {options.municipio || "[Nome do Município]"}, a fim de prestação de serviços de assessoria técnica e
+            jurídica nas <strong>áreas de Direito Público, Tributário, Econômico, Financeiro, Minerário e Previdenciário,</strong>
+            atuando perante o Ministério da Fazenda e os seus órgãos administrativos, em especial para alcançar o
+            incremento de receitas, ficando responsável pelo ajuizamento, acompanhamento e eventuais intervenções de
+            terceiro em ações de interesse do Município.
           </p>
-          <p style={{ textAlign: "justify" }}><strong>(i)</strong> Análise do caso concreto, com a elaboração dos estudos pertinentes ao Município de Manacapuru, Estado do Amazonas;</p>
-          <p style={{ textAlign: "justify" }}><strong>(ii)</strong> Ingresso de medida administrativa e/ou judicial, com posterior acompanhamento do processo durante sua tramitação, com realização de defesas, diligências, manifestação em razão de intimações, produção de provas, recursos e demais atos necessários ao deslinde dos feitos;</p>
-          <p style={{ textAlign: "justify" }}><strong>(iii)</strong> Atuação perante a Justiça Federal seja na condição de recorrente ou recorrido, bem como interposição de recursos ou apresentação de contrarrazões aos Tribunais Superiores, se necessário for;</p>
-          <p style={{ textAlign: "justify" }}><strong>(iv)</strong> Acompanhamento processual completo, até o trânsito em Julgado da Sentença administrativa e/ou judicial;</p>
-          <p style={{ textAlign: "justify" }}><strong>(v)</strong> Acompanhamento do cumprimento das medidas administrativas e/ou judiciais junto aos órgãos administrativos.</p>
-        </Page>
-      
+          <p style={{ margin: "4px 0 8px 0", textAlign: "justify" }}>A proposta inclui os seguintes objetos:</p>
+        </div>
+        <table
+          className="w-full"
+          style={{
+            width: "100%",
+            borderCollapse: 'collapse',
+            border: `1px solid #000`,
+            fontSize: "10px",
+            marginTop: "8px"
+          }}>
+          <thead>
+            <tr style={{ background: "#f7f7f7" }}>
+              <th style={{ padding: 4, borderBottom: `2px solid #000`, borderRight: `1px solid #000`, textAlign: 'center', fontSize: "10px" }}>
+                <strong>TESE</strong>
+              </th>
+              <th style={{ padding: 4, borderBottom: `2px solid #000`, textAlign: 'center', fontSize: "10px" }}>
+                <strong>CABIMENTO</strong>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {renderTableRow(
+              "folhaPagamento",
+              "Folha de pagamento, recuperação de verbas indenizatórias e contribuições previdenciárias (INSS)",
+              "A perspectiva de incremento/recuperação é de aproximadamente o valor referente a até duas folhas de pagamento mensais."
+            )}
+            {renderTableRow("pasep", "Recuperação/ compensação PASEP", "Cabível")}
+            {renderTableRow("rpps", "RPPS Regime Próprio de Previdência Social", "Cabível")}
+            {renderTableRow("cfem", "Compensação financeira pela exploração de recursos minerais – CFEM", "Cabível")}
+            {renderTableRow(
+              "cfurh",
+              "Compensação Financeira pela Utilização dos Recursos Hídricos – CFURH",
+              "Cabível"
+            )}
+            {renderTableRow("tabelaSUS", "Tabela SUS", "Cabível")}
+            {renderTableRow("fundef", "FUNDEF - Possível atuação no feito para agilizar a tramitação, a fim de efetivar o incremento financeiro, com a consequente expedição do precatório.", "Cabível")}
+            {renderTableRow("fundeb", "Recuperação dos valores repassados à menor a título de FUNDEB.", "Cabível")}
+            {renderTableRow("energiaEletrica", "Auditoria e Consultoria do pagamento de Energia Elétrica", "Cabível")}
+            {renderTableRow(
+              "royaltiesOleoGas",
+              "Royalties pela exploração de óleo bruto, xisto betuminoso e gás natural.",
+              "Cabível"
+            )}
+            {renderTableRow(
+              "repassesFPM",
+              "Repasses dos recursos de FPM com base na real e efetiva arrecadação do IPI e IR.",
+              "Cabível"
+            )}
+            {renderTableRow("revisaoParcelamento", "Revisão dos parcelamentos previdenciários", "Cabível")}
+            {renderTableRow("issqn", "Recuperação de Créditos de ISSQN", "Cabível")}
+            {renderTableRow(
+              "servicosTecnicos",
+              "Serviços técnicos especializados de assessoria e consultoria jurídica (DF)",
+              "Cabível"
+            )}
+            {renderTableRow(
+              "demaisTeses",
+              "Demais teses consiste na prestação de serviços de assessoria técnica e jurídica nas áreas de Direito Público, Tributário, Econômico, Financeiro, previdenciário e Minerário, atuando perante o Ministério da Fazenda e os seus órgãos administrativos.",
+              "Cabível"
+            )}
+          </tbody>
+        </table>
+        <p style={{ marginTop: 16, textAlign: "justify" }}>
+          Além disso, a proposta também tem como objeto:
+        </p>
+        <p style={{ textAlign: "justify" }}><strong>(i)</strong> Análise do caso concreto, com a elaboração dos estudos pertinentes ao Município de Manacapuru, Estado do Amazonas;</p>
+        <p style={{ textAlign: "justify" }}><strong>(ii)</strong> Ingresso de medida administrativa e/ou judicial, com posterior acompanhamento do processo durante sua tramitação, com realização de defesas, diligências, manifestação em razão de intimações, produção de provas, recursos e demais atos necessários ao deslinde dos feitos;</p>
+        <p style={{ textAlign: "justify" }}><strong>(iii)</strong> Atuação perante a Justiça Federal seja na condição de recorrente ou recorrido, bem como interposição de recursos ou apresentação de contrarrazões aos Tribunais Superiores, se necessário for;</p>
+        <p style={{ textAlign: "justify" }}><strong>(iv)</strong> Acompanhamento processual completo, até o trânsito em Julgado da Sentença administrativa e/ou judicial;</p>
+        <p style={{ textAlign: "justify" }}><strong>(v)</strong> Acompanhamento do cumprimento das medidas administrativas e/ou judiciais junto aos órgãos administrativos.</p>
+      </Page>
+
       {/* SEÇÃO 2: ANÁLISE DA QUESTÃO (DINÂMICA) */}
       {analysisSectionPages}
 
 
       {/* Página dinâmica: Honorários e Prazo */}
       <Page pageNumber={nextPageAfterAnalysis} showLogo={true} FooterComponent={Footer}>
-          <div className="page-content-body">
-            {/* Seção 3: Honorários */}
-            <h2 style={{ fontSize: '14px', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: 4, marginBottom: 6, marginTop: 8 }}>
-              3. Dos Honorários, das Condições de Pagamento e Despesas
-            </h2>
-            <p style={{ margin: "2px 0", textAlign: "justify", fontSize: "11px" }}>
-              Considerando a necessidade de manutenção do equilíbrio econômico-financeiro do contrato administrativo, propõe o escritório CAVALCANTE REIS ADVOGADOS que esta Municipalidade pague ao Proponente da seguinte forma:
-            </p>
-            <p style={{ margin: "2px 0", textAlign: "justify", fontSize: "11px" }}>
-              <strong>3.1.1</strong> <strong>Para todos os demais itens descritos nesta Proposta</strong> será efetuado o pagamento de honorários advocatícios à CAVALCANTE REIS ADVOGADOS pela execução dos serviços de recuperação de créditos, <strong>ad êxito na ordem de {paymentValue} para cada R$ 1,00 (um real)</strong> do montante referente ao incremento financeiro, ou seja, com base nos valores que entrarem nos cofres do CONTRATANTE;
-            </p>
-            <p style={{ margin: "2px 0", textAlign: "justify", fontSize: "11px" }}>
-              <strong>3.1.2</strong> Em caso de valores retroativos recuperados em favor da municipalidade, que consiste nos <strong>valores não repassados em favor do Contratante nos últimos 5 (cinco) anos</strong> (prescrição quinquenal) ou não abarcados pela prescrição, também serão cobrados honorários advocatícios <strong>na ordem de {paymentValue} para cada R$ 1.00 (um real) do montante recuperado aos Cofres Municipais.</strong>
-            </p>
+        <div className="page-content-body">
+          {/* Seção 3: Honorários */}
+          <h2 style={{ fontSize: '14px', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: 4, marginBottom: 6, marginTop: 8 }}>
+            3. Dos Honorários, das Condições de Pagamento e Despesas
+          </h2>
+          <p style={{ margin: "2px 0", textAlign: "justify", fontSize: "11px" }}>
+            Considerando a necessidade de manutenção do equilíbrio econômico-financeiro do contrato administrativo, propõe o escritório CAVALCANTE REIS ADVOGADOS que esta Municipalidade pague ao Proponente da seguinte forma:
+          </p>
+          <p style={{ margin: "2px 0", textAlign: "justify", fontSize: "11px" }}>
+            <strong>3.1.1</strong> <strong>Para todos os demais itens descritos nesta Proposta</strong> será efetuado o pagamento de honorários advocatícios à CAVALCANTE REIS ADVOGADOS pela execução dos serviços de recuperação de créditos, <strong>ad êxito na ordem de {paymentValue} para cada R$ 1,00 (um real)</strong> do montante referente ao incremento financeiro, ou seja, com base nos valores que entrarem nos cofres do CONTRATANTE;
+          </p>
+          <p style={{ margin: "2px 0", textAlign: "justify", fontSize: "11px" }}>
+            <strong>3.1.2</strong> Em caso de valores retroativos recuperados em favor da municipalidade, que consiste nos <strong>valores não repassados em favor do Contratante nos últimos 5 (cinco) anos</strong> (prescrição quinquenal) ou não abarcados pela prescrição, também serão cobrados honorários advocatícios <strong>na ordem de {paymentValue} para cada R$ 1.00 (um real) do montante recuperado aos Cofres Municipais.</strong>
+          </p>
 
-            {/* Seção 4: Prazo */}
-            <h2 style={{ fontSize: '14px', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: 4, marginBottom: 6, marginTop: 12 }}>
-              4. Prazo e Cronograma de Execução dos Serviços
-            </h2>
-            <p style={{ margin: "2px 0", textAlign: "justify", fontSize: "11px" }}>
-              O prazo de execução será de {prazo} meses ou pelo tempo que perdurar os processos judiciais,
-              podendo ser prorrogado por interesse das partes.
-            </p>
-          </div>
-        </Page>
+          {/* Seção 4: Prazo */}
+          <h2 style={{ fontSize: '14px', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: 4, marginBottom: 6, marginTop: 12 }}>
+            4. Prazo e Cronograma de Execução dos Serviços
+          </h2>
+          <p style={{ margin: "2px 0", textAlign: "justify", fontSize: "11px" }}>
+            O prazo de execução será de {prazo} meses ou pelo tempo que perdurar os processos judiciais,
+            podendo ser prorrogado por interesse das partes.
+          </p>
+        </div>
+      </Page>
 
       {/* Página dinâmica: Experiência */}
       <Page pageNumber={nextPageAfterAnalysis + 1} showLogo={true} FooterComponent={Footer}>
-          {/* Seção 5: Experiência */}
-          <h2 style={{ fontSize: '14px', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: 4, marginBottom: 12 }}>
-            5. Experiência e Equipe Responsável
-          </h2>
-          <div className="page-content-body">
-            <p style={{ marginBottom: 8, fontSize: "11px", textAlign: "justify" }}>No portfólio de serviços executados e/ou em execução, constam os seguintes Municípios contratantes:</p>
-          </div>
-          <div style={{ marginTop: 8, marginBottom: 6 }}>
-            <img src="/munincipios01.png" alt="Municípios Contratantes 1" crossOrigin="anonymous" style={{ width: "100%", height: "250px", objectFit: "contain", display: "block", margin: "0 auto" }} />
-          </div>
-          <div style={{ marginTop: 6, marginBottom: 12 }}>
-            <img src="/Munincipios02.png" alt="Municípios Contratantes 2" crossOrigin="anonymous" style={{ width: "100%", height: "180px", objectFit: "contain", display: "block", margin: "0 auto" }} />
-          </div>
-          <div className="page-content-body">
-            <p style={{ marginTop: 12, marginBottom: 8, fontSize: "11px", textAlign: "justify" }}>
-              Para coordenar os trabalhos de consultoria propostos neste documento, a CAVALCANTE REIS ADVOGADOS alocará os seguintes profissionais:
-            </p>
-            <p style={{ marginBottom: 12, textAlign: 'justify' }}>
-              <strong>IURI DO LAGO NOGUEIRA CAVALCANTE REIS –</strong> Doutorando em Direito e Mestre em Direito Econômico e Desenvolvimento pelo Instituto Brasileiro de Ensino, Desenvolvimento e Pesquisa (IDP/Brasília). LLM (Master of Laws) em Direito Empresarial pela Fundação Getúlio Vargas (FGV/RJ). Integrante da Comissão de Juristas do Senado Federal criada para consolidar a proposta do novo Código Comercial Brasileiro. Autor e Coautor de livros, pareceres e artigos jurídicos na área do direito público. Sócio-diretor do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: iuri@cavalcantereis.adv.br).
-            </p>
-            <p style={{ marginBottom: 12, textAlign: 'justify' }}>
-              <strong>PEDRO AFONSO FIGUEIREDO DE SOUZA –</strong> Graduado em Direito pela Pontifícia Universidade Católica de Minas Gerais. Especialista em Direito Penal e Processo Penal pela Academia Brasileira de Direito Constitucional. Mestre em Direito nas Relações Econômicas e Sociais pela Faculdade de Direito Milton Campos. Diretor de Comunicação e Conselheiro Consultivo, Científico e Fiscal do Instituto de Ciências Penais. Autor de artigos e capítulos de livros jurídicos. Advogado associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: pedro@cavalcantereis.adv.br).
-            </p>
-            <p style={{ marginBottom: 12, textAlign: 'justify' }}>
-              <strong>SÉRGIO RICARDO ALVES DE JESUS FILHO –</strong> Graduado em Direito pelo Centro Universitário de Brasília (UniCEUB). Graduando em Ciências Contábeis pelo Centro Universitário de Brasília (UniCEUB). Pós-graduando em Direito Tributário pelo Instituto Brasileiro de Ensino, Desenvolvimento e Pesquisa (IDP). Membro da Comissão de Assuntos Tributários da OAB/DF. Advogado Associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: sergio@cavalcantereis.adv.br).
-            </p>
-            <p style={{ marginBottom: 12, textAlign: 'justify' }}>
-              <strong>JOSÉ HUMBERTO DOS SANTOS JÚNIOR –</strong> Graduado em Direito pelo Centro Universitário UniProcessus. Pós-graduando em Direito Penal e Direito Processual Penal aplicados e Execução Penal pela Escola Brasileira de Direito (EBRADI). Advogado Associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: jose.humberto@cavalcantereis.adv.br).
-            </p>
-            <p style={{ marginBottom: 12, textAlign: 'justify' }}>
-              <strong>GABRIEL SALES RESENDE SALGADO -</strong> Graduado em Direito pela Universidade do Distrito Federal (UDF). Pós-graduando em Direito Tributário pelo Instituto Brasileiro de Estudos Tributários (IBET). Advogado Associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248- 0612 (endereço eletrônico: gabriel@cavalcantereis.adv.br).
-            </p>
-            <p style={{ marginBottom: 12, textAlign: 'justify' }}>
-              Além desses profissionais, a CAVALCANTE REIS ADVOGADOS alocará uma equipe de profissionais pertencentes ao seu quadro técnico, utilizando, também, caso necessário, o apoio técnico especializado de terceiros, pessoas físicas ou jurídicas, que deverão atuar sob sua orientação, cabendo à CAVALCANTE REIS ADVOGADOS a responsabilidade técnica pela execução das tarefas.
-            </p>
-            <p>
-              Nossa contratação, portanto, devido à altíssima qualificação e experiência, aliada à singularidade do objeto da demanda, bem como os diferenciais já apresentados acima, está inserida dentre as hipóteses do art. 6º, XVIII “e” e art. 74, III, “e”, da Lei n.º 14.133/2021.
-            </p>
-          </div>
-        </Page>
+        {/* Seção 5: Experiência */}
+        <h2 style={{ fontSize: '14px', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: 4, marginBottom: 12 }}>
+          5. Experiência e Equipe Responsável
+        </h2>
+        <div className="page-content-body">
+          <p style={{ marginBottom: 8, fontSize: "11px", textAlign: "justify" }}>No portfólio de serviços executados e/ou em execução, constam os seguintes Municípios contratantes:</p>
+        </div>
+        <div style={{ marginTop: 8, marginBottom: 6 }}>
+          <img src="/munincipios01.png" alt="Municípios Contratantes 1" crossOrigin="anonymous" style={{ width: "100%", height: "250px", objectFit: "contain", display: "block", margin: "0 auto" }} />
+        </div>
+        <div style={{ marginTop: 6, marginBottom: 12 }}>
+          <img src="/Munincipios02.png" alt="Municípios Contratantes 2" crossOrigin="anonymous" style={{ width: "100%", height: "180px", objectFit: "contain", display: "block", margin: "0 auto" }} />
+        </div>
+        <div className="page-content-body">
+          <p style={{ marginTop: 12, marginBottom: 8, fontSize: "11px", textAlign: "justify" }}>
+            Para coordenar os trabalhos de consultoria propostos neste documento, a CAVALCANTE REIS ADVOGADOS alocará os seguintes profissionais:
+          </p>
+          <p style={{ marginBottom: 12, textAlign: 'justify' }}>
+            <strong>IURI DO LAGO NOGUEIRA CAVALCANTE REIS –</strong> Doutorando em Direito e Mestre em Direito Econômico e Desenvolvimento pelo Instituto Brasileiro de Ensino, Desenvolvimento e Pesquisa (IDP/Brasília). LLM (Master of Laws) em Direito Empresarial pela Fundação Getúlio Vargas (FGV/RJ). Integrante da Comissão de Juristas do Senado Federal criada para consolidar a proposta do novo Código Comercial Brasileiro. Autor e Coautor de livros, pareceres e artigos jurídicos na área do direito público. Sócio-diretor do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: iuri@cavalcantereis.adv.br).
+          </p>
+          <p style={{ marginBottom: 12, textAlign: 'justify' }}>
+            <strong>PEDRO AFONSO FIGUEIREDO DE SOUZA –</strong> Graduado em Direito pela Pontifícia Universidade Católica de Minas Gerais. Especialista em Direito Penal e Processo Penal pela Academia Brasileira de Direito Constitucional. Mestre em Direito nas Relações Econômicas e Sociais pela Faculdade de Direito Milton Campos. Diretor de Comunicação e Conselheiro Consultivo, Científico e Fiscal do Instituto de Ciências Penais. Autor de artigos e capítulos de livros jurídicos. Advogado associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: pedro@cavalcantereis.adv.br).
+          </p>
+          <p style={{ marginBottom: 12, textAlign: 'justify' }}>
+            <strong>SÉRGIO RICARDO ALVES DE JESUS FILHO –</strong> Graduado em Direito pelo Centro Universitário de Brasília (UniCEUB). Graduando em Ciências Contábeis pelo Centro Universitário de Brasília (UniCEUB). Pós-graduando em Direito Tributário pelo Instituto Brasileiro de Ensino, Desenvolvimento e Pesquisa (IDP). Membro da Comissão de Assuntos Tributários da OAB/DF. Advogado Associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: sergio@cavalcantereis.adv.br).
+          </p>
+          <p style={{ marginBottom: 12, textAlign: 'justify' }}>
+            <strong>JOSÉ HUMBERTO DOS SANTOS JÚNIOR –</strong> Graduado em Direito pelo Centro Universitário UniProcessus. Pós-graduando em Direito Penal e Direito Processual Penal aplicados e Execução Penal pela Escola Brasileira de Direito (EBRADI). Advogado Associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: jose.humberto@cavalcantereis.adv.br).
+          </p>
+          <p style={{ marginBottom: 12, textAlign: 'justify' }}>
+            <strong>GABRIEL SALES RESENDE SALGADO -</strong> Graduado em Direito pela Universidade do Distrito Federal (UDF). Pós-graduando em Direito Tributário pelo Instituto Brasileiro de Estudos Tributários (IBET). Advogado Associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248- 0612 (endereço eletrônico: gabriel@cavalcantereis.adv.br).
+          </p>
+          <p style={{ marginBottom: 12, textAlign: 'justify' }}>
+            Além desses profissionais, a CAVALCANTE REIS ADVOGADOS alocará uma equipe de profissionais pertencentes ao seu quadro técnico, utilizando, também, caso necessário, o apoio técnico especializado de terceiros, pessoas físicas ou jurídicas, que deverão atuar sob sua orientação, cabendo à CAVALCANTE REIS ADVOGADOS a responsabilidade técnica pela execução das tarefas.
+          </p>
+          <p>
+            Nossa contratação, portanto, devido à altíssima qualificação e experiência, aliada à singularidade do objeto da demanda, bem como os diferenciais já apresentados acima, está inserida dentre as hipóteses do art. 6º, XVIII “e” e art. 74, III, “e”, da Lei n.º 14.133/2021.
+          </p>
+        </div>
+      </Page>
 
       {/* Página dinâmica: Disposições Finais */}
       <Page pageNumber={nextPageAfterAnalysis + 2} showLogo={true} FooterComponent={Footer}>
-          {/* Seção 6: Disposições Finais */}
-          <h2 style={{ fontSize: '14px', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: 4, marginBottom: 6 }}>
-            6. Disposições Finais
-          </h2>
-          <div className="page-content-body">
-            <div style={{ textAlign: 'left', fontSize: "11px" }}>
-              <p style={{ margin: "2px 0", textAlign: "justify" }}>
-                Nesse sentido, ficamos no aguardo da manifestação deste Município para promover os ajustes contratuais que entenderem necessários, sendo mantida a mesma forma de remuneração aqui proposta, com fundamento no art. 6º, XVIII, “e” e art. 74, III, “e”, da Lei n.º 14.133/2021.
-              </p>
-              <p style={{ margin: "2px 0", textAlign: "justify" }}>
-                A presente proposta tem validade de 60 (sessenta) dias.
-              </p>
-              <p style={{ margin: "2px 0", textAlign: "justify" }}>
-                Sendo o que se apresenta para o momento, aguardamos posicionamento da parte de V. Exa., colocando-nos, desde já, à inteira disposição para dirimir quaisquer dúvidas eventualmente existentes.
-              </p>
-            </div>
+        {/* Seção 6: Disposições Finais */}
+        <h2 style={{ fontSize: '14px', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: 4, marginBottom: 6 }}>
+          6. Disposições Finais
+        </h2>
+        <div className="page-content-body">
+          <div style={{ textAlign: 'left', fontSize: "11px" }}>
+            <p style={{ margin: "2px 0", textAlign: "justify" }}>
+              Nesse sentido, ficamos no aguardo da manifestação deste Município para promover os ajustes contratuais que entenderem necessários, sendo mantida a mesma forma de remuneração aqui proposta, com fundamento no art. 6º, XVIII, “e” e art. 74, III, “e”, da Lei n.º 14.133/2021.
+            </p>
+            <p style={{ margin: "2px 0", textAlign: "justify" }}>
+              A presente proposta tem validade de 60 (sessenta) dias.
+            </p>
+            <p style={{ margin: "2px 0", textAlign: "justify" }}>
+              Sendo o que se apresenta para o momento, aguardamos posicionamento da parte de V. Exa., colocando-nos, desde já, à inteira disposição para dirimir quaisquer dúvidas eventualmente existentes.
+            </p>
           </div>
-          <p style={{ marginTop: 12, marginBottom: 6, textAlign: "center", fontSize: "11px" }}>
-            Brasília-DF, {formatDateWithMonthName(options.data)}.
-          </p>
-          <div style={{ marginTop: 6, textAlign: "center" }}>
-            <p style={{ fontSize: "11px" }}>Atenciosamente,</p>
-            <img src="/Assinatura.png" alt="Assinatura" crossOrigin="anonymous" style={{ width: "180px", margin: "6px auto 0" }} />
-            <h3 style={{ fontWeight: "bold", marginTop: "6px", fontSize: "12px" }}>CAVALCANTE REIS ADVOGADOS</h3>
-          </div>
-        </Page>
+        </div>
+        <p style={{ marginTop: 12, marginBottom: 6, textAlign: "center", fontSize: "11px" }}>
+          Brasília-DF, {formatDateWithMonthName(options.data)}.
+        </p>
+        <div style={{ marginTop: 6, textAlign: "center" }}>
+          <p style={{ fontSize: "11px" }}>Atenciosamente,</p>
+          <img src="/Assinatura.png" alt="Assinatura" crossOrigin="anonymous" style={{ width: "180px", margin: "6px auto 0" }} />
+          <h3 style={{ fontWeight: "bold", marginTop: "6px", fontSize: "12px" }}>CAVALCANTE REIS ADVOGADOS</h3>
+        </div>
+      </Page>
     </div>
   );
 };
@@ -1348,71 +1349,78 @@ function App() {
   const [previewTranslate, setPreviewTranslate] = useState({ x: 0, y: 0 });
 
   const generatePdf = async () => {
+    console.log("=== INÍCIO GERAÇÃO PDF ===");
     setLoadingPdf(true);
     console.log("Gerando PDF...");
     const previewElement = document.getElementById('preview');
+    console.log("Preview element:", previewElement);
     if (!previewElement) {
+      console.error("Elemento de pré-visualização não encontrado!");
       alert("Elemento de pré-visualização não encontrado.");
       setLoadingPdf(false);
       return;
     }
 
     const pageElements = previewElement.querySelectorAll('.pdf-page-render');
+    console.log("Páginas encontradas:", pageElements.length);
     if (pageElements.length === 0) {
+      console.error("Nenhuma página encontrada!");
       alert("Nenhuma página encontrada para gerar o PDF.");
       setLoadingPdf(false);
       return;
     }
 
     // Aguardar um pouco para garantir renderização
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfHeight = pdf.internal.pageSize.getHeight();
 
-    // Capturar todas as páginas em paralelo (mais rápido)
-    const canvasPromises = Array.from(pageElements).map((pageElement, index) => {
-      console.log(`Capturando página ${index + 1}...`);
-      return html2canvas(pageElement, {
-        scale: 1.2, // Reduzido de 1.5 para 1.2 para melhorar a performance
-        useCORS: true,
-        allowTaint: false,
-        backgroundColor: '#ffffff',
-        logging: false,
-        imageTimeout: 10000,
-        removeContainer: true
-      });
-    });
+    try {
+      // Capturar cada página sequencialmente (mais estável que em paralelo)
+      for (let i = 0; i < pageElements.length; i++) {
+        console.log(`Capturando página ${i + 1}...`);
 
-    const canvases = await Promise.all(canvasPromises);
-    console.log(`${canvases.length} páginas capturadas!`);
+        const canvas = await html2canvas(pageElements[i], {
+          scale: 1.5,
+          useCORS: true,
+          backgroundColor: '#ffffff',
+          logging: false,
+          imageTimeout: 0
+        });
 
-    // Adicionar todas as páginas ao PDF
-    for (let i = 0; i < canvases.length; i++) {
-      const canvas = canvases[i];
-      const imgData = canvas.toDataURL('image/jpeg', 0.95); // JPEG em vez de PNG (muito mais rápido)
+        const imgData = canvas.toDataURL('image/png');
 
-      if (i > 0) {
-        pdf.addPage();
+        if (i > 0) {
+          pdf.addPage();
+        }
+
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        console.log(`Página ${i + 1} adicionada ao PDF`);
       }
 
-      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-      console.log(`Página ${i + 1} adicionada ao PDF`);
+      pdf.save(`Proposta-${options.municipio || "Municipio"}.pdf`);
+      console.log("Download do PDF iniciado!");
+    } catch (error) {
+      console.error("Erro ao gerar PDF:", error);
+      alert(`Erro ao gerar PDF: ${error.message}`);
+    } finally {
+      setLoadingPdf(false);
     }
-
-    pdf.save(`Proposta-${options.municipio || "Municipio"}.pdf`);
-    console.log("Download do PDF iniciado!");
-    setLoadingPdf(false);
   };
 
   // Funções auxiliares
   const generateDocx = async () => {
+    console.log("=== INÍCIO GERAÇÃO DOCX ===");
     setLoadingDocx(true);
     console.log("Gerando DOCX...");
 
     // Validar campos obrigatórios
+    console.log("Município:", options.municipio);
+    console.log("Data:", options.data);
     if (!options.municipio || !options.data) {
+      console.warn("Campos obrigatórios não preenchidos!");
       setModal({
         open: true,
         title: "Campos Obrigatórios",
@@ -1644,7 +1652,7 @@ function App() {
         "repassesFPM", "revisaoParcelamento", "issqn", "servicosTecnicos", "demaisTeses"
       ];
       const activeAnalysisServices = analysisServicesOrder.filter(key => services[key]);
-      
+
       if (activeAnalysisServices.length > 0) {
         const servicesPerPage = 4;
         const servicePages = [];
@@ -1655,7 +1663,7 @@ function App() {
         let teseCounter = 1;
         servicePages.forEach((pageServices, index) => {
           const pageChildren = [headerLogo];
-          
+
           // Adiciona o título principal apenas na primeira página da seção
           if (index === 0) {
             pageChildren.push(createSectionTitle("2. Análise da Questão"));
@@ -1668,13 +1676,13 @@ function App() {
                 children: [new TextRun({ text: `2.${teseCounter} ${allServices[key]}`, bold: true, font: defaultFont, size: 26 })]
               }));
               teseCounter++;
-              
+
               const paragraphs = serviceTextDatabase[key]
                 .replace(/<p[^>]*>/gi, "")
                 .split(/<\/p>/gi)
                 .map(p => p.replace(/<[^>]+>/g, ' ').trim())
                 .filter(p => p);
-              
+
               paragraphs.forEach(pText => {
                 pageChildren.push(new Paragraph({
                   spacing: { after: 150 },
@@ -1696,7 +1704,6 @@ function App() {
       // Página: Honorários e Prazo (juntos na mesma página)
       sections.push({
         properties: { page: { margin: pageMargins } },
-        headers: { default: headerConfig },
         footers: { default: footerConfig },
         children: [
           headerLogo,
