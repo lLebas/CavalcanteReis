@@ -537,4 +537,9 @@ html,
   }
 }
 
+.page-content-body {
+  max-width: 90%;
+  margin: 0 auto;
+}
+
 /* Dark theme is handled via CSS variables on .app.dark */
