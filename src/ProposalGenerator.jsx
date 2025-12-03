@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+﻿import React, { useState, useMemo, useEffect } from "react";
 import Modal from "./Modal";
 import DOMPurify from "dompurify";
 import { Clipboard, Settings, FileText, Eye, X } from "lucide-react";
@@ -963,41 +963,6 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
     "repassesFPM", "revisaoParcelamento", "issqn", "servicosTecnicos", "demaisTeses"
   ];
   const activeAnalysisServices = analysisServicesOrder.filter(key => services[key]);
-  const servicesPerPage = 4;
-  const servicePages = [];
-  if (activeAnalysisServices.length > 0) {
-    for (let i = 0; i < activeAnalysisServices.length; i += servicesPerPage) {
-      servicePages.push(activeAnalysisServices.slice(i, i + servicesPerPage));
-    }
-  }
-
-  const analysisSectionPages = servicePages.map((pageServices, index) => {
-    if (pageServices.length === 0) return null;
-    const pageContent = (
-      <>
-        {index === 0 && (
-          <h2 style={{ fontSize: '14px', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: 4, marginBottom: 8 }}>
-            2. Análise da Questão
-          </h2>
-        )}
-        {pageServices.map(serviceKey => (
-          <React.Fragment key={serviceKey}>
-            {renderServiceSection(serviceKey, allServices[serviceKey], serviceTextDatabase[serviceKey])}
-          </React.Fragment>
-        ))}      </>
-    );
-    // A numeração começa na página 4
-    const currentPageNumber = 4 + index;
-    return (
-      <Page key={`analysis-page-${index}`} pageNumber={currentPageNumber} showLogo={true} FooterComponent={Footer}>
-        {pageContent}
-      </Page>
-    );
-  }).filter(Boolean); // Filtra páginas nulas
-
-  // Calcula o número da próxima página a ser renderizada
-  const nextPageAfterAnalysis = 4 + analysisSectionPages.length;
-
 
   return (
     <div id="preview" className="preview" style={{ fontFamily: "'EB Garamond', serif", fontSize: "11px", color: "#000", lineHeight: "1.4" }}>
@@ -1152,110 +1117,98 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
         <p style={{ textAlign: "justify" }}><strong>(v)</strong> Acompanhamento do cumprimento das medidas administrativas e/ou judiciais junto aos órgãos administrativos.</p>
       </Page>
 
-      {/* SEÇÃO 2: ANÁLISE DA QUESTÃO (DINÂMICA) */}
-      {analysisSectionPages}
+      {/* Páginas 3+: TODO O CONTEÚDO EM FLUXO CONTÍNUO (SEM ESPAÇOS EM BRANCO) */}
+      <Page showLogo={true} FooterComponent={Footer}>
+        {/* SEÇÃO 2: Análise da Questão */}
+        {activeAnalysisServices.map((serviceKey, index) => (
+          <div key={serviceKey}>
+            {renderServiceSection(serviceKey, allServices[serviceKey])}
+          </div>
+        ))}
 
+        {/* SEÇÃO 3: Honorários */}
+        <h2 style={{ fontSize: '12pt', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: 3, marginBottom: 5, marginTop: 12, lineHeight: "1.4" }}>
+          3. Dos Honorários, das Condições de Pagamento e Despesas
+        </h2>
+        <p style={{ margin: "2px 0", textAlign: "justify", fontSize: "11pt", lineHeight: "1.4" }}>
+          Considerando a necessidade de manutenção do equilíbrio econômico-financeiro do contrato administrativo, propõe o escritório CAVALCANTE REIS ADVOGADOS que esta Municipalidade pague ao Proponente da seguinte forma:
+        </p>
+        <p style={{ margin: "2px 0", textAlign: "justify", fontSize: "11pt", lineHeight: "1.4" }}>
+          <strong>3.1.1</strong> <strong>Para todos os demais itens descritos nesta Proposta</strong> será efetuado o pagamento de honorários advocatícios à CAVALCANTE REIS ADVOGADOS pela execução dos serviços de recuperação de créditos, <strong>ad êxito na ordem de {paymentValue} para cada R$ 1,00 (um real)</strong> do montante referente ao incremento financeiro, ou seja, com base nos valores que entrarem nos cofres do CONTRATANTE;
+        </p>
+        <p style={{ margin: "2px 0", textAlign: "justify", fontSize: "11pt", lineHeight: "1.4" }}>
+          <strong>3.1.2</strong> Em caso de valores retroativos recuperados em favor da municipalidade, que consiste nos <strong>valores não repassados em favor do Contratante nos últimos 5 (cinco) anos</strong> (prescrição quinquenal) ou não abarcados pela prescrição, também serão cobrados honorários advocatícios <strong>na ordem de {paymentValue} para cada R$ 1.00 (um real) do montante recuperado aos Cofres Municipais.</strong>
+        </p>
 
-      {/* Página dinâmica: Honorários e Prazo */}
-      <Page pageNumber={nextPageAfterAnalysis} showLogo={true} FooterComponent={Footer}>
-        <div className="page-content-body">
-          {/* Seção 3: Honorários */}
-          <h2 style={{ fontSize: '14px', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: 4, marginBottom: 6, marginTop: 8 }}>
-            3. Dos Honorários, das Condições de Pagamento e Despesas
-          </h2>
-          <p style={{ margin: "2px 0", textAlign: "justify", fontSize: "11px" }}>
-            Considerando a necessidade de manutenção do equilíbrio econômico-financeiro do contrato administrativo, propõe o escritório CAVALCANTE REIS ADVOGADOS que esta Municipalidade pague ao Proponente da seguinte forma:
-          </p>
-          <p style={{ margin: "2px 0", textAlign: "justify", fontSize: "11px" }}>
-            <strong>3.1.1</strong> <strong>Para todos os demais itens descritos nesta Proposta</strong> será efetuado o pagamento de honorários advocatícios à CAVALCANTE REIS ADVOGADOS pela execução dos serviços de recuperação de créditos, <strong>ad êxito na ordem de {paymentValue} para cada R$ 1,00 (um real)</strong> do montante referente ao incremento financeiro, ou seja, com base nos valores que entrarem nos cofres do CONTRATANTE;
-          </p>
-          <p style={{ margin: "2px 0", textAlign: "justify", fontSize: "11px" }}>
-            <strong>3.1.2</strong> Em caso de valores retroativos recuperados em favor da municipalidade, que consiste nos <strong>valores não repassados em favor do Contratante nos últimos 5 (cinco) anos</strong> (prescrição quinquenal) ou não abarcados pela prescrição, também serão cobrados honorários advocatícios <strong>na ordem de {paymentValue} para cada R$ 1.00 (um real) do montante recuperado aos Cofres Municipais.</strong>
-          </p>
+        {/* SEÇÃO 4: Prazo */}
+        <h2 style={{ fontSize: '12pt', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: 3, marginBottom: 5, marginTop: 12, lineHeight: "1.4" }}>
+          4. Prazo e Cronograma de Execução dos Serviços
+        </h2>
+        <p style={{ margin: "2px 0", textAlign: "justify", fontSize: "11pt", lineHeight: "1.4" }}>
+          O prazo de execução será de {prazo} meses ou pelo tempo que perdurar os processos judiciais,
+          podendo ser prorrogado por interesse das partes.
+        </p>
 
-          {/* Seção 4: Prazo */}
-          <h2 style={{ fontSize: '14px', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: 4, marginBottom: 6, marginTop: 12 }}>
-            4. Prazo e Cronograma de Execução dos Serviços
-          </h2>
-          <p style={{ margin: "2px 0", textAlign: "justify", fontSize: "11px" }}>
-            O prazo de execução será de {prazo} meses ou pelo tempo que perdurar os processos judiciais,
-            podendo ser prorrogado por interesse das partes.
-          </p>
-        </div>
-      </Page>
-
-      {/* Página dinâmica: Experiência */}
-      <Page pageNumber={nextPageAfterAnalysis + 1} showLogo={true} FooterComponent={Footer}>
-        {/* Seção 5: Experiência */}
-        <h2 style={{ fontSize: '14px', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: 4, marginBottom: 12 }}>
+        {/* SEÇÃO 5: Experiência */}
+        <h2 style={{ fontSize: '12pt', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: 3, marginBottom: 10, marginTop: 12, lineHeight: "1.4" }}>
           5. Experiência e Equipe Responsável
         </h2>
-        <div className="page-content-body">
-          <p style={{ marginBottom: 8, fontSize: "11px", textAlign: "justify" }}>No portfólio de serviços executados e/ou em execução, constam os seguintes Municípios contratantes:</p>
-        </div>
+        <p style={{ marginBottom: 8, fontSize: "11pt", lineHeight: "1.4", textAlign: "justify" }}>No portfólio de serviços executados e/ou em execução, constam os seguintes Municípios contratantes:</p>
         <div style={{ marginTop: 8, marginBottom: 6 }}>
-          <img src="/munincipios01.png" alt="Municípios Contratantes 1" crossOrigin="anonymous" style={{ width: "100%", height: "250px", objectFit: "contain", display: "block", margin: "0 auto" }} />
+          <img src="/munincipios01.png" alt="Municípios Contratantes 1" crossOrigin="anonymous" style={{ width: "100%", height: "auto", maxHeight: "280px", objectFit: "contain", objectPosition: "center", display: "block", margin: "0 auto" }} />
         </div>
         <div style={{ marginTop: 6, marginBottom: 12 }}>
-          <img src="/Munincipios02.png" alt="Municípios Contratantes 2" crossOrigin="anonymous" style={{ width: "100%", height: "180px", objectFit: "contain", display: "block", margin: "0 auto" }} />
+          <img src="/Munincipios02.png" alt="Municípios Contratantes 2" crossOrigin="anonymous" style={{ width: "100%", height: "auto", maxHeight: "200px", objectFit: "contain", objectPosition: "center", display: "block", margin: "0 auto" }} />
         </div>
-        <div className="page-content-body">
-          <p style={{ marginTop: 12, marginBottom: 8, fontSize: "11px", textAlign: "justify" }}>
-            Para coordenar os trabalhos de consultoria propostos neste documento, a CAVALCANTE REIS ADVOGADOS alocará os seguintes profissionais:
-          </p>
-          <p style={{ marginBottom: 12, textAlign: 'justify' }}>
-            <strong>IURI DO LAGO NOGUEIRA CAVALCANTE REIS –</strong> Doutorando em Direito e Mestre em Direito Econômico e Desenvolvimento pelo Instituto Brasileiro de Ensino, Desenvolvimento e Pesquisa (IDP/Brasília). LLM (Master of Laws) em Direito Empresarial pela Fundação Getúlio Vargas (FGV/RJ). Integrante da Comissão de Juristas do Senado Federal criada para consolidar a proposta do novo Código Comercial Brasileiro. Autor e Coautor de livros, pareceres e artigos jurídicos na área do direito público. Sócio-diretor do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: iuri@cavalcantereis.adv.br).
-          </p>
-          <p style={{ marginBottom: 12, textAlign: 'justify' }}>
-            <strong>PEDRO AFONSO FIGUEIREDO DE SOUZA –</strong> Graduado em Direito pela Pontifícia Universidade Católica de Minas Gerais. Especialista em Direito Penal e Processo Penal pela Academia Brasileira de Direito Constitucional. Mestre em Direito nas Relações Econômicas e Sociais pela Faculdade de Direito Milton Campos. Diretor de Comunicação e Conselheiro Consultivo, Científico e Fiscal do Instituto de Ciências Penais. Autor de artigos e capítulos de livros jurídicos. Advogado associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: pedro@cavalcantereis.adv.br).
-          </p>
-          <p style={{ marginBottom: 12, textAlign: 'justify' }}>
-            <strong>SÉRGIO RICARDO ALVES DE JESUS FILHO –</strong> Graduado em Direito pelo Centro Universitário de Brasília (UniCEUB). Graduando em Ciências Contábeis pelo Centro Universitário de Brasília (UniCEUB). Pós-graduando em Direito Tributário pelo Instituto Brasileiro de Ensino, Desenvolvimento e Pesquisa (IDP). Membro da Comissão de Assuntos Tributários da OAB/DF. Advogado Associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: sergio@cavalcantereis.adv.br).
-          </p>
-          <p style={{ marginBottom: 12, textAlign: 'justify' }}>
-            <strong>JOSÉ HUMBERTO DOS SANTOS JÚNIOR –</strong> Graduado em Direito pelo Centro Universitário UniProcessus. Pós-graduando em Direito Penal e Direito Processual Penal aplicados e Execução Penal pela Escola Brasileira de Direito (EBRADI). Advogado Associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: jose.humberto@cavalcantereis.adv.br).
-          </p>
-          <p style={{ marginBottom: 12, textAlign: 'justify' }}>
-            <strong>GABRIEL SALES RESENDE SALGADO -</strong> Graduado em Direito pela Universidade do Distrito Federal (UDF). Pós-graduando em Direito Tributário pelo Instituto Brasileiro de Estudos Tributários (IBET). Advogado Associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248- 0612 (endereço eletrônico: gabriel@cavalcantereis.adv.br).
-          </p>
-          <p style={{ marginBottom: 12, textAlign: 'justify' }}>
-            Além desses profissionais, a CAVALCANTE REIS ADVOGADOS alocará uma equipe de profissionais pertencentes ao seu quadro técnico, utilizando, também, caso necessário, o apoio técnico especializado de terceiros, pessoas físicas ou jurídicas, que deverão atuar sob sua orientação, cabendo à CAVALCANTE REIS ADVOGADOS a responsabilidade técnica pela execução das tarefas.
-          </p>
-          <p>
-            Nossa contratação, portanto, devido à altíssima qualificação e experiência, aliada à singularidade do objeto da demanda, bem como os diferenciais já apresentados acima, está inserida dentre as hipóteses do art. 6º, XVIII “e” e art. 74, III, “e”, da Lei n.º 14.133/2021.
-          </p>
-        </div>
-      </Page>
+        <p style={{ marginTop: 12, marginBottom: 8, fontSize: "11pt", lineHeight: "1.4", textAlign: "justify" }}>
+          Para coordenar os trabalhos de consultoria propostos neste documento, a CAVALCANTE REIS ADVOGADOS alocará os seguintes profissionais:
+        </p>
+        <p style={{ marginBottom: 12, fontSize: "11pt", lineHeight: "1.4", textAlign: 'justify' }}>
+          <strong>IURI DO LAGO NOGUEIRA CAVALCANTE REIS –</strong> Doutorando em Direito e Mestre em Direito Econômico e Desenvolvimento pelo Instituto Brasileiro de Ensino, Desenvolvimento e Pesquisa (IDP/Brasília). LLM (Master of Laws) em Direito Empresarial pela Fundação Getúlio Vargas (FGV/RJ). Integrante da Comissão de Juristas do Senado Federal criada para consolidar a proposta do novo Código Comercial Brasileiro. Autor e Coautor de livros, pareceres e artigos jurídicos na área do direito público. Sócio-diretor do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: iuri@cavalcantereis.adv.br).
+        </p>
+        <p style={{ marginBottom: 12, fontSize: "11pt", lineHeight: "1.4", textAlign: 'justify' }}>
+          <strong>PEDRO AFONSO FIGUEIREDO DE SOUZA –</strong> Graduado em Direito pela Pontifícia Universidade Católica de Minas Gerais. Especialista em Direito Penal e Processo Penal pela Academia Brasileira de Direito Constitucional. Mestre em Direito nas Relações Econômicas e Sociais pela Faculdade de Direito Milton Campos. Diretor de Comunicação e Conselheiro Consultivo, Científico e Fiscal do Instituto de Ciências Penais. Autor de artigos e capítulos de livros jurídicos. Advogado associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: pedro@cavalcantereis.adv.br).
+        </p>
+        <p style={{ marginBottom: 12, fontSize: "11pt", lineHeight: "1.4", textAlign: 'justify' }}>
+          <strong>SÉRGIO RICARDO ALVES DE JESUS FILHO –</strong> Graduado em Direito pelo Centro Universitário de Brasília (UniCEUB). Graduando em Ciências Contábeis pelo Centro Universitário de Brasília (UniCEUB). Pós-graduando em Direito Tributário pelo Instituto Brasileiro de Ensino, Desenvolvimento e Pesquisa (IDP). Membro da Comissão de Assuntos Tributários da OAB/DF. Advogado Associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: sergio@cavalcantereis.adv.br).
+        </p>
+        <p style={{ marginBottom: 12, fontSize: "11pt", lineHeight: "1.4", textAlign: 'justify' }}>
+          <strong>JOSÉ HUMBERTO DOS SANTOS JÚNIOR –</strong> Graduado em Direito pelo Centro Universitário UniProcessus. Pós-graduando em Direito Penal e Direito Processual Penal aplicados e Execução Penal pela Escola Brasileira de Direito (EBRADI). Advogado Associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: jose.humberto@cavalcantereis.adv.br).
+        </p>
+        <p style={{ marginBottom: 12, fontSize: "11pt", lineHeight: "1.4", textAlign: 'justify' }}>
+          <strong>GABRIEL SALES RESENDE SALGADO -</strong> Graduado em Direito pela Universidade do Distrito Federal (UDF). Pós-graduando em Direito Tributário pelo Instituto Brasileiro de Estudos Tributários (IBET). Advogado Associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248- 0612 (endereço eletrônico: gabriel@cavalcantereis.adv.br).
+        </p>
+        <p style={{ marginBottom: 12, fontSize: "11pt", lineHeight: "1.4", textAlign: 'justify' }}>
+          Além desses profissionais, a CAVALCANTE REIS ADVOGADOS alocará uma equipe de profissionais pertencentes ao seu quadro técnico, utilizando, também, caso necessário, o apoio técnico especializado de terceiros, pessoas físicas ou jurídicas, que deverão atuar sob sua orientação, cabendo à CAVALCANTE REIS ADVOGADOS a responsabilidade técnica pela execução das tarefas.
+        </p>
+        <p style={{ fontSize: "11pt", lineHeight: "1.4" }}>
+          Nossa contratação, portanto, devido à altíssima qualificação e experiência, aliada à singularidade do objeto da demanda, bem como os diferenciais já apresentados acima, está inserida dentre as hipóteses do art. 6º, XVIII “e” e art. 74, III, “e”, da Lei n.º 14.133/2021.
+        </p>
+    </div>
 
-      {/* Página dinâmica: Disposições Finais */}
-      <Page pageNumber={nextPageAfterAnalysis + 2} showLogo={true} FooterComponent={Footer}>
-        {/* Seção 6: Disposições Finais */}
-        <h2 style={{ fontSize: '14px', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: 4, marginBottom: 6 }}>
+        {/* SEÇÃO 6: Disposições Finais */ }
+        <h2 style={{ fontSize: '12pt', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: 3, marginBottom: 5, marginTop: 12, lineHeight: "1.4" }}>
           6. Disposições Finais
         </h2>
-        <div className="page-content-body">
-          <div style={{ textAlign: 'left', fontSize: "11px" }}>
-            <p style={{ margin: "2px 0", textAlign: "justify" }}>
-              Nesse sentido, ficamos no aguardo da manifestação deste Município para promover os ajustes contratuais que entenderem necessários, sendo mantida a mesma forma de remuneração aqui proposta, com fundamento no art. 6º, XVIII, “e” e art. 74, III, “e”, da Lei n.º 14.133/2021.
+        <p style={{ margin: "2px 0", textAlign: "justify", fontSize: "11pt", lineHeight: "1.4" }}>
+          Nesse sentido, ficamos no aguardo da manifestação deste Município para promover os ajustes contratuais que entenderem necessários, sendo mantida a mesma forma de remuneração aqui proposta, com fundamento no art. 6º, XVIII, “e” e art. 74, III, “e”, da Lei n.º 14.133/2021.
             </p>
-            <p style={{ margin: "2px 0", textAlign: "justify" }}>
-              A presente proposta tem validade de 60 (sessenta) dias.
+        <p style={{ margin: "2px 0", textAlign: "justify", fontSize: "11pt", lineHeight: "1.4" }}>
+          A presente proposta tem validade de 60 (sessenta) dias.
             </p>
-            <p style={{ margin: "2px 0", textAlign: "justify" }}>
-              Sendo o que se apresenta para o momento, aguardamos posicionamento da parte de V. Exa., colocando-nos, desde já, à inteira disposição para dirimir quaisquer dúvidas eventualmente existentes.
-            </p>
-          </div>
-        </div>
+        <p style={{ margin: "2px 0", textAlign: "justify", fontSize: "11pt", lineHeight: "1.4" }}>
+          Sendo o que se apresenta para o momento, aguardamos posicionamento da parte de V. Exa., colocando-nos, desde já, à inteira disposição para dirimir quaisquer dúvidas eventualmente existentes.
+        </p>
         <p style={{ marginTop: 12, marginBottom: 6, textAlign: "center", fontSize: "11px" }}>
           Brasília-DF, {formatDateWithMonthName(options.data)}.
         </p>
         <div style={{ marginTop: 6, textAlign: "center" }}>
-          <p style={{ fontSize: "11px" }}>Atenciosamente,</p>
+          <p style={{ fontSize: "11pt", lineHeight: "1.4" }}>Atenciosamente,</p>
           <img src="/Assinatura.png" alt="Assinatura" crossOrigin="anonymous" style={{ width: "180px", margin: "6px auto 0" }} />
-          <h3 style={{ fontWeight: "bold", marginTop: "6px", fontSize: "12px" }}>CAVALCANTE REIS ADVOGADOS</h3>
+          <h3 style={{ fontWeight: "bold", marginTop: "6px", fontSize: "12pt", lineHeight: "1.4" }}>CAVALCANTE REIS ADVOGADOS</h3>
         </div>
-      </Page>
-    </div>
+      </Page >
+    </div >
   );
 };
 // Componente principal App
