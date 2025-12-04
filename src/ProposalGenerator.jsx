@@ -1181,21 +1181,20 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
         <p style={{ marginBottom: 12, fontSize: "11pt", lineHeight: "1.4", textAlign: 'justify' }}>
           Além desses profissionais, a CAVALCANTE REIS ADVOGADOS alocará uma equipe de profissionais pertencentes ao seu quadro técnico, utilizando, também, caso necessário, o apoio técnico especializado de terceiros, pessoas físicas ou jurídicas, que deverão atuar sob sua orientação, cabendo à CAVALCANTE REIS ADVOGADOS a responsabilidade técnica pela execução das tarefas.
         </p>
-        <p style={{ fontSize: "11pt", lineHeight: "1.4" }}>
+        <p style={{ fontSize: "11pt", lineHeight: "1.4", textAlign: 'justify' }}>
           Nossa contratação, portanto, devido à altíssima qualificação e experiência, aliada à singularidade do objeto da demanda, bem como os diferenciais já apresentados acima, está inserida dentre as hipóteses do art. 6º, XVIII “e” e art. 74, III, “e”, da Lei n.º 14.133/2021.
         </p>
-    </div>
 
-        {/* SEÇÃO 6: Disposições Finais */ }
+        {/* SEÇÃO 6: Disposições Finais */}
         <h2 style={{ fontSize: '12pt', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: 3, marginBottom: 5, marginTop: 12, lineHeight: "1.4" }}>
           6. Disposições Finais
         </h2>
         <p style={{ margin: "2px 0", textAlign: "justify", fontSize: "11pt", lineHeight: "1.4" }}>
           Nesse sentido, ficamos no aguardo da manifestação deste Município para promover os ajustes contratuais que entenderem necessários, sendo mantida a mesma forma de remuneração aqui proposta, com fundamento no art. 6º, XVIII, “e” e art. 74, III, “e”, da Lei n.º 14.133/2021.
-            </p>
+        </p>
         <p style={{ margin: "2px 0", textAlign: "justify", fontSize: "11pt", lineHeight: "1.4" }}>
           A presente proposta tem validade de 60 (sessenta) dias.
-            </p>
+        </p>
         <p style={{ margin: "2px 0", textAlign: "justify", fontSize: "11pt", lineHeight: "1.4" }}>
           Sendo o que se apresenta para o momento, aguardamos posicionamento da parte de V. Exa., colocando-nos, desde já, à inteira disposição para dirimir quaisquer dúvidas eventualmente existentes.
         </p>
@@ -1207,8 +1206,8 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
           <img src="/Assinatura.png" alt="Assinatura" crossOrigin="anonymous" style={{ width: "180px", margin: "6px auto 0" }} />
           <h3 style={{ fontWeight: "bold", marginTop: "6px", fontSize: "12pt", lineHeight: "1.4" }}>CAVALCANTE REIS ADVOGADOS</h3>
         </div>
-      </Page >
-    </div >
+      </Page>
+    </div>
   );
 };
 // Componente principal App
