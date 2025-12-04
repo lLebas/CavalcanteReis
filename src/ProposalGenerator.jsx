@@ -1199,7 +1199,7 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
         <p style={{ margin: "2px 0", textAlign: "justify", fontSize: "11pt", lineHeight: "1.4" }}>
           Sendo o que se apresenta para o momento, aguardamos posicionamento da parte de V. Exa., colocando-nos, desde já, à inteira disposição para dirimir quaisquer dúvidas eventualmente existentes.
         </p>
-        <p style={{ marginTop: 12, marginBottom: 6, textAlign: "center", fontSize: "11px" }}>
+        <p style={{ marginTop: 12, marginBottom: 6, textAlign: "center", fontSize: "11pt", lineHeight: "1.4" }}>
           Brasília-DF, {formatDateWithMonthName(options.data)}.
         </p>
         <div style={{ marginTop: 6, textAlign: "center" }}>
