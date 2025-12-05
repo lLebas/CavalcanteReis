@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo, useEffect } from "react";
+﻿import React, { useState, useMemo, useEffect, useRef } from "react";
 import Modal from "./Modal";
 import DOMPurify from "dompurify";
 import { Clipboard, Settings, FileText, Eye, X } from "lucide-react";
@@ -922,7 +922,6 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
             <img
               src="/logo-cavalcante-reis.png"
               alt="Logo Cavalcante Reis Advogados"
-              crossOrigin="anonymous"
               style={{ width: '140px', height: 'auto', display: 'block', margin: '0 auto' }}
             />
           </div>
@@ -934,11 +933,9 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
         </div>
 
         {/* RODAPÉ */}
-        {!isCoverPage && (
-          <div className="page-footer" style={{ flexShrink: 0, marginTop: '24px', paddingTop: '12px' }}>
-            <FooterComponent />
-          </div>
-        )}
+        <div className="page-footer" style={{ flexShrink: 0, marginTop: isCoverPage ? 'auto' : '24px', paddingTop: '12px' }}>
+          <FooterComponent />
+        </div>
 
         {/* NÚMERO DA PÁGINA (OPCIONAL) */}
         {pageNumber && (
@@ -972,7 +969,6 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
           <img
             src="/logo-cavalcante-reis.png"
             alt="Cavalcante Reis Advogados"
-            crossOrigin="anonymous"
             style={{ width: "166px", height: "87px", display: "block", margin: "0 auto" }}
           />
         </div>
@@ -1006,24 +1002,24 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
 
       {/* Página 2: Sumário */}
       <Page pageNumber={2} showLogo={true} FooterComponent={Footer}>
-        <h2 style={{ fontSize: "16px", fontWeight: "bold", marginBottom: 12 }}>Sumário</h2>
-        <div style={{ paddingLeft: 20, lineHeight: 1.6 }}>
-          <p style={{ margin: "6px 0" }}>
+        <h2 style={{ fontSize: "18px", fontWeight: "bold", marginBottom: 20, marginTop: 8 }}>Sumário</h2>
+        <div style={{ paddingLeft: 24, lineHeight: 2.2 }}>
+          <p style={{ margin: "10px 0", fontSize: "13px" }}>
             <strong>1. Objeto da Proposta</strong>
           </p>
-          <p style={{ margin: "6px 0" }}>
+          <p style={{ margin: "10px 0", fontSize: "13px" }}>
             <strong>2. Análise da Questão</strong>
           </p>
-          <p style={{ margin: "6px 0" }}>
+          <p style={{ margin: "10px 0", fontSize: "13px" }}>
             <strong>3. Dos Honorários, das Condições de Pagamento e Despesas</strong>
           </p>
-          <p style={{ margin: "6px 0" }}>
+          <p style={{ margin: "10px 0", fontSize: "13px" }}>
             <strong>4. Prazo e Cronograma de Execução dos Serviços</strong>
           </p>
-          <p style={{ margin: "6px 0" }}>
+          <p style={{ margin: "10px 0", fontSize: "13px" }}>
             <strong>5. Experiência em atuação em favor de Municípios e da Equipe Responsável</strong>
           </p>
-          <p style={{ margin: "6px 0" }}>
+          <p style={{ margin: "10px 0", fontSize: "13px" }}>
             <strong>6. Disposições Finais</strong>
           </p>
         </div>
@@ -1031,7 +1027,7 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
 
       {/* Página 3: Objeto da Proposta */}
       <Page pageNumber={3} showLogo={true} FooterComponent={Footer}>
-        <h2 style={{ fontSize: '14px', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: 4, marginBottom: 8 }}>
+        <h2 style={{ fontSize: '16px', fontWeight: 'bold', borderBottom: '2px solid #000', paddingBottom: 6, marginBottom: 12, marginTop: 4 }}>
           1. Objeto da Proposta
         </h2>
         <div className="page-content-body">
@@ -1117,15 +1113,24 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
         <p style={{ textAlign: "justify" }}><strong>(v)</strong> Acompanhamento do cumprimento das medidas administrativas e/ou judiciais junto aos órgãos administrativos.</p>
       </Page>
 
-      {/* Páginas 3+: TODO O CONTEÚDO EM FLUXO CONTÍNUO (SEM ESPAÇOS EM BRANCO) */}
-      <Page showLogo={true} FooterComponent={Footer}>
-        {/* SEÇÃO 2: Análise da Questão */}
-        {activeAnalysisServices.map((serviceKey, index) => (
+      {/* Página 4: Análise da Questão */}
+      <Page pageNumber={4} showLogo={true} FooterComponent={Footer}>
+        <h2 style={{ fontSize: '14px', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: 4, marginBottom: 8 }}>
+          2. Análise da Questão
+        </h2>
+        {activeAnalysisServices.map((serviceKey) => (
           <div key={serviceKey}>
-            {renderServiceSection(serviceKey, allServices[serviceKey])}
+            {renderServiceSection(
+              serviceKey,
+              allServices[serviceKey],
+              serviceTextDatabase[serviceKey]
+            )}
           </div>
         ))}
+      </Page>
 
+      {/* Página 5: Honorários e Prazo */}
+      <Page pageNumber={5} showLogo={true} FooterComponent={Footer}>
         {/* SEÇÃO 3: Honorários */}
         <h2 style={{ fontSize: '12pt', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: 3, marginBottom: 5, marginTop: 12, lineHeight: "1.4" }}>
           3. Dos Honorários, das Condições de Pagamento e Despesas
@@ -1148,17 +1153,19 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
           O prazo de execução será de {prazo} meses ou pelo tempo que perdurar os processos judiciais,
           podendo ser prorrogado por interesse das partes.
         </p>
+      </Page>
 
-        {/* SEÇÃO 5: Experiência */}
+      {/* Página 6: Experiência */}
+      <Page pageNumber={6} showLogo={true} FooterComponent={Footer}>
         <h2 style={{ fontSize: '12pt', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: 3, marginBottom: 10, marginTop: 12, lineHeight: "1.4" }}>
           5. Experiência e Equipe Responsável
         </h2>
         <p style={{ marginBottom: 8, fontSize: "11pt", lineHeight: "1.4", textAlign: "justify" }}>No portfólio de serviços executados e/ou em execução, constam os seguintes Municípios contratantes:</p>
         <div style={{ marginTop: 8, marginBottom: 6 }}>
-          <img src="/munincipios01.png" alt="Municípios Contratantes 1" crossOrigin="anonymous" style={{ width: "100%", height: "auto", maxHeight: "280px", objectFit: "contain", objectPosition: "center", display: "block", margin: "0 auto" }} />
+          <img src="/munincipios01.png" alt="Municípios Contratantes 1" style={{ width: "100%", height: "auto", maxHeight: "280px", objectFit: "contain", objectPosition: "center", display: "block", margin: "0 auto" }} />
         </div>
         <div style={{ marginTop: 6, marginBottom: 12 }}>
-          <img src="/Munincipios02.png" alt="Municípios Contratantes 2" crossOrigin="anonymous" style={{ width: "100%", height: "auto", maxHeight: "200px", objectFit: "contain", objectPosition: "center", display: "block", margin: "0 auto" }} />
+          <img src="/Munincipios02.png" alt="Municípios Contratantes 2" style={{ width: "100%", height: "auto", maxHeight: "200px", objectFit: "contain", objectPosition: "center", display: "block", margin: "0 auto" }} />
         </div>
         <p style={{ marginTop: 12, marginBottom: 8, fontSize: "11pt", lineHeight: "1.4", textAlign: "justify" }}>
           Para coordenar os trabalhos de consultoria propostos neste documento, a CAVALCANTE REIS ADVOGADOS alocará os seguintes profissionais:
@@ -1184,7 +1191,10 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
         <p style={{ fontSize: "11pt", lineHeight: "1.4", textAlign: 'justify' }}>
           Nossa contratação, portanto, devido à altíssima qualificação e experiência, aliada à singularidade do objeto da demanda, bem como os diferenciais já apresentados acima, está inserida dentre as hipóteses do art. 6º, XVIII “e” e art. 74, III, “e”, da Lei n.º 14.133/2021.
         </p>
+      </Page>
 
+      {/* Página 7: Disposições Finais */}
+      <Page pageNumber={7} showLogo={true} FooterComponent={Footer}>
         {/* SEÇÃO 6: Disposições Finais */}
         <h2 style={{ fontSize: '12pt', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: 3, marginBottom: 5, marginTop: 12, lineHeight: "1.4" }}>
           6. Disposições Finais
@@ -1203,7 +1213,7 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
         </p>
         <div style={{ marginTop: 6, textAlign: "center" }}>
           <p style={{ fontSize: "11pt", lineHeight: "1.4" }}>Atenciosamente,</p>
-          <img src="/Assinatura.png" alt="Assinatura" crossOrigin="anonymous" style={{ width: "180px", margin: "6px auto 0" }} />
+          <img src="/Assinatura.png" alt="Assinatura" style={{ width: "180px", margin: "6px auto 0" }} />
           <h3 style={{ fontWeight: "bold", marginTop: "6px", fontSize: "12pt", lineHeight: "1.4" }}>CAVALCANTE REIS ADVOGADOS</h3>
         </div>
       </Page>
@@ -1299,69 +1309,89 @@ function App() {
   // Estados para zoom touch na prévia mobile
   const [previewScale, setPreviewScale] = useState(0.4);
   const [previewTranslate, setPreviewTranslate] = useState({ x: 0, y: 0 });
+  const containerRef = useRef(null);
 
   const generatePdf = async () => {
     console.log("=== INÍCIO GERAÇÃO PDF ===");
-    setLoadingPdf(true);
-    console.log("Gerando PDF...");
-    const previewElement = document.getElementById('preview');
-    console.log("Preview element:", previewElement);
-    if (!previewElement) {
-      console.error("Elemento de pré-visualização não encontrado!");
-      alert("Elemento de pré-visualização não encontrado.");
-      setLoadingPdf(false);
-      return;
+
+    // Verificar se a prévia está aberta
+    if (!showPreview) {
+      console.log("📖 Abrindo prévia primeiro...");
+      setShowPreview(true);
+
+      // Aguardar o React renderizar a prévia (500ms)
+      await new Promise(resolve => setTimeout(resolve, 500));
     }
 
-    const pageElements = previewElement.querySelectorAll('.pdf-page-render');
-    console.log("Páginas encontradas:", pageElements.length);
-    if (pageElements.length === 0) {
-      console.error("Nenhuma página encontrada!");
-      alert("Nenhuma página encontrada para gerar o PDF.");
-      setLoadingPdf(false);
+    const container = containerRef.current;
+    console.log("Container ref:", container);
+
+    if (!container) {
+      alert("Erro: Container não encontrado! Tente novamente.");
+      console.error("containerRef.current é null");
       return;
     }
-
-    // Aguardar um pouco para garantir renderização
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
 
     try {
-      // Capturar cada página sequencialmente (mais estável que em paralelo)
-      for (let i = 0; i < pageElements.length; i++) {
-        console.log(`Capturando página ${i + 1}...`);
+      // Pegar todas as páginas
+      const pages = container.querySelectorAll('[data-page]');
+      console.log(`Total de páginas encontradas: ${pages.length}`);
 
-        const canvas = await html2canvas(pageElements[i], {
-          scale: 1.5,
-          useCORS: true,
-          backgroundColor: '#ffffff',
-          logging: false,
-          imageTimeout: 0
-        });
+      if (pages.length === 0) {
+        alert("Erro: Nenhuma página encontrada! Verifique se a prévia está aberta.");
+        console.error("Nenhum elemento com [data-page] encontrado");
+        return;
+      }
 
-        const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+        compress: true
+      });
+
+      for (let i = 0; i < pages.length; i++) {
+        console.log(`📄 Processando página ${i + 1}/${pages.length}...`);
 
         if (i > 0) {
           pdf.addPage();
         }
 
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-        console.log(`Página ${i + 1} adicionada ao PDF`);
+        // Capturar a página usando html2canvas
+        console.log(`🖼️ Capturando canvas da página ${i + 1}...`);
+        const canvas = await html2canvas(pages[i], {
+          scale: 2,
+          useCORS: true,
+          logging: true,
+          backgroundColor: '#ffffff',
+          width: pages[i].scrollWidth,
+          height: pages[i].scrollHeight
+        });
+
+        console.log(`✅ Canvas capturado: ${canvas.width}x${canvas.height}`);
+
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        const imgWidth = 210; // A4 width in mm
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        console.log(`📎 Adicionando imagem ao PDF: ${imgWidth}mm x ${imgHeight}mm`);
+        pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
       }
 
-      pdf.save(`Proposta-${options.municipio || "Municipio"}.pdf`);
-      console.log("Download do PDF iniciado!");
+      // Baixar o PDF
+      const fileName = formData.municipio
+        ? `Proposta_${formData.municipio.replace(/\s+/g, '_')}.pdf`
+        : 'Proposta.pdf';
+
+      console.log(`💾 Salvando PDF: ${fileName}`);
+      pdf.save(fileName);
+      console.log("✅ PDF gerado com sucesso!");
+
     } catch (error) {
       console.error("Erro ao gerar PDF:", error);
-      alert(`Erro ao gerar PDF: ${error.message}`);
-    } finally {
-      setLoadingPdf(false);
+      alert("Erro ao gerar PDF: " + error.message);
     }
   };
-
   // Funções auxiliares
   const generateDocx = async () => {
     console.log("=== INÍCIO GERAÇÃO DOCX ===");
@@ -2235,7 +2265,7 @@ function App() {
                   }
                 }}
               >
-                <div style={{
+                <div ref={containerRef} style={{
                   transform: `scale(${previewScale})`,
                   transformOrigin: 'top center',
                   transition: 'transform 0.1s ease-out',
