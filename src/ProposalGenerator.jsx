@@ -1094,7 +1094,7 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
         const pageNumber = 4 + index; // Começa na página 4, incrementa para cada serviço
         const numberedTitle = `2.${serviceNumber} – ${allServices[serviceKey]}`;
         const isFirstService = index === 0;
-        
+
         return (
           <Page key={serviceKey} pageNumber={pageNumber} showLogo={true} FooterComponent={Footer} data-page={pageNumber}>
             {isFirstService && (
