@@ -798,16 +798,8 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
 
   // Helper para renderizar serviços como componentes React
 
-  // Contador para numeração dinâmica dos serviços na seção 2
-  let serviceCounter = 0;
-
-  // Helper para renderizar serviços como componentes React
-  const renderServiceSection = (serviceKey, title, content) => {
-    if (!services[serviceKey]) return null;
-
-    // Incrementar o contador apenas se o serviço estiver selecionado
-    serviceCounter++;
-
+  // Helper para renderizar o conteúdo de um serviço (sem o título, que será renderizado na página)
+  const renderServiceContent = (serviceKey, content) => {
     let processedContent = content;
     if (content) {
       if (serviceKey === 'rpps' && customEstimates.rpps) {
@@ -817,14 +809,7 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
         processedContent = content.replace('{{impostoRenda_estimate}}', customEstimates.impostoRenda);
       }
     } else if (!content) {
-      // Handle missing content
-      return (
-        <>
-          <hr style={{ border: "2px solid black", margin: "24px 0" }} />
-          <h3 className="font-bold text-lg mt-6 mb-2" style={{ color: "#000" }}>{title}</h3>
-          <div className="space-y-4"><p>Conteúdo não disponível.</p></div>
-        </>
-      );
+      return <p style={{ margin: "4px 0", textAlign: "justify", fontSize: "11px" }}>Conteúdo não disponível.</p>;
     }
 
     const tempDiv = document.createElement("div");
@@ -833,7 +818,7 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
     // Use querySelectorAll to select only the elements I want to render.
     const elements = Array.from(tempDiv.querySelectorAll("p, div.image-placeholder")).map((el, idx) => {
       if (el.tagName === 'P') {
-        return <p key={idx} style={{ margin: "4px 0", textAlign: "justify", fontSize: "11px" }}>{el.textContent}</p>;
+        return <p key={idx} style={{ margin: "4px 0", textAlign: "justify", fontSize: "11px", lineHeight: "1.4" }}>{el.textContent}</p>;
       }
       if (el.tagName === 'DIV' && el.classList.contains('image-placeholder')) {
         if (rppsImage) {
@@ -849,17 +834,7 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
       return null;
     }).filter(Boolean);
 
-    // Usar o contador dinâmico para a numeração
-    const numberedTitle = `2.${serviceCounter} – ${title}`;
-
-    return (
-      <>
-        <h3 style={{ fontWeight: "bold", fontSize: "12px", marginTop: "12px", marginBottom: "6px", color: "#000" }}>
-          {numberedTitle}
-        </h3>
-        <div className="page-content-body" style={{ marginBottom: "12px" }}>{elements}</div>
-      </>
-    );
+    return <div className="page-content-body">{elements}</div>;
   };
 
   // Helper para renderizar linhas da tabela
@@ -897,12 +872,12 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
   };
 
   // Helper para renderizar uma "página" com cabeçalho e rodapé
-  const Page = ({ children, pageNumber, showLogo = true, isCoverPage = false, FooterComponent }) => {
+  const Page = ({ children, pageNumber, showLogo = true, isCoverPage = false, FooterComponent, ...props }) => {
     // A capa e páginas sem conteúdo explícito não devem mostrar o logo no cabeçalho.
     const displayLogo = showLogo && !isCoverPage;
 
     return (
-      <div className="pdf-page-render" style={{
+      <div className="pdf-page-render" {...props} style={{
         pageBreakAfter: 'always',
         background: 'white',
         width: '210mm',
@@ -964,7 +939,7 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
   return (
     <div id="preview" className="preview" style={{ fontFamily: "'EB Garamond', serif", fontSize: "11px", color: "#000", lineHeight: "1.4" }}>
       {/* Página 1: Capa */}
-      <Page isCoverPage={true} FooterComponent={Footer}>
+      <Page isCoverPage={true} FooterComponent={Footer} data-page={1}>
         <div style={{ textAlign: "center", marginTop: 80, marginBottom: 120 }}>
           <img
             src="/logo-cavalcante-reis.png"
@@ -1001,7 +976,7 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
       </Page>
 
       {/* Página 2: Sumário */}
-      <Page pageNumber={2} showLogo={true} FooterComponent={Footer}>
+      <Page pageNumber={2} showLogo={true} FooterComponent={Footer} data-page={2}>
         <h2 style={{ fontSize: "18px", fontWeight: "bold", marginBottom: 20, marginTop: 8 }}>Sumário</h2>
         <div style={{ paddingLeft: 24, lineHeight: 2.2 }}>
           <p style={{ margin: "10px 0", fontSize: "13px" }}>
@@ -1026,7 +1001,7 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
       </Page>
 
       {/* Página 3: Objeto da Proposta */}
-      <Page pageNumber={3} showLogo={true} FooterComponent={Footer}>
+      <Page pageNumber={3} showLogo={true} FooterComponent={Footer} data-page={3}>
         <h2 style={{ fontSize: '16px', fontWeight: 'bold', borderBottom: '2px solid #000', paddingBottom: 6, marginBottom: 12, marginTop: 4 }}>
           1. Objeto da Proposta
         </h2>
@@ -1113,24 +1088,30 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
         <p style={{ textAlign: "justify" }}><strong>(v)</strong> Acompanhamento do cumprimento das medidas administrativas e/ou judiciais junto aos órgãos administrativos.</p>
       </Page>
 
-      {/* Página 4: Análise da Questão */}
-      <Page pageNumber={4} showLogo={true} FooterComponent={Footer}>
-        <h2 style={{ fontSize: '14px', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: 4, marginBottom: 8 }}>
-          2. Análise da Questão
-        </h2>
-        {activeAnalysisServices.map((serviceKey) => (
-          <div key={serviceKey}>
-            {renderServiceSection(
-              serviceKey,
-              allServices[serviceKey],
-              serviceTextDatabase[serviceKey]
+      {/* Páginas dinâmicas: Análise da Questão - Cada serviço em sua própria página */}
+      {activeAnalysisServices.map((serviceKey, index) => {
+        const serviceNumber = index + 1; // Numeração do serviço (1, 2, 3, ...)
+        const pageNumber = 4 + index; // Começa na página 4, incrementa para cada serviço
+        const numberedTitle = `2.${serviceNumber} – ${allServices[serviceKey]}`;
+        const isFirstService = index === 0;
+        
+        return (
+          <Page key={serviceKey} pageNumber={pageNumber} showLogo={true} FooterComponent={Footer} data-page={pageNumber}>
+            {isFirstService && (
+              <h2 style={{ fontSize: '14px', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: 4, marginBottom: 8, marginTop: 4 }}>
+                2. Análise da Questão
+              </h2>
             )}
-          </div>
-        ))}
-      </Page>
+            <h3 style={{ fontWeight: "bold", fontSize: "12px", marginTop: isFirstService ? "12px" : "4px", marginBottom: "8px", color: "#000" }}>
+              {numberedTitle}
+            </h3>
+            {renderServiceContent(serviceKey, serviceTextDatabase[serviceKey])}
+          </Page>
+        );
+      })}
 
-      {/* Página 5: Honorários e Prazo */}
-      <Page pageNumber={5} showLogo={true} FooterComponent={Footer}>
+      {/* Página: Honorários e Prazo */}
+      <Page pageNumber={4 + activeAnalysisServices.length} showLogo={true} FooterComponent={Footer} data-page={4 + activeAnalysisServices.length}>
         {/* SEÇÃO 3: Honorários */}
         <h2 style={{ fontSize: '12pt', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: 3, marginBottom: 5, marginTop: 12, lineHeight: "1.4" }}>
           3. Dos Honorários, das Condições de Pagamento e Despesas
@@ -1155,8 +1136,8 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
         </p>
       </Page>
 
-      {/* Página 6: Experiência */}
-      <Page pageNumber={6} showLogo={true} FooterComponent={Footer}>
+      {/* Página: Experiência */}
+      <Page pageNumber={5 + activeAnalysisServices.length} showLogo={true} FooterComponent={Footer} data-page={5 + activeAnalysisServices.length}>
         <h2 style={{ fontSize: '12pt', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: 3, marginBottom: 10, marginTop: 12, lineHeight: "1.4" }}>
           5. Experiência e Equipe Responsável
         </h2>
@@ -1193,8 +1174,8 @@ const ProposalDocument = ({ theme, options, prazo, services, customCabimentos, c
         </p>
       </Page>
 
-      {/* Página 7: Disposições Finais */}
-      <Page pageNumber={7} showLogo={true} FooterComponent={Footer}>
+      {/* Página: Disposições Finais */}
+      <Page pageNumber={6 + activeAnalysisServices.length} showLogo={true} FooterComponent={Footer} data-page={6 + activeAnalysisServices.length}>
         {/* SEÇÃO 6: Disposições Finais */}
         <h2 style={{ fontSize: '12pt', fontWeight: 'bold', borderBottom: '1px solid #000', paddingBottom: 3, marginBottom: 5, marginTop: 12, lineHeight: "1.4" }}>
           6. Disposições Finais
