@@ -1,78 +1,199 @@
-# Gerador de Propostas - Livia Advogados
+# Sistema Cavalcante Reis - Propostas Advocatícias
 
-# Gerador de Propostas - Livia Advogados
+Sistema completo para geração de propostas advocatícias, construído com **NestJS** (backend) e **Next.js** (frontend), ambos em TypeScript.
 
-App em Next.js (React) para gerar propostas advocatícias dinâmicas e processar modelos .docx no servidor.
+## 🏗️ Arquitetura
 
-Requisitos:
+- **Backend**: NestJS + TypeScript
+- **Frontend**: Next.js 14 + TypeScript + React
+- **Banco de Dados**: JSON file (pode ser migrado para PostgreSQL/Prisma)
 
-- Node 18+ e npm
+## 📦 Instalação
 
-Instalação (Windows cmd.exe):
+### ⚠️ IMPORTANTE: Instalar dependências primeiro!
 
+**Antes de rodar `npm run dev`, você PRECISA instalar as dependências:**
+
+#### Opção 1: Script Automático (Recomendado)
+
+**Windows:**
+```bash
+install-all.bat
+```
+
+**Linux/Mac:**
+```bash
+chmod +x install-all.sh
+./install-all.sh
+```
+
+#### Opção 2: Usar o script do package.json
+
+```bash
+npm run install:all
+```
+
+#### Opção 3: Manual
+
+```bash
+# 1. Instalar dependências do monorepo
 npm install
 
-Rodar em desenvolvimento:
+# 2. Instalar dependências do backend
+cd backend && npm install && cd ..
 
+# 3. Instalar dependências do frontend
+cd frontend && npm install && cd ..
+```
+
+**⚠️ Se você ver o erro `'nest' não é reconhecido` ou `'next' não é reconhecido`, significa que as dependências não foram instaladas. Execute os comandos acima primeiro!**
+
+Ou manualmente:
+
+```bash
+# Instalar dependências do monorepo
+npm install
+
+# Instalar dependências do backend
+cd backend
+npm install
+
+# Instalar dependências do frontend
+cd ../frontend
+npm install
+```
+
+## 🚀 Desenvolvimento
+
+### Rodar backend e frontend simultaneamente
+
+```bash
 npm run dev
+```
 
-Build para produção:
+### Rodar separadamente
 
+**Backend (porta 3001):**
+```bash
+npm run dev:backend
+```
+
+**Frontend (porta 3000):**
+```bash
+npm run dev:frontend
+```
+
+## 📝 Variáveis de Ambiente
+
+### Backend (`backend/.env`)
+```env
+PORT=3001
+FRONTEND_URL=http://localhost:3000
+```
+
+### Frontend (`frontend/.env.local`)
+```env
+NEXT_PUBLIC_API_URL=http://localhost:3001
+```
+
+## 🏭 Build para Produção
+
+```bash
 npm run build
+```
 
-Deploy na Vercel:
+## 📚 Documentação da API
 
-- Crie uma conta em https://vercel.com e vincule o repositório (GitHub/GitLab/Bitbucket).
-- Vercel detecta automaticamente um app Next.js. Use o branch `main` (ou o branch de sua preferência).
+Quando o backend estiver rodando, acesse:
+- Swagger UI: http://localhost:3001/api
 
-Funcionalidades implementadas nesta versão:
+## 🧹 Limpeza de Arquivos Antigos
 
-- Editor lateral para selecionar município, data e quais serviços (2.1-2.7) incluir
-- Preview do documento com estrutura básica
-- Copiar o HTML do preview para área de transferência
-- Upload de modelo .docx e processamento server-side (substituição de município/data e remoção das seções 2.2-2.8)
-- Geração e download do .docx ajustado via API
+Agora que migramos para NestJS + Next.js, você pode remover os arquivos da estrutura antiga (Vite + React).
 
-Próximos passos sugeridos:
+**📖 Veja o guia completo**: [CLEANUP_GUIDE.md](./CLEANUP_GUIDE.md)
 
-- Ajustar heurísticas de extração/removal usando exemplos reais de .docx
-- Preservar formatação/tabelas do documento original (pode exigir processamento mais avançado)
-- Polir layout e paleta de cores
+**⚡ Resumo rápido**: [RESUMO_LIMPEZA.md](./RESUMO_LIMPEZA.md)
 
-Suporte ao Supabase (opcional):
+### Scripts de Limpeza Rápida
 
-- Se você quiser persistir propostas em produção (Vercel) recomendo usar Supabase ou outro DB gerenciado. Crie uma tabela `propostas` com colunas JSON/text conforme necessário.
-- Defina as variáveis de ambiente no Vercel / .env.local:
+1. **Copiar arquivos públicos** (IMPORTANTE fazer primeiro):
+   ```bash
+   # Windows
+   copy-public.bat
+   
+   # Linux/Mac
+   ./copy-public.sh
+   ```
 
-	NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
-	NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-	SUPABASE_SERVICE_ROLE_KEY=your-service-role-key   # opcional, necessário para operações server-side com privilégios
+2. **Limpar arquivos antigos**:
+   ```bash
+   # Windows
+   cleanup.bat
+   
+   # Linux/Mac
+   ./cleanup.sh
+   ```
 
-- Quando o Supabase estiver configurado, a API usará Supabase automaticamente. Caso contrário, o app usará um arquivo local `data/proposals.json` como fallback (somente para desenvolvimento).
+### O que será removido:
+- ❌ `src/` - Código antigo (Vite + React)
+- ❌ `dist/` - Build antigo
+- ❌ `api-backup/` - APIs antigas (já migradas)
+- ❌ `vite.config.js`, `index.html`, etc.
+- ❌ `prisma/` - Se não vai usar PostgreSQL
 
-Limpeza automática:
+## 🗂️ Estrutura do Projeto
 
-- Propostas com mais de 7 dias são removidas automaticamente (lazy cleanup) ao listar/salvar. Também existe um endpoint DELETE para exclusão manual pelo usuário.
+```
+.
+├── backend/          # NestJS Backend
+│   ├── src/
+│   │   ├── propostas/    # Módulo de propostas
+│   │   ├── documents/    # Módulo de documentos
+│   │   └── main.ts       # Entry point
+│   └── package.json
+│
+├── frontend/         # Next.js Frontend
+│   ├── src/
+│   │   ├── app/          # Next.js App Router
+│   │   ├── components/   # Componentes React
+│   │   └── lib/          # Utilitários (API client, etc.)
+│   └── package.json
+│
+└── package.json     # Scripts do monorepo
+```
 
-Deploy no Vercel
------------------
+## 🔄 Migração do Código Antigo
 
-- O app foi construído em Next.js e é compatível com deploys automáticos no Vercel.
-- IMPORTANTE: O fallback por arquivo (`data/proposals.json`) não é persistente em ambientes serverless (como Vercel) — arquivos gravados no filesystem podem desaparecer entre implantações/cold starts. Por isso é fortemente recomendado configurar Supabase (ou outro banco gerenciado) para produção.
+O código foi migrado de:
+- **Vite + React (JSX)** → **Next.js + TypeScript (TSX)**
+- **API Routes Next.js** → **NestJS Controllers**
 
-Passos rápidos:
+## 📋 Funcionalidades
 
-1. Crie uma conta em https://vercel.com e conecte o repositório Git.
-2. Em Settings > Environment Variables adicione as chaves (se usar Supabase):
+- ✅ Autenticação
+- ✅ Geração de propostas
+- ✅ Processamento de documentos DOCX
+- ✅ Geração de PDF
+- ✅ Geração de DOCX
+- ✅ Salvamento de propostas
+- ✅ Interface responsiva
 
-	NEXT_PUBLIC_SUPABASE_URL
-	NEXT_PUBLIC_SUPABASE_ANON_KEY
-	SUPABASE_SERVICE_ROLE_KEY
+## 🛠️ Tecnologias
 
-3. Defina a Branch a ser implantada (por exemplo `main` ou `Feactue-Edições`).
-4. Deploy será automático ao pushar commits.
+### Backend
+- NestJS
+- TypeScript
+- Swagger/OpenAPI
+- Class Validator
 
-Observações:
+### Frontend
+- Next.js 14
+- React 18
+- TypeScript
+- Lucide Icons
+- Axios
 
-- Se não configurar Supabase, o app ainda irá funcionar, mas os dados salvos podem não persistir entre deploys.
-- Para testes locais, use `.env.local` com as mesmas variáveis.
+## 📄 Licença
+
+MIT
