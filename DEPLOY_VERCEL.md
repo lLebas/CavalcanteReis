@@ -79,6 +79,6 @@ Backend (NestJS)   → Railway/Render (porta automática)
 - Verifique CORS no backend (deve permitir a origem da Vercel)
 
 ### Erro no Build: "nest: command not found"
-- O `vercel.json` já está configurado para fazer build apenas do frontend
+- O `` vercel.jsonjá está configurado para fazer build apenas do frontend
 - Se ainda der erro, verifique se o `rootDirectory` está como `frontend` no painel da Vercel
 

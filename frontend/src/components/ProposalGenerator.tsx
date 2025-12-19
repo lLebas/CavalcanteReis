@@ -348,7 +348,7 @@ const ControlsSidebar = ({
 
       <div className="field" style={{ marginTop: '20px' }}>
         <label>Valor do Pagamento</label>
-        <input type="text" value={paymentValue} onChange={(e) => setPaymentValue(e.target.value)} placeholder="Ex: R$ 0,20 (vinte centavos)" style={{ borderRadius: '8px', border: '1px solid #ccc' }} />
+        <input type="text" value={paymentValue} onChange={(e) => setPaymentValue(e.target.value)} placeholder="Ex: R$ 0,12 (doze centavos)" style={{ borderRadius: '8px', border: '1px solid #ccc' }} />
       </div>
 
       <div className="actions" style={{ marginTop: '30px' }}>
@@ -369,16 +369,26 @@ const ControlsSidebar = ({
         <h3>Propostas Salvas</h3>
         <div className="proposals-list">
           {savedProposals.length === 0 ? <p style={{ fontSize: '13px', color: '#999' }}>Nenhuma proposta salva.</p> :
-            savedProposals.map((p: any) => (
-              <div key={p.id} className="proposal-item">
-                <div style={{ fontWeight: 'bold', fontSize: '14px', marginBottom: '4px' }}>{p.municipio || "Sem nome"}</div>
-                <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>{p.data}</div>
-                <div style={{ display: 'flex', gap: '6px' }}>
-                  <button onClick={() => onLoadProposal(p)} className="btn-small load">Carregar</button>
-                  <button onClick={() => onDeleteProposal(p.id)} className="btn-small delete">Excluir</button>
+            savedProposals.map((p: any) => {
+              const expiresAt = p.expiresAt ? new Date(p.expiresAt) : null;
+              const daysUntilExpiry = expiresAt ? Math.ceil((expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : null;
+
+              return (
+                <div key={p.id} className="proposal-item">
+                  <div style={{ fontWeight: 'bold', fontSize: '14px', marginBottom: '4px' }}>{p.municipio || "Sem nome"}</div>
+                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>{p.data}</div>
+                  {daysUntilExpiry && daysUntilExpiry > 0 && (
+                    <div style={{ fontSize: '11px', color: '#999', marginBottom: '8px' }}>
+                      Expira em {daysUntilExpiry} dia{daysUntilExpiry > 1 ? 's' : ''}
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    <button onClick={() => onLoadProposal(p)} className="btn-small load">Carregar</button>
+                    <button onClick={() => onDeleteProposal(p.id)} className="btn-small delete">Excluir</button>
+                  </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           }
         </div>
       </div>
@@ -407,8 +417,8 @@ const ProposalDocument = ({ options, prazo, services, customCabimentos, customEs
             </div>
           ))}
         </div>
-        <div style={{ textAlign: 'center', marginTop: '15px', fontSize: '9px', letterSpacing: '2px', fontWeight: 'bold', color: '#227056', textTransform: 'uppercase' }}>
-          www.cavalcantereis.adv.br
+        <div style={{ textAlign: 'center', marginTop: '15px', fontSize: '9px', letterSpacing: '2px', fontWeight: 'bold', color: '#000', textTransform: 'uppercase' }}>
+          www.cavalcante-reis.adv.br
         </div>
       </div>
     );
@@ -419,11 +429,15 @@ const ProposalDocument = ({ options, prazo, services, customCabimentos, customEs
       boxShadow: '0 0 20px rgba(0,0,0,0.1)',
       margin: '0 auto 30px',
       background: 'white',
-      padding: '20mm 20mm 15mm 25mm'
+      padding: '20mm 20mm 15mm 25mm',
+      width: '210mm',
+      minHeight: '297mm',
+      position: 'relative',
+      boxSizing: 'border-box'
     }}>
       {!isCover && (
         <div style={{ textAlign: 'center', marginBottom: '35px' }}>
-          <img src="/logo-cavalcante-reis.png" alt="Logo" style={{ width: '130px' }} />
+          <img src="/logo-cavalcante-reis.png" alt="Logo" style={{ width: '130px' }} crossOrigin="anonymous" />
         </div>
       )}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>{children}</div>
@@ -433,15 +447,13 @@ const ProposalDocument = ({ options, prazo, services, customCabimentos, customEs
       {pageNumber && (
         <div style={{
           position: 'absolute',
-          bottom: '10mm',
+          top: '10mm',
           right: '15mm',
           fontSize: '10px',
           fontWeight: 'bold',
-          color: '#333',
-          borderTop: '1px solid #eee',
-          paddingTop: '5px'
+          color: '#333'
         }}>
-          Página | {pageNumber}
+          {pageNumber}-
         </div>
       )}
     </div>
@@ -449,110 +461,285 @@ const ProposalDocument = ({ options, prazo, services, customCabimentos, customEs
 
   const activeServices = Object.keys(services).filter(k => services[k]);
 
+  // Função para calcular tamanho aproximado do conteúdo (removendo tags HTML)
+  const getContentSize = (serviceKey: string): number => {
+    const text = serviceTextDatabase[serviceKey] || "";
+    // Remove tags HTML e espaços, conta caracteres
+    const cleanText = text.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+    return cleanText.length;
+  };
+
+  // Agrupar serviços: pequenos (até 800 chars) podem ficar juntos (2-3 por página), grandes (>1000) ficam sozinhos
+  const groupServices = (services: string[]): string[][] => {
+    const groups: string[][] = [];
+    const LARGE_THRESHOLD = 1000; // Seções com mais de 1000 caracteres ficam sozinhas
+    const MEDIUM_THRESHOLD = 800; // Seções até 800 podem ser agrupadas
+
+    let currentGroup: string[] = [];
+    let currentGroupSize = 0;
+
+    services.forEach((serviceKey, index) => {
+      const size = getContentSize(serviceKey);
+
+      // Seção muito grande, fica sozinha
+      if (size > LARGE_THRESHOLD) {
+        // Salva grupo atual se houver
+        if (currentGroup.length > 0) {
+          groups.push([...currentGroup]);
+          currentGroup = [];
+          currentGroupSize = 0;
+        }
+        // Adiciona seção grande sozinha
+        groups.push([serviceKey]);
+      }
+      // Seção pequena/média, pode agrupar
+      else if (size <= MEDIUM_THRESHOLD) {
+        // Se o grupo atual + esta seção não ultrapassar 2400 chars (limite seguro para A4) e tiver menos de 3 itens
+        if (currentGroupSize + size <= 2400 && currentGroup.length < 3) {
+          currentGroup.push(serviceKey);
+          currentGroupSize += size;
+        } else {
+          // Salva grupo atual e começa novo
+          if (currentGroup.length > 0) {
+            groups.push([...currentGroup]);
+          }
+          currentGroup = [serviceKey];
+          currentGroupSize = size;
+        }
+      }
+      // Seção média-grande (entre 800-1000), pode ficar sozinha ou com uma pequena
+      else {
+        if (currentGroup.length === 0 || (currentGroupSize + size <= 2400 && currentGroup.length === 1)) {
+          currentGroup.push(serviceKey);
+          currentGroupSize += size;
+        } else {
+          if (currentGroup.length > 0) {
+            groups.push([...currentGroup]);
+          }
+          currentGroup = [serviceKey];
+          currentGroupSize = size;
+        }
+      }
+    });
+
+    // Adiciona último grupo se houver
+    if (currentGroup.length > 0) {
+      groups.push([...currentGroup]);
+    }
+
+    return groups;
+  };
+
+  const serviceGroups = groupServices(activeServices);
+
   return (
     <div id="preview" className="preview" style={{ fontFamily: "'EB Garamond', serif" }}>
       <Page isCover={true} FooterComponent={FooterComp} data-page={1}>
         <div style={{ textAlign: "center", marginTop: '60px' }}>
-          <img src="/logo-cavalcante-reis.png" alt="Logo" style={{ width: "200px" }} />
+          <img src="/logo-cavalcante-reis.png" alt="Logo" style={{ width: "130px" }} crossOrigin="anonymous" />
         </div>
-        <div style={{ marginTop: '120px', textAlign: "right", borderRight: '4px solid #227056', paddingRight: '25px', maxWidth: '80%', marginLeft: 'auto' }}>
+        <div style={{ marginTop: '120px', textAlign: "right", paddingRight: '25px', maxWidth: '80%', marginLeft: 'auto' }}>
           <p style={{ fontSize: '14px', color: '#666', marginBottom: '5px' }}>Proponente:</p>
-          <p style={{ fontSize: '18px', fontWeight: 'bold', color: '#227056' }}>Cavalcante Reis Advogados</p>
+          <p style={{ fontSize: '18px', fontWeight: 'bold', color: '#000' }}>Cavalcante Reis Advogados</p>
 
           <p style={{ fontSize: '14px', color: '#666', marginTop: '30px', marginBottom: '5px' }}>Destinatário:</p>
-          <p style={{ fontSize: '18px', fontWeight: 'bold', color: '#333' }}>Prefeitura Municipal de {options.municipio || "[Nome do Município]"}</p>
+          <p style={{ fontSize: '18px', fontWeight: 'bold', color: '#000' }}>Prefeitura Municipal de {options.municipio || "[Nome do Município]"}</p>
 
           <div style={{ marginTop: '60px' }}>
-            <p style={{ fontSize: '24px', fontWeight: 'bold', color: '#227056' }}>{options.data || "2025"}</p>
+            <p style={{ fontSize: '24px', fontWeight: 'bold', color: '#000' }}>{options.data || "2025"}</p>
           </div>
         </div>
       </Page>
 
       <Page pageNumber={2} FooterComponent={FooterComp}>
-        <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#227056', borderBottom: '2px solid #227056', paddingBottom: '10px', marginBottom: '40px', textAlign: 'center' }}>SUMÁRIO</h2>
-        <div style={{ lineHeight: '3', fontSize: '15px', maxWidth: '85%', margin: '0 auto' }}>
-          {[
-            { t: "1. Objeto da Proposta", p: 3 },
-            { t: "2. Análise da Questão", p: 4 },
-            { t: "3. Dos Honorários e Condições", p: 4 + activeServices.length },
-            { t: "4. Prazo e Cronograma de Execução", p: 4 + activeServices.length },
-            { t: "5. Experiência e Equipe Responsável", p: 5 + activeServices.length },
-            { t: "6. Disposições Finais", p: 6 + activeServices.length }
-          ].map((item, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'baseline', gap: '10px' }}>
-              <strong style={{ whiteSpace: 'nowrap' }}>{item.t}</strong>
-              <div style={{ flex: 1, borderBottom: '1px dotted #aaa', height: '1px' }}></div>
-              <span style={{ fontWeight: 'bold', color: '#227056' }}>Pág. {String(item.p).padStart(2, '0')}</span>
-            </div>
-          ))}
+        <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#000', marginBottom: '30px' }}>Sumário</h2>
+        <div style={{ lineHeight: '2.5', fontSize: '15px' }}>
+          <div style={{ marginBottom: '15px', color: '#000' }}><strong>1. Objeto da Proposta</strong></div>
+          <div style={{ marginBottom: '15px', color: '#000' }}><strong>2. Análise da Questão</strong></div>
+          <div style={{ marginBottom: '15px', color: '#000' }}><strong>3. Dos Honorários, das Condições de Pagamento e Despesas</strong></div>
+          <div style={{ marginBottom: '15px', color: '#000' }}><strong>4. Prazo e Cronograma de Execução dos Serviços</strong></div>
+          <div style={{ marginBottom: '15px', color: '#000' }}><strong>5. Experiência em atuação em favor de Municípios e da Equipe Responsável</strong></div>
+          <div style={{ marginBottom: '15px', color: '#000' }}><strong>6. Disposições Finais</strong></div>
         </div>
       </Page>
 
       <Page pageNumber={3} FooterComponent={FooterComp}>
-        <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#227056', borderBottom: '2px solid #227056', paddingBottom: '8px', marginBottom: '20px' }}>1. Objeto da Proposta</h2>
-        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', marginBottom: '20px' }}>
-          É objeto da presente proposta o desenvolvimento de serviços advocatícios especializados por parte da Proponente ao Aceitante, Município de <strong>{options.municipio || "[MUNICÍPIO]"}</strong>, visando a prestação de assessoria técnica e jurídica nas áreas de Direito Público, Tributário, Econômico, Financeiro e Previdenciário.
+        <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#000', borderBottom: '1px solid #000', paddingBottom: '8px', marginBottom: '20px' }}>1. Objeto da Proposta</h2>
+        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', marginBottom: '20px', color: '#000' }}>
+          É objeto do presente contrato o desenvolvimento de serviços advocatícios especializados por parte da Proponente, Cavalcante Reis Advogados, ao Aceitante, Município de <strong>{options.municipio || "[MUNICÍPIO]"}</strong>, a fim de prestação de serviços de assessoria técnica e jurídica nas áreas de Direito Público, Tributário, Econômico, Financeiro, Previdenciário, atuando perante o Ministério da Fazenda e os seus órgãos administrativos, em especial para alcançar o incremento de receitas, ficando responsável pelo ajuizamento, acompanhamento e eventuais intervenções de terceiro em ações de interesse do Município.
         </p>
-        <table className="proposal-table" style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #227056' }}>
+
+        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', marginBottom: '15px', color: '#000' }}>
+          A proposta inclui os seguintes objetos:
+        </p>
+
+        <table className="proposal-table" style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #000', marginBottom: '20px' }}>
           <thead>
-            <tr style={{ background: '#f0f7f4' }}>
-              <th style={{ border: '1px solid #227056', padding: '10px', fontSize: '12px', color: '#227056' }}>TESE / SERVIÇO</th>
-              <th style={{ border: '1px solid #227056', padding: '10px', fontSize: '12px', color: '#227056', textAlign: 'center' }}>CABIMENTO</th>
+            <tr style={{ background: '#f9f9f9' }}>
+              <th style={{ border: '1px solid #000', padding: '10px', fontSize: '12px', color: '#000', fontWeight: 'bold' }}>TESE</th>
+              <th style={{ border: '1px solid #000', padding: '10px', fontSize: '12px', color: '#000', textAlign: 'center', fontWeight: 'bold' }}>CABIMENTO</th>
             </tr>
           </thead>
           <tbody>
             {activeServices.map(k => (
               <tr key={k}>
-                <td style={{ border: '1px solid #227056', padding: '8px', fontSize: '11px' }}><strong>{allServices[k]}</strong></td>
-                <td style={{ border: '1px solid #227056', padding: '8px', fontSize: '11px', textAlign: 'center' }}>{customCabimentos[k] || "Cabível"}</td>
+                <td style={{ border: '1px solid #000', padding: '8px', fontSize: '11px', color: '#000' }}><strong>{allServices[k]}</strong></td>
+                <td style={{ border: '1px solid #000', padding: '8px', fontSize: '11px', textAlign: 'center', color: '#000' }}>{customCabimentos[k] || "Cabível"}</td>
               </tr>
             ))}
           </tbody>
         </table>
-      </Page>
 
-      {activeServices.map((k, i) => (
-        <Page key={k} pageNumber={4 + i} FooterComponent={FooterComp}>
-          {i === 0 && <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#227056', borderBottom: '2px solid #227056', paddingBottom: '8px', marginBottom: '25px' }}>2. Análise da Questão</h2>}
-          <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: '#227056', marginBottom: '15px', background: '#f9f9f9', padding: '8px', borderLeft: '4px solid #227056' }}>
-            2.{i + 1} – {allServices[k]}
-          </h3>
-          <div style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', color: '#333' }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(serviceTextDatabase[k] || "") }} />
-        </Page>
-      ))}
-
-      <Page pageNumber={4 + activeServices.length} FooterComponent={FooterComp}>
-        <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#227056', borderBottom: '2px solid #227056', paddingBottom: '8px', marginBottom: '20px' }}>3. Honorários e Condições de Pagamento</h2>
-        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6' }}>
-          Pelos serviços prestados, o Município pagará à Proponente, a título de honorários ad exitum, o valor de <strong>{paymentValue}</strong> por cada economia efetivamente recuperada ou compensada.
+        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', marginBottom: '15px', color: '#000' }}>
+          Além disso, a proposta também tem como objeto:
         </p>
 
-        <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#227056', borderBottom: '2px solid #227056', paddingBottom: '8px', marginTop: '40px', marginBottom: '20px' }}>4. Prazo e Cronograma de Execução</h2>
-        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6' }}>
-          O prazo estimado para a execução total dos serviços objeto desta proposta é de <strong>{prazo} meses</strong>, contados a partir da assinatura do contrato.
-        </p>
-      </Page>
-
-      <Page pageNumber={5 + activeServices.length} FooterComponent={FooterComp}>
-        <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#227056', borderBottom: '2px solid #227056', paddingBottom: '8px', marginBottom: '30px' }}>5. Experiência e Equipe Responsável</h2>
-        <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '30px' }}>
-          <div style={{ border: '1px solid #eee', padding: '10px', borderRadius: '8px' }}>
-            <img src="/munincipios01.png" style={{ width: '100%', height: 'auto' }} alt="Experiência 1" />
-          </div>
-          <div style={{ border: '1px solid #eee', padding: '10px', borderRadius: '8px' }}>
-            <img src="/Munincipios02.png" style={{ width: '100%', height: 'auto' }} alt="Experiência 2" />
-          </div>
+        <div style={{ fontSize: '13px', lineHeight: '1.8', color: '#000', marginBottom: '20px' }}>
+          <p style={{ marginBottom: '10px', textAlign: 'justify' }}>(i) Análise do caso concreto, com a elaboração dos estudos pertinentes ao Município de {options.municipio || "[MUNICÍPIO]"};</p>
+          <p style={{ marginBottom: '10px', textAlign: 'justify' }}>(ii) Análise e coleta dos documentos fornecidos pela municipalidade que irão gerar subsídios para os pleitos do incremento de receita relativo ao CFEM no critério de produção afetação e/ou limítrofe;</p>
+          <p style={{ marginBottom: '10px', textAlign: 'justify' }}>(iii) Ingresso de medida administrativa perante a ANM e/ou judicial, com posterior acompanhamento do processo durante sua tramitação, com realização de defesas, diligências, manifestação em razão de intimações, produção de provas, recursos e demais atos necessários ao deslinde dos feitos;</p>
+          <p style={{ marginBottom: '10px', textAlign: 'justify' }}>(iv) Atuação perante a Justiça Federal seja na condição de recorrente ou recorrido, bem como interposição de recursos ou apresentação de contrarrazões aos Tribunais Superiores, se necessário for;</p>
+          <p style={{ marginBottom: '10px', textAlign: 'justify' }}>(v) Acompanhamento processual completo, até o trânsito em Julgado da Sentença administrativa e/ou judicial;</p>
+          <p style={{ marginBottom: '10px', textAlign: 'justify' }}>(vi) Acompanhamento do cumprimento das medidas administrativas e/ou judiciais junto aos órgãos administrativos, sobretudo na ANM.</p>
         </div>
       </Page>
 
-      <Page pageNumber={6 + activeServices.length} FooterComponent={FooterComp}>
-        <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#227056', borderBottom: '2px solid #227056', paddingBottom: '8px', marginBottom: '40px' }}>6. Disposições Finais</h2>
-        <p style={{ textAlign: 'center', fontSize: '14px', marginBottom: '60px' }}>Brasília-DF, {options.data || new Date().toLocaleDateString('pt-BR')}.</p>
+      {serviceGroups.map((group, groupIndex) => {
+        const pageNumber = 4 + groupIndex;
+        const isFirstGroup = groupIndex === 0;
+        // Calcular o número da primeira seção deste grupo
+        let sectionStartNumber = 1;
+        for (let i = 0; i < groupIndex; i++) {
+          sectionStartNumber += serviceGroups[i].length;
+        }
 
-        <div style={{ textAlign: 'center' }}>
-          <p style={{ fontSize: '14px', marginBottom: '10px' }}>Atenciosamente,</p>
-          <img src="/Assinatura.png" style={{ width: '180px', margin: '10px auto' }} alt="Assinatura" />
-          <h3 style={{ fontWeight: 'bold', color: '#227056', fontSize: '16px', marginTop: '10px' }}>CAVALCANTE REIS ADVOGADOS</h3>
+        return (
+          <Page key={`group-${groupIndex}`} pageNumber={pageNumber} FooterComponent={FooterComp}>
+            {isFirstGroup && <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#000', borderBottom: '1px solid #000', paddingBottom: '8px', marginBottom: '25px' }}>2. Análise da Questão</h2>}
+            {group.map((serviceKey, itemIndex) => {
+              const currentSectionNumber = sectionStartNumber + itemIndex;
+              const isFirstInGroup = itemIndex === 0 && !isFirstGroup;
+
+              return (
+                <div key={serviceKey} style={{ marginBottom: itemIndex < group.length - 1 ? '30px' : '0' }}>
+                  <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: '#000', marginBottom: '15px', marginTop: (isFirstInGroup ? '0' : itemIndex === 0 ? '0' : '20px') }}>
+                    2.{currentSectionNumber} – {allServices[serviceKey]}
+                  </h3>
+                  <div style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', color: '#000' }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(serviceTextDatabase[serviceKey] || "") }} />
+                </div>
+              );
+            })}
+          </Page>
+        );
+      })}
+
+      <Page pageNumber={4 + activeServices.length} FooterComponent={FooterComp}>
+        <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#000', borderBottom: '1px solid #000', paddingBottom: '8px', marginBottom: '20px' }}>3. Dos Honorários, das Condições de Pagamento e Despesas</h2>
+
+        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', color: '#000', marginBottom: '20px' }}>
+          Os valores levantados a título de incremento são provisórios, baseados em informações preliminares, podendo, ao final, representar valores a maior ou a menor.
+        </p>
+
+        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', color: '#000', marginBottom: '20px' }}>
+          Considerando a necessidade de manutenção do equilíbrio econômico-financeiro do contrato administrativo, propõe o escritório CAVALCANTE REIS ADVOGADOS que esta Municipalidade pague ao Proponente da seguinte forma:
+        </p>
+
+        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', color: '#000', marginBottom: '15px' }}>
+          <strong>3.1.1.</strong> Para todos os demais itens descritos nesta Proposta será efetuado o pagamento de honorários advocatícios à CAVALCANTE REIS ADVOGADOS pela execução dos serviços de recuperação de créditos, <strong>ad êxito</strong> na ordem de <strong>R$ 0,12 (doze centavos)</strong> para cada R$ 1,00 (um real) do montante referente ao incremento financeiro, ou seja, com base nos valores que entrarem nos cofres do CONTRATANTE;
+        </p>
+
+        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', color: '#000', marginBottom: '15px' }}>
+          <strong>3.1.2.</strong> Em caso de valores retroativos recuperados em favor da municipalidade, que consiste nos valores não repassados em favor do Contratante nos últimos 5 (cinco) anos (prescrição quinquenal) ou não abarcados pela prescrição, também serão cobrados honorários advocatícios na ordem de <strong>R$ 0,12 (doze centavos)</strong> para cada R$ 1,00 (um real) do montante recuperado aos Cofres Municipais.
+        </p>
+
+        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', color: '#000', marginBottom: '20px' }}>
+          <strong>3.1.3.</strong> Sendo um contrato <strong>AD EXITUM</strong>, acaso o incremento financeiro em favor deste Município supere o valor mencionado na cláusula que trata do valor do contrato, os desembolsos não poderão ser previstos por dotação orçamentária, posto que terão origem na <strong>REDUÇÃO DE DESPESAS/INCREMENTO DE RECEITAS</strong>, como consequência da prestação dos serviços.
+        </p>
+
+        <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#000', borderBottom: '1px solid #000', paddingBottom: '8px', marginTop: '40px', marginBottom: '20px' }}>4. Prazo e Cronograma de Execução dos Serviços</h2>
+        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', color: '#000' }}>
+          O prazo de execução será de <strong>{prazo} (vinte e quatro) meses</strong> ou pelo tempo que perdurar os processos judiciais, podendo ser prorrogado por interesse das partes, com base no art. 107 da Lei n.º 14.133/21.
+        </p>
+      </Page>
+
+      <Page pageNumber={5 + serviceGroups.length} FooterComponent={FooterComp}>
+        <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#000', borderBottom: '1px solid #000', paddingBottom: '8px', marginBottom: '20px' }}>5. Experiência em atuação em favor de Municípios e da Equipe Responsável</h2>
+        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', color: '#000', marginBottom: '20px' }}>
+          No portfólio de serviços executados e/ou em execução, constam os seguintes Municípios contratantes:
+        </p>
+
+        {/* Imagens das duas páginas de municípios - menores */}
+        <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '30px' }}>
+          <img src="/munincipios01.png" style={{ maxWidth: '60%', height: 'auto', margin: '0 auto' }} alt="Municípios 1" crossOrigin="anonymous" />
+          <img src="/Munincipios02.png" style={{ maxWidth: '60%', height: 'auto', margin: '0 auto' }} alt="Municípios 2" crossOrigin="anonymous" />
+        </div>
+
+        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', color: '#000', marginBottom: '20px' }}>
+          Para coordenar os trabalhos de consultoria propostos neste documento, a CAVALCANTE REIS ADVOGADOS alocará os seguintes profissionais:
+        </p>
+
+        <div style={{ fontSize: '12px', lineHeight: '1.8', color: '#000', marginBottom: '15px' }}>
+          <p style={{ fontWeight: 'bold', marginBottom: '5px' }}>IURI DO LAGO NOGUEIRA CAVALCANTE REIS</p>
+          <p style={{ marginBottom: '10px', textAlign: 'justify' }}>
+            Doutorando em Direito e Mestre em Direito Econômico e Desenvolvimento pelo Instituto Brasileiro de Ensino, Desenvolvimento e Pesquisa (IDP/Brasília). LLM (Master of Laws) em Direito Empresarial pela Fundação Getúlio Vargas (FGV/RJ). Integrante da Comissão de Juristas do Senado Federal criada para consolidar a proposta do novo Código Comercial Brasileiro. Autor e Coautor de livros, pareceres e artigos jurídicos na área do direito público. Sócio-diretor do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: iuri@cavalcantereis.adv.br).
+          </p>
+
+          <p style={{ fontWeight: 'bold', marginBottom: '5px' }}>PEDRO AFONSO FIGUEIREDO DE SOUZA</p>
+          <p style={{ marginBottom: '10px', textAlign: 'justify' }}>
+            Graduado em Direito pela Pontifícia Universidade Católica de Minas Gerais. Especialista em Direito Penal e Processo Penal pela Academia Brasileira de Direito Constitucional. Mestre em Direito nas Relações Econômicas e Sociais pela Faculdade de Direito Milton Campos. Diretor de Comunicação e Conselheiro Consultivo, Científico e Fiscal do Instituto de Ciências Penais. Autor de artigos e capítulos de livros jurídicos. Advogado associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: pedro@cavalcantereis.adv.br).
+          </p>
+
+          <p style={{ fontWeight: 'bold', marginBottom: '5px' }}>SÉRGIO RICARDO ALVES DE JESUS FILHO</p>
+          <p style={{ marginBottom: '10px', textAlign: 'justify' }}>
+            Graduado em Direito pelo Centro Universitário de Brasília (UniCEUB). Graduando em Ciências Contábeis pelo Centro Universitário de Brasília (UniCEUB). Pós-graduando em Direito Tributário pelo Instituto Brasileiro de Ensino, Desenvolvimento e Pesquisa (IDP). Membro da Comissão de Assuntos Tributários da OAB/DF. Advogado Associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: sergio@cavalcantereis.adv.br).
+          </p>
+
+          <p style={{ fontWeight: 'bold', marginBottom: '5px' }}>GABRIEL GAUDÊNCIO ZANCHETTA CALIMAN</p>
+          <p style={{ marginBottom: '10px', textAlign: 'justify' }}>
+            Graduado em Direito pelo Centro Universitário de Brasília (UniCeub). Especialista em Gestão Pública e Tributária pelo Gran Centro Universitário. Membro da Comissão de Assuntos Tributários da OAB/DF. Advogado associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: gabrielcaliman@cavalcantereis.adv.br).
+          </p>
+
+          <p style={{ fontWeight: 'bold', marginBottom: '5px' }}>FELIPE NOBREGA ROCHA</p>
+          <p style={{ marginBottom: '10px', textAlign: 'justify' }}>
+            Graduado em Direito pela Universidade Presbiteriana Mackenzie. LLM (Master of Laws) em Direito Empresarial pela Fundação Getúlio Vargas (FGV). Mestrado Profissional em Direito pelo Instituto Brasileiro de Ensino, Desenvolvimento e Pesquisa (IDP). Advogado associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: felipe@cavalcantereis.adv.br).
+          </p>
+
+          <p style={{ fontWeight: 'bold', marginBottom: '5px' }}>RYSLHAINY DOS SANTOS CORDEIRO</p>
+          <p style={{ marginBottom: '10px', textAlign: 'justify' }}>
+            Graduada em Direito pelo Centro Universitário ICESP. Pós-graduada em Direito Civil e Processo Civil, Direito Tributário e Processo Tributário e Planejamento Tributário pela Faculdade Legale. Advogada associada do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: ryslhainy@cavalcantereis.adv.br).
+          </p>
+        </div>
+
+        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', color: '#000', marginTop: '20px', marginBottom: '10px' }}>
+          Além desses profissionais, a CAVALCANTE REIS ADVOGADOS alocará uma equipe de profissionais pertencentes ao seu quadro técnico, utilizando, também, caso necessário, o apoio técnico especializado de terceiros, pessoas físicas ou jurídicas, que deverão atuar sob sua orientação, cabendo à CAVALCANTE REIS ADVOGADOS a responsabilidade técnica pela execução das tarefas.
+        </p>
+
+        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', color: '#000' }}>
+          Nossa contratação, portanto, devido à altíssima qualificação e experiência, aliada à singularidade do objeto da demanda, bem como os diferenciais já apresentados acima, está inserida dentre as hipóteses do art. 6°, XVIII "e" e art. 74, III, "e", da Lei n.º 14.133/2021.
+        </p>
+      </Page>
+
+      <Page pageNumber={6 + serviceGroups.length} FooterComponent={FooterComp}>
+        <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#000', borderBottom: '1px solid #000', paddingBottom: '8px', marginBottom: '20px' }}>6. Disposições Finais</h2>
+        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', color: '#000', marginBottom: '15px' }}>
+          Nesse sentido, ficamos no aguardo da manifestação deste Município para promover os ajustes contratuais que entenderem necessários, sendo mantida a mesma forma de remuneração aqui proposta, com fundamento no art. 6º, XVIII, "e" e art. 74, III, "e", da Lei n.º 14.133/2021.
+        </p>
+        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', color: '#000', marginBottom: '15px' }}>
+          A presente proposta tem validade de 60 (sessenta) dias.
+        </p>
+        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', color: '#000', marginBottom: '40px' }}>
+          Sendo o que se apresenta para o momento, aguardamos posicionamento da parte de V. Exa., colocando-nos, desde já, à inteira disposição para dirimir quaisquer dúvidas eventualmente existentes.
+        </p>
+
+        <p style={{ textAlign: 'right', fontSize: '14px', marginBottom: '20px', color: '#000' }}>Brasília-DF, {options.data || new Date().toLocaleDateString('pt-BR')}.</p>
+
+        <div style={{ textAlign: 'right', marginBottom: '20px' }}>
+          <p style={{ fontSize: '14px', marginBottom: '10px', color: '#000' }}>Atenciosamente,</p>
+        </div>
+
+        <div style={{ textAlign: 'center', marginTop: '40px' }}>
+          <img src="/Assinatura.png" style={{ width: '180px', margin: '10px auto' }} alt="Assinatura" crossOrigin="anonymous" />
+          <h3 style={{ fontWeight: 'bold', color: '#000', fontSize: '16px', marginTop: '10px' }}>CAVALCANTE REIS ADVOGADOS</h3>
         </div>
       </Page>
     </div>
@@ -573,50 +760,273 @@ export default function ProposalGenerator({ onBackToHome, onLogout }: ProposalGe
     am: { enabled: true, cidade: "Manaus - AM", linha1: "Rua Silva Ramos, 78 - Centro", linha2: "Manaus, AM", linha3: "CEP: 69010-180" }
   });
   const [rppsImage, setRppsImage] = useState<string | null>(null);
-  const [paymentValue, setPaymentValue] = useState("R$ 0,20 (vinte centavos)");
+  const [paymentValue, setPaymentValue] = useState("R$ 0,12 (doze centavos)");
   const [savedProposals, setSavedProposals] = useState<any[]>([]);
   const [loadingPdf, setLoadingPdf] = useState(false);
   const [loadingDocx, setLoadingDocx] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const [modal, setModal] = useState<any>({ open: false, title: "", message: "", type: "info" });
 
+  // Função para deletar propostas expiradas
+  const deleteExpiredProposals = () => {
+    const saved = localStorage.getItem("savedPropostas");
+    if (!saved) return [];
+
+    const proposals = JSON.parse(saved);
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
+    const validProposals = proposals.filter((p: any) => {
+      const createdAt = new Date(p.createdAt);
+      return createdAt > oneYearAgo;
+    });
+
+    if (validProposals.length !== proposals.length) {
+      localStorage.setItem("savedPropostas", JSON.stringify(validProposals));
+    }
+
+    return validProposals;
+  };
+
   useEffect(() => {
+    // Deletar propostas expiradas ao carregar
+    const validProposals = deleteExpiredProposals();
+    setSavedProposals(validProposals);
+
     // Simular loading inicial
     setTimeout(() => setIsLoading(false), 800);
-
-    // Carregar propostas salvas
-    const saved = localStorage.getItem("savedPropostas");
-    if (saved) setSavedProposals(JSON.parse(saved));
   }, []);
 
   const handleSaveProposal = () => {
-    const newProp = { id: Date.now(), municipio: options.municipio, data: options.data, services, customCabimentos, createdAt: new Date().toISOString() };
+    const newProp = {
+      id: Date.now(),
+      municipio: options.municipio,
+      data: options.data,
+      services,
+      customCabimentos,
+      createdAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString() // 1 ano
+    };
     const updated = [...savedProposals, newProp];
     setSavedProposals(updated);
     localStorage.setItem("savedPropostas", JSON.stringify(updated));
-    setModal({ open: true, title: "Sucesso", message: "Proposta salva localmente!", type: "success" });
+    setModal({ open: true, title: "Sucesso", message: "Proposta salva localmente! Ela será deletada automaticamente em 1 ano.", type: "success" });
   };
 
   const handleDownloadPdf = async () => {
+    // Validação
+    if (!options.municipio || !options.municipio.trim()) {
+      setModal({
+        open: true,
+        title: "Atenção",
+        message: "Por favor, preencha o nome do município.",
+        type: "error"
+      });
+      return;
+    }
+
+    if (!options.destinatario || !options.destinatario.trim()) {
+      setModal({
+        open: true,
+        title: "Atenção",
+        message: "Por favor, preencha o destinatário.",
+        type: "error"
+      });
+      return;
+    }
+
+    if (!options.data || !options.data.trim()) {
+      setModal({
+        open: true,
+        title: "Atenção",
+        message: "Por favor, preencha a data da proposta.",
+        type: "error"
+      });
+      return;
+    }
+
+    const activeServicesList = Object.keys(services).filter(k => services[k]);
+    if (activeServicesList.length === 0) {
+      setModal({
+        open: true,
+        title: "Atenção",
+        message: "Por favor, selecione pelo menos uma tese/serviço.",
+        type: "error"
+      });
+      return;
+    }
+
     setLoadingPdf(true);
     const container = document.getElementById("preview");
-    if (!container) return;
+    if (!container) {
+      setModal({
+        open: true,
+        title: "Erro",
+        message: "Container de preview não encontrado.",
+        type: "error"
+      });
+      setLoadingPdf(false);
+      return;
+    }
+
     try {
+      // Função para garantir que todas as imagens estejam carregadas
+      const waitForImages = (element: HTMLElement): Promise<void> => {
+        return new Promise((resolve) => {
+          const images = element.querySelectorAll('img');
+          if (images.length === 0) {
+            resolve();
+            return;
+          }
+
+          let loadedCount = 0;
+          const totalImages = images.length;
+
+          const checkComplete = () => {
+            loadedCount++;
+            if (loadedCount === totalImages) {
+              resolve();
+            }
+          };
+
+          images.forEach((img) => {
+            if (img.complete) {
+              checkComplete();
+            } else {
+              img.onload = checkComplete;
+              img.onerror = checkComplete; // Continua mesmo se houver erro na imagem
+            }
+          });
+
+          // Timeout de segurança
+          setTimeout(resolve, 3000);
+        });
+      };
+
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pages = container.querySelectorAll('.pdf-page-render');
-      for (let i = 0; i < pages.length; i++) {
-        if (i > 0) pdf.addPage();
-        const canvas = await html2canvas(pages[i] as HTMLElement, { scale: 2 });
-        pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, 210, 297);
+
+      if (pages.length === 0) {
+        setModal({
+          open: true,
+          title: "Erro",
+          message: "Nenhuma página encontrada para gerar o PDF.",
+          type: "error"
+        });
+        setLoadingPdf(false);
+        return;
       }
+
+      // Aguardar imagens carregarem
+      for (let i = 0; i < pages.length; i++) {
+        await waitForImages(pages[i] as HTMLElement);
+      }
+
+      // Aguardar um pouco mais para garantir renderização completa
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      for (let i = 0; i < pages.length; i++) {
+        if (i > 0) {
+          pdf.addPage();
+        }
+
+        const pageElement = pages[i] as HTMLElement;
+
+        try {
+          const canvas = await html2canvas(pageElement, {
+            scale: 2,
+            useCORS: true,
+            allowTaint: false,
+            logging: false,
+            backgroundColor: '#ffffff',
+            width: pageElement.scrollWidth || 794, // 210mm em pixels (210mm * 3.779527559 = ~794px)
+            height: pageElement.scrollHeight || 1123, // 297mm em pixels
+            windowWidth: pageElement.scrollWidth || 794,
+            windowHeight: pageElement.scrollHeight || 1123,
+          });
+
+          const imgData = canvas.toDataURL('image/jpeg', 0.95);
+          const imgWidth = 210; // A4 width in mm
+          const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+          // Limitar altura máxima para A4
+          const maxHeight = 297; // A4 height in mm
+          if (imgHeight > maxHeight) {
+            const ratio = maxHeight / imgHeight;
+            pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth * ratio, maxHeight);
+          } else {
+            pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+          }
+        } catch (pageError) {
+          console.error(`Erro ao processar página ${i + 1}:`, pageError);
+          // Continua para próxima página mesmo se uma falhar
+        }
+      }
+
       pdf.save(`Proposta_${options.municipio || "CR"}.pdf`);
-    } catch (e) {
-      console.error(e);
+
+      setModal({
+        open: true,
+        title: "Sucesso",
+        message: "PDF gerado e baixado com sucesso!",
+        type: "success"
+      });
+    } catch (e: any) {
+      console.error('Erro ao gerar PDF:', e);
+      setModal({
+        open: true,
+        title: "Erro",
+        message: `Erro ao gerar o PDF: ${e.message || 'Erro desconhecido'}. Tente novamente.`,
+        type: "error"
+      });
+    } finally {
+      setLoadingPdf(false);
     }
-    setLoadingPdf(false);
   };
 
   const handleDownloadDocx = async () => {
+    // Validação
+    if (!options.municipio || !options.municipio.trim()) {
+      setModal({
+        open: true,
+        title: "Atenção",
+        message: "Por favor, preencha o nome do município.",
+        type: "error"
+      });
+      return;
+    }
+
+    if (!options.destinatario || !options.destinatario.trim()) {
+      setModal({
+        open: true,
+        title: "Atenção",
+        message: "Por favor, preencha o destinatário.",
+        type: "error"
+      });
+      return;
+    }
+
+    if (!options.data || !options.data.trim()) {
+      setModal({
+        open: true,
+        title: "Atenção",
+        message: "Por favor, preencha a data da proposta.",
+        type: "error"
+      });
+      return;
+    }
+
+    const activeServicesList = Object.keys(services).filter(k => services[k]);
+    if (activeServicesList.length === 0) {
+      setModal({
+        open: true,
+        title: "Atenção",
+        message: "Por favor, selecione pelo menos uma tese/serviço.",
+        type: "error"
+      });
+      return;
+    }
+
     setLoadingDocx(true);
     try {
       const payload = {
@@ -624,25 +1034,52 @@ export default function ProposalGenerator({ onBackToHome, onLogout }: ProposalGe
         data: options.data,
         prazo,
         paymentValue,
-        services: Object.keys(services).filter(k => services[k]).map(k => ({
+        services: activeServicesList.map(k => ({
           label: allServices[k],
           content: serviceTextDatabase[k],
           cabimento: customCabimentos[k] || "Cabível"
         })),
         footerOffices
       };
-      const response = await fetch("http://localhost:3001/documents/generate-docx", {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${apiUrl}/documents/generate-docx`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        let errorMessage = "Erro ao gerar o documento.";
+        try {
+          const errorJson = JSON.parse(errorText);
+          errorMessage = errorJson.message || errorMessage;
+        } catch {
+          errorMessage = errorText || errorMessage;
+        }
+        throw new Error(errorMessage);
+      }
+
       const blob = await response.blob();
       saveAs(blob, `Proposta_${options.municipio || "CR"}.docx`);
-    } catch (e) {
+
+      setModal({
+        open: true,
+        title: "Sucesso",
+        message: "DOCX gerado e baixado com sucesso!",
+        type: "success"
+      });
+    } catch (e: any) {
       console.error(e);
-      setModal({ open: true, title: "Erro", message: "Erro ao conectar com o backend.", type: "error" });
+      setModal({
+        open: true,
+        title: "Erro",
+        message: `Erro ao gerar DOCX: ${e.message || 'Erro desconhecido'}. Verifique se o backend está rodando.`,
+        type: "error"
+      });
+    } finally {
+      setLoadingDocx(false);
     }
-    setLoadingDocx(false);
   };
 
   if (isLoading) {

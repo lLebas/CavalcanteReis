@@ -128,7 +128,7 @@ export class DocumentsService {
             spacing: { before: 200 },
             children: [
               new TextRun({
-                text: 'w w w . c a v a l c a n t e r e i s . a d v . b r',
+                text: 'www.cavalcante-reis.adv.br',
                 bold: true,
                 font: defaultFont,
                 size: 18,
@@ -143,12 +143,17 @@ export class DocumentsService {
     const docChildren = [];
 
     // --- PÁGINA 1: CAPA ---
+    if (logoBuffer) {
+      docChildren.push(
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 2000, after: 1000 },
+          children: [new ImageRun({ data: logoBuffer, transformation: { width: 166, height: 87 } })],
+        })
+      );
+    }
+    
     docChildren.push(
-      new Paragraph({
-        alignment: AlignmentType.CENTER,
-        spacing: { before: 2000, after: 1000 },
-        children: [new ImageRun({ data: logoBuffer, transformation: { width: 166, height: 87 } })],
-      }),
       new Paragraph({
         alignment: AlignmentType.RIGHT,
         spacing: { before: 3000 },
@@ -170,9 +175,8 @@ export class DocumentsService {
     // --- PÁGINA 2: SUMÁRIO ---
     docChildren.push(
       new Paragraph({
-        alignment: AlignmentType.CENTER,
-        spacing: { after: 500 },
-        children: [new TextRun({ text: 'SUMÁRIO', bold: true, font: defaultFont, size: 36 })],
+        spacing: { after: 300 },
+        children: [new TextRun({ text: 'Sumário', bold: true, font: defaultFont, size: titleSize })],
       }),
       new Paragraph({ spacing: { before: 200 }, children: [new TextRun({ text: '1. Objeto da Proposta', bold: true, font: defaultFont, size: 26 })] }),
       new Paragraph({ spacing: { before: 200 }, children: [new TextRun({ text: '2. Análise da Questão', bold: true, font: defaultFont, size: 26 })] }),
@@ -192,10 +196,21 @@ export class DocumentsService {
       }),
       new Paragraph({
         alignment: AlignmentType.JUSTIFIED,
-        spacing: { before: 200 },
+        spacing: { before: 200, after: 200 },
         children: [
           new TextRun({
-            text: `É objeto do presente contrato o desenvolvimento de serviços advocatícios especializados por parte da Proponente ao Aceitante, Município de ${municipio}, a fim de prestação de serviços de assessoria técnica e jurídica nas áreas de Direito Público, Tributário, Econômico, Financeiro, Minerário e Previdenciário.`,
+            text: `É objeto do presente contrato o desenvolvimento de serviços advocatícios especializados por parte da Proponente, Cavalcante Reis Advogados, ao Aceitante, Município de ${municipio}, a fim de prestação de serviços de assessoria técnica e jurídica nas áreas de Direito Público, Tributário, Econômico, Financeiro, Previdenciário, atuando perante o Ministério da Fazenda e os seus órgãos administrativos, em especial para alcançar o incremento de receitas, ficando responsável pelo ajuizamento, acompanhamento e eventuais intervenções de terceiro em ações de interesse do Município.`,
+            font: defaultFont,
+            size: defaultSize,
+          }),
+        ],
+      }),
+      new Paragraph({
+        alignment: AlignmentType.JUSTIFIED,
+        spacing: { before: 200, after: 200 },
+        children: [
+          new TextRun({
+            text: 'A proposta inclui os seguintes objetos:',
             font: defaultFont,
             size: defaultSize,
           }),
@@ -227,6 +242,81 @@ export class DocumentsService {
       new Table({
         width: { size: 100, type: WidthType.PERCENTAGE },
         rows: tableRows,
+      }),
+      new Paragraph({
+        alignment: AlignmentType.JUSTIFIED,
+        spacing: { before: 200, after: 200 },
+        children: [
+          new TextRun({
+            text: 'Além disso, a proposta também tem como objeto:',
+            font: defaultFont,
+            size: defaultSize,
+          }),
+        ],
+      }),
+      new Paragraph({
+        alignment: AlignmentType.JUSTIFIED,
+        spacing: { before: 100 },
+        children: [
+          new TextRun({ text: '(i) Análise do caso concreto, com a elaboração dos estudos pertinentes ao Município de ', font: defaultFont, size: defaultSize }),
+          new TextRun({ text: municipio, font: defaultFont, size: defaultSize, bold: true }),
+          new TextRun({ text: ';', font: defaultFont, size: defaultSize }),
+        ],
+      }),
+      new Paragraph({
+        alignment: AlignmentType.JUSTIFIED,
+        spacing: { before: 100 },
+        children: [
+          new TextRun({
+            text: '(ii) Análise e coleta dos documentos fornecidos pela municipalidade que irão gerar subsídios para os pleitos do incremento de receita relativo ao CFEM no critério de produção afetação e/ou limítrofe;',
+            font: defaultFont,
+            size: defaultSize,
+          }),
+        ],
+      }),
+      new Paragraph({
+        alignment: AlignmentType.JUSTIFIED,
+        spacing: { before: 100 },
+        children: [
+          new TextRun({
+            text: '(iii) Ingresso de medida administrativa perante a ANM e/ou judicial, com posterior acompanhamento do processo durante sua tramitação, com realização de defesas, diligências, manifestação em razão de intimações, produção de provas, recursos e demais atos necessários ao deslinde dos feitos;',
+            font: defaultFont,
+            size: defaultSize,
+          }),
+        ],
+      }),
+      new Paragraph({
+        alignment: AlignmentType.JUSTIFIED,
+        spacing: { before: 100 },
+        children: [
+          new TextRun({
+            text: '(iv) Atuação perante a Justiça Federal seja na condição de recorrente ou recorrido, bem como interposição de recursos ou apresentação de contrarrazões aos Tribunais Superiores, se necessário for;',
+            font: defaultFont,
+            size: defaultSize,
+          }),
+        ],
+      }),
+      new Paragraph({
+        alignment: AlignmentType.JUSTIFIED,
+        spacing: { before: 100 },
+        children: [
+          new TextRun({
+            text: '(v) Acompanhamento processual completo, até o trânsito em Julgado da Sentença administrativa e/ou judicial;',
+            font: defaultFont,
+            size: defaultSize,
+          }),
+        ],
+      }),
+      new Paragraph({
+        alignment: AlignmentType.JUSTIFIED,
+        spacing: { before: 100 },
+        children: [
+          new TextRun({
+            text: '(vi) Acompanhamento do cumprimento das medidas administrativas e/ou judiciais junto aos órgãos administrativos, sobretudo na ANM.',
+            font: defaultFont,
+            size: defaultSize,
+          }),
+        ],
       }),
       new Paragraph({ children: [new PageBreak()] })
     );
@@ -264,7 +354,79 @@ export class DocumentsService {
       }),
       new Paragraph({
         alignment: AlignmentType.JUSTIFIED,
-        children: [new TextRun({ text: `O Município pagará à Proponente o valor de ${paymentValue} por cada economia recuperada.`, font: defaultFont, size: defaultSize })],
+        spacing: { before: 200, after: 200 },
+        children: [
+          new TextRun({
+            text: 'Os valores levantados a título de incremento são provisórios, baseados em informações preliminares, podendo, ao final, representar valores a maior ou a menor.',
+            font: defaultFont,
+            size: defaultSize,
+          }),
+        ],
+      }),
+      new Paragraph({
+        alignment: AlignmentType.JUSTIFIED,
+        spacing: { before: 200, after: 200 },
+        children: [
+          new TextRun({
+            text: 'Considerando a necessidade de manutenção do equilíbrio econômico-financeiro do contrato administrativo, propõe o escritório CAVALCANTE REIS ADVOGADOS que esta Municipalidade pague ao Proponente da seguinte forma:',
+            font: defaultFont,
+            size: defaultSize,
+          }),
+        ],
+      }),
+      new Paragraph({
+        alignment: AlignmentType.JUSTIFIED,
+        spacing: { before: 200, after: 200 },
+        children: [
+          new TextRun({ text: '3.1.1. ', font: defaultFont, size: defaultSize, bold: true }),
+          new TextRun({
+            text: 'Para todos os demais itens descritos nesta Proposta será efetuado o pagamento de honorários advocatícios à CAVALCANTE REIS ADVOGADOS pela execução dos serviços de recuperação de créditos, ',
+            font: defaultFont,
+            size: defaultSize,
+          }),
+          new TextRun({ text: 'ad êxito', font: defaultFont, size: defaultSize, bold: true }),
+          new TextRun({
+            text: ` na ordem de R$ 0,12 (doze centavos) para cada R$ 1,00 (um real) do montante referente ao incremento financeiro, ou seja, com base nos valores que entrarem nos cofres do CONTRATANTE;`,
+            font: defaultFont,
+            size: defaultSize,
+          }),
+        ],
+      }),
+      new Paragraph({
+        alignment: AlignmentType.JUSTIFIED,
+        spacing: { before: 200, after: 200 },
+        children: [
+          new TextRun({ text: '3.1.2. ', font: defaultFont, size: defaultSize, bold: true }),
+          new TextRun({
+            text: 'Em caso de valores retroativos recuperados em favor da municipalidade, que consiste nos valores não repassados em favor do Contratante nos últimos 5 (cinco) anos (prescrição quinquenal) ou não abarcados pela prescrição, também serão cobrados honorários advocatícios na ordem de R$ 0,12 (doze centavos) para cada R$ 1,00 (um real) do montante recuperado aos Cofres Municipais.',
+            font: defaultFont,
+            size: defaultSize,
+          }),
+        ],
+      }),
+      new Paragraph({
+        alignment: AlignmentType.JUSTIFIED,
+        spacing: { before: 200, after: 200 },
+        children: [
+          new TextRun({ text: '3.1.3. ', font: defaultFont, size: defaultSize, bold: true }),
+          new TextRun({
+            text: 'Sendo um contrato ',
+            font: defaultFont,
+            size: defaultSize,
+          }),
+          new TextRun({ text: 'AD EXITUM', font: defaultFont, size: defaultSize, bold: true }),
+          new TextRun({
+            text: ', acaso o incremento financeiro em favor deste Município supere o valor mencionado na cláusula que trata do valor do contrato, os desembolsos não poderão ser previstos por dotação orçamentária, posto que terão origem na ',
+            font: defaultFont,
+            size: defaultSize,
+          }),
+          new TextRun({ text: 'REDUÇÃO DE DESPESAS/INCREMENTO DE RECEITAS', font: defaultFont, size: defaultSize, bold: true }),
+          new TextRun({
+            text: ', como consequência da prestação dos serviços.',
+            font: defaultFont,
+            size: defaultSize,
+          }),
+        ],
       }),
       new Paragraph({ children: [new PageBreak()] }),
 
@@ -275,7 +437,10 @@ export class DocumentsService {
       }),
       new Paragraph({
         alignment: AlignmentType.JUSTIFIED,
-        children: [new TextRun({ text: `O prazo de execução será de ${prazo} meses.`, font: defaultFont, size: defaultSize })],
+        children: [
+          new TextRun({ text: `O prazo de execução será de ${prazo} (vinte e quatro) meses`, font: defaultFont, size: defaultSize, bold: true }),
+          new TextRun({ text: ' ou pelo tempo que perdurar os processos judiciais, podendo ser prorrogado por interesse das partes, com base no art. 107 da Lei n.º 14.133/21.', font: defaultFont, size: defaultSize }),
+        ],
       }),
       new Paragraph({ children: [new PageBreak()] }),
 
@@ -284,15 +449,15 @@ export class DocumentsService {
         border: { bottom: { color: '000000', space: 1, style: BorderStyle.SINGLE, size: 6 } },
         children: [new TextRun({ text: '5. Experiência e Equipe Responsável', bold: true, font: defaultFont, size: titleSize })],
       }),
-      new Paragraph({
+      ...(mun01Buffer ? [new Paragraph({
         alignment: AlignmentType.CENTER,
         children: [new ImageRun({ data: mun01Buffer, transformation: { width: 500, height: 250 } })],
-      }),
-      new Paragraph({
+      })] : []),
+      ...(mun02Buffer ? [new Paragraph({
         alignment: AlignmentType.CENTER,
         spacing: { before: 400 },
         children: [new ImageRun({ data: mun02Buffer, transformation: { width: 500, height: 180 } })],
-      }),
+      })] : []),
       new Paragraph({ children: [new PageBreak()] }),
 
       new Paragraph({
@@ -308,11 +473,11 @@ export class DocumentsService {
           new TextRun({ break: 2, text: 'Atenciosamente,', font: defaultFont, size: defaultSize }),
         ],
       }),
-      new Paragraph({
+      ...(assinaturaBuffer ? [new Paragraph({
         alignment: AlignmentType.CENTER,
         spacing: { before: 400 },
         children: [new ImageRun({ data: assinaturaBuffer, transformation: { width: 180, height: 60 } })],
-      }),
+      })] : []),
       new Paragraph({
         alignment: AlignmentType.CENTER,
         children: [new TextRun({ text: 'CAVALCANTE REIS ADVOGADOS', bold: true, font: defaultFont, size: 24 })],
