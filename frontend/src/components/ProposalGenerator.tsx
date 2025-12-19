@@ -415,8 +415,8 @@ const ProposalDocument = ({ options, prazo, services, customCabimentos, customEs
   };
 
   const Page = ({ children, pageNumber, isCover = false, FooterComponent }: any) => (
-    <div className="pdf-page-render" data-page={pageNumber} style={{ 
-      boxShadow: '0 0 20px rgba(0,0,0,0.1)', 
+    <div className="pdf-page-render" data-page={pageNumber} style={{
+      boxShadow: '0 0 20px rgba(0,0,0,0.1)',
       margin: '0 auto 30px',
       background: 'white',
       padding: '20mm 20mm 15mm 25mm'
@@ -431,11 +431,11 @@ const ProposalDocument = ({ options, prazo, services, customCabimentos, customEs
         <FooterComponent />
       </div>
       {pageNumber && (
-        <div style={{ 
-          position: 'absolute', 
-          bottom: '10mm', 
-          right: '15mm', 
-          fontSize: '10px', 
+        <div style={{
+          position: 'absolute',
+          bottom: '10mm',
+          right: '15mm',
+          fontSize: '10px',
           fontWeight: 'bold',
           color: '#333',
           borderTop: '1px solid #eee',
@@ -458,10 +458,10 @@ const ProposalDocument = ({ options, prazo, services, customCabimentos, customEs
         <div style={{ marginTop: '120px', textAlign: "right", borderRight: '4px solid #227056', paddingRight: '25px', maxWidth: '80%', marginLeft: 'auto' }}>
           <p style={{ fontSize: '14px', color: '#666', marginBottom: '5px' }}>Proponente:</p>
           <p style={{ fontSize: '18px', fontWeight: 'bold', color: '#227056' }}>Cavalcante Reis Advogados</p>
-          
+
           <p style={{ fontSize: '14px', color: '#666', marginTop: '30px', marginBottom: '5px' }}>Destinatário:</p>
           <p style={{ fontSize: '18px', fontWeight: 'bold', color: '#333' }}>Prefeitura Municipal de {options.municipio || "[Nome do Município]"}</p>
-          
+
           <div style={{ marginTop: '60px' }}>
             <p style={{ fontSize: '24px', fontWeight: 'bold', color: '#227056' }}>{options.data || "2025"}</p>
           </div>
@@ -489,22 +489,22 @@ const ProposalDocument = ({ options, prazo, services, customCabimentos, customEs
       </Page>
 
       <Page pageNumber={3} FooterComponent={FooterComp}>
-        <h2 style={{ fontSize: '18px', borderBottom: '2px solid #000', paddingBottom: '10px', marginBottom: '20px' }}>1. Objeto da Proposta</h2>
-        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6' }}>
-          A presente proposta tem por objeto a prestação de serviços advocatícios especializados para o Município de {options.municipio || "[Nome]"}, com foco em incremento de receitas e auditoria tributária.
+        <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#227056', borderBottom: '2px solid #227056', paddingBottom: '8px', marginBottom: '20px' }}>1. Objeto da Proposta</h2>
+        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', marginBottom: '20px' }}>
+          É objeto da presente proposta o desenvolvimento de serviços advocatícios especializados por parte da Proponente ao Aceitante, Município de <strong>{options.municipio || "[MUNICÍPIO]"}</strong>, visando a prestação de assessoria técnica e jurídica nas áreas de Direito Público, Tributário, Econômico, Financeiro e Previdenciário.
         </p>
-        <table className="proposal-table">
+        <table className="proposal-table" style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #227056' }}>
           <thead>
-            <tr>
-              <th>TESE</th>
-              <th>CABIMENTO</th>
+            <tr style={{ background: '#f0f7f4' }}>
+              <th style={{ border: '1px solid #227056', padding: '10px', fontSize: '12px', color: '#227056' }}>TESE / SERVIÇO</th>
+              <th style={{ border: '1px solid #227056', padding: '10px', fontSize: '12px', color: '#227056', textAlign: 'center' }}>CABIMENTO</th>
             </tr>
           </thead>
           <tbody>
             {activeServices.map(k => (
               <tr key={k}>
-                <td><strong>{allServices[k]}</strong></td>
-                <td>{customCabimentos[k] || "Cabível"}</td>
+                <td style={{ border: '1px solid #227056', padding: '8px', fontSize: '11px' }}><strong>{allServices[k]}</strong></td>
+                <td style={{ border: '1px solid #227056', padding: '8px', fontSize: '11px', textAlign: 'center' }}>{customCabimentos[k] || "Cabível"}</td>
               </tr>
             ))}
           </tbody>
@@ -513,34 +513,46 @@ const ProposalDocument = ({ options, prazo, services, customCabimentos, customEs
 
       {activeServices.map((k, i) => (
         <Page key={k} pageNumber={4 + i} FooterComponent={FooterComp}>
-          {i === 0 && <h2 style={{ fontSize: '18px', borderBottom: '2px solid #000', paddingBottom: '10px', marginBottom: '20px' }}>2. Análise da Questão</h2>}
-          <h3 style={{ fontSize: '15px', marginBottom: '15px' }}>2.{i + 1} – {allServices[k]}</h3>
-          <div style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.5' }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(serviceTextDatabase[k] || "") }} />
+          {i === 0 && <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#227056', borderBottom: '2px solid #227056', paddingBottom: '8px', marginBottom: '25px' }}>2. Análise da Questão</h2>}
+          <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: '#227056', marginBottom: '15px', background: '#f9f9f9', padding: '8px', borderLeft: '4px solid #227056' }}>
+            2.{i + 1} – {allServices[k]}
+          </h3>
+          <div style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', color: '#333' }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(serviceTextDatabase[k] || "") }} />
         </Page>
       ))}
 
       <Page pageNumber={4 + activeServices.length} FooterComponent={FooterComp}>
-        <h2 style={{ fontSize: '18px', borderBottom: '2px solid #000', paddingBottom: '10px', marginBottom: '20px' }}>3. Honorários e Condições</h2>
-        <p style={{ textAlign: 'justify', fontSize: '13px' }}>Os honorários serão de <strong>{paymentValue}</strong> por item recuperado.</p>
-        <h2 style={{ fontSize: '18px', borderBottom: '2px solid #000', paddingBottom: '10px', marginTop: '40px', marginBottom: '20px' }}>4. Prazo e Cronograma</h2>
-        <p style={{ textAlign: 'justify', fontSize: '13px' }}>O prazo de execução é de {prazo} meses.</p>
+        <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#227056', borderBottom: '2px solid #227056', paddingBottom: '8px', marginBottom: '20px' }}>3. Honorários e Condições de Pagamento</h2>
+        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6' }}>
+          Pelos serviços prestados, o Município pagará à Proponente, a título de honorários ad exitum, o valor de <strong>{paymentValue}</strong> por cada economia efetivamente recuperada ou compensada.
+        </p>
+
+        <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#227056', borderBottom: '2px solid #227056', paddingBottom: '8px', marginTop: '40px', marginBottom: '20px' }}>4. Prazo e Cronograma de Execução</h2>
+        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6' }}>
+          O prazo estimado para a execução total dos serviços objeto desta proposta é de <strong>{prazo} meses</strong>, contados a partir da assinatura do contrato.
+        </p>
       </Page>
 
       <Page pageNumber={5 + activeServices.length} FooterComponent={FooterComp}>
-        <h2 style={{ fontSize: '18px', borderBottom: '2px solid #000', paddingBottom: '10px', marginBottom: '20px' }}>5. Experiência e Equipe</h2>
-        <div style={{ textAlign: 'center' }}>
-          <img src="/munincipios01.png" style={{ width: '100%', marginBottom: '20px' }} alt="Exp 1" />
-          <img src="/Munincipios02.png" style={{ width: '100%' }} alt="Exp 2" />
+        <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#227056', borderBottom: '2px solid #227056', paddingBottom: '8px', marginBottom: '30px' }}>5. Experiência e Equipe Responsável</h2>
+        <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '30px' }}>
+          <div style={{ border: '1px solid #eee', padding: '10px', borderRadius: '8px' }}>
+            <img src="/munincipios01.png" style={{ width: '100%', height: 'auto' }} alt="Experiência 1" />
+          </div>
+          <div style={{ border: '1px solid #eee', padding: '10px', borderRadius: '8px' }}>
+            <img src="/Munincipios02.png" style={{ width: '100%', height: 'auto' }} alt="Experiência 2" />
+          </div>
         </div>
       </Page>
 
       <Page pageNumber={6 + activeServices.length} FooterComponent={FooterComp}>
-        <h2 style={{ fontSize: '18px', borderBottom: '2px solid #000', paddingBottom: '10px', marginBottom: '20px' }}>6. Disposições Finais</h2>
-        <p style={{ textAlign: 'center', marginTop: '50px' }}>Brasília-DF, {options.data}.</p>
-        <div style={{ textAlign: 'center', marginTop: '60px' }}>
-          <p>Atenciosamente,</p>
-          <img src="/Assinatura.png" style={{ width: '200px', margin: '20px auto' }} alt="Assinatura" />
-          <h3 style={{ fontWeight: 'bold' }}>CAVALCANTE REIS ADVOGADOS</h3>
+        <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#227056', borderBottom: '2px solid #227056', paddingBottom: '8px', marginBottom: '40px' }}>6. Disposições Finais</h2>
+        <p style={{ textAlign: 'center', fontSize: '14px', marginBottom: '60px' }}>Brasília-DF, {options.data || new Date().toLocaleDateString('pt-BR')}.</p>
+
+        <div style={{ textAlign: 'center' }}>
+          <p style={{ fontSize: '14px', marginBottom: '10px' }}>Atenciosamente,</p>
+          <img src="/Assinatura.png" style={{ width: '180px', margin: '10px auto' }} alt="Assinatura" />
+          <h3 style={{ fontWeight: 'bold', color: '#227056', fontSize: '16px', marginTop: '10px' }}>CAVALCANTE REIS ADVOGADOS</h3>
         </div>
       </Page>
     </div>
