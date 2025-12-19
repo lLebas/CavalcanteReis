@@ -274,16 +274,16 @@ const ControlsSidebar = ({
 
   return (
     <aside className="sidebar">
-      <div className="sidebar-header">
-        <Settings size={24} />
-        <h2>Personalizar Proposta</h2>
+      <div className="sidebar-header" style={{ marginBottom: '24px' }}>
+        <Settings size={24} color="#227056" />
+        <h2 style={{ fontSize: '20px', fontWeight: '700', color: '#227056' }}>Personalizar Proposta</h2>
       </div>
 
       <div className="start-buttons">
-        <button onClick={onStartFromScratch} className="btn primary">
+        <button onClick={onStartFromScratch} className="btn primary" style={{ width: '100%' }}>
           <RefreshCw size={18} /> Começar do Zero
         </button>
-        <button onClick={() => document.getElementById("import-docx-input")?.click()} className="btn secondary">
+        <button onClick={() => document.getElementById("import-docx-input")?.click()} className="btn secondary" style={{ width: '100%' }}>
           <FileText size={18} /> Importar .docx Modelo
         </button>
         <input id="import-docx-input" type="file" accept=".docx" style={{ display: "none" }} onChange={(e) => { const file = e.target.files?.[0]; if (file) onImportDocx(file); }} />
@@ -291,42 +291,42 @@ const ControlsSidebar = ({
 
       <div className="field">
         <label>Município Destinatário</label>
-        <input name="municipio" value={options.municipio} onChange={handleOptionChange} placeholder="Nome do Município" />
+        <input name="municipio" value={options.municipio} onChange={handleOptionChange} placeholder="Nome do Município" style={{ borderRadius: '8px', border: '1px solid #ccc' }} />
       </div>
 
       <div className="field">
         <label>Data da Proposta</label>
-        <input name="data" value={options.data} onChange={handleOptionChange} placeholder="Ex: 18 de dezembro de 2025" />
+        <input name="data" value={options.data} onChange={handleOptionChange} placeholder="Ex: 18 de dezembro de 2025" style={{ borderRadius: '8px', border: '1px solid #ccc' }} />
       </div>
 
       <div className="field">
         <label>Prazo de Execução (meses)</label>
-        <input name="prazo" value={prazo} onChange={(e) => setPrazo(e.target.value)} placeholder="24" />
+        <input name="prazo" value={prazo} onChange={(e) => setPrazo(e.target.value)} placeholder="24" style={{ borderRadius: '8px', border: '1px solid #ccc' }} />
       </div>
 
       <hr style={{ margin: '24px 0', border: 'none', borderTop: '1px solid #eee' }} />
 
-      <h3>Serviços (Seções)</h3>
-      <div className="start-buttons" style={{ flexDirection: 'row', gap: '8px' }}>
-        <button className="btn-small load" style={{ flex: 1 }} onClick={() => setServices(Object.keys(allServices).reduce((acc: any, key) => { acc[key] = true; return acc; }, {}))}>Selecionar Todos</button>
-        <button className="btn-small delete" style={{ flex: 1 }} onClick={() => setServices(Object.keys(allServices).reduce((acc: any, key) => { acc[key] = false; return acc; }, {}))}>Desmarcar Todos</button>
+      <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>Serviços (Seções)</h3>
+      <div className="start-buttons" style={{ flexDirection: 'row', gap: '8px', marginBottom: '16px' }}>
+        <button className="btn-small load" style={{ flex: 1, padding: '8px' }} onClick={() => setServices(Object.keys(allServices).reduce((acc: any, key) => { acc[key] = true; return acc; }, {}))}>Selecionar Todos</button>
+        <button className="btn-small delete" style={{ flex: 1, padding: '8px', background: '#f5f5f5', color: '#666', border: '1px solid #ddd' }} onClick={() => setServices(Object.keys(allServices).reduce((acc: any, key) => { acc[key] = false; return acc; }, {}))}>Desmarcar</button>
       </div>
 
-      <div className="services">
+      <div className="services" style={{ maxHeight: '300px', overflowY: 'auto', paddingRight: '4px' }}>
         {Object.entries(allServices).map(([key, label]) => (
-          <div key={key} style={{ marginBottom: "12px" }}>
-            <label className="service-item">
-              <input type="checkbox" checked={!!services[key]} onChange={() => handleServiceChange(key)} />
-              <span>{label}</span>
+          <div key={key} style={{ marginBottom: "10px", padding: '8px', borderRadius: '6px', border: '1px solid #f0f0f0', background: services[key] ? '#f9fbf9' : 'transparent' }}>
+            <label className="service-item" style={{ margin: 0, fontWeight: services[key] ? '600' : '400' }}>
+              <input type="checkbox" checked={!!services[key]} onChange={() => handleServiceChange(key)} style={{ accentColor: '#227056' }} />
+              <span style={{ fontSize: '13px' }}>{label}</span>
             </label>
             {services[key] && (
-              <div style={{ marginLeft: "28px", marginTop: "4px" }}>
+              <div style={{ marginLeft: "28px", marginTop: "8px" }}>
                 <input
                   type="text"
                   value={customCabimentos[key] || ""}
                   onChange={(e) => handleCabimentoChange(key, e.target.value)}
                   placeholder="Cabimento/Perspectiva"
-                  style={{ width: "100%", padding: "6px 10px", fontSize: "12px", border: "1px solid #ddd", borderRadius: "4px" }}
+                  style={{ width: "100%", padding: "8px 10px", fontSize: "12px", border: "1px solid #ddd", borderRadius: "6px", background: 'white' }}
                 />
               </div>
             )}
@@ -336,30 +336,30 @@ const ControlsSidebar = ({
 
       <hr style={{ margin: '24px 0', border: 'none', borderTop: '1px solid #eee' }} />
 
-      <h3>Informações do Rodapé</h3>
-      <div className="services">
+      <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>Informações do Rodapé</h3>
+      <div className="services" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
         {(['rj', 'df', 'sp', 'am'] as const).map(loc => (
-          <label key={loc} className="service-item">
-            <input type="checkbox" checked={footerOffices[loc].enabled} onChange={() => setFooterOffices({ ...footerOffices, [loc]: { ...footerOffices[loc], enabled: !footerOffices[loc].enabled } })} />
-            <span>{footerOffices[loc].cidade}</span>
+          <label key={loc} className="service-item" style={{ fontSize: '12px', border: '1px solid #eee', padding: '6px', borderRadius: '6px' }}>
+            <input type="checkbox" checked={footerOffices[loc].enabled} onChange={() => setFooterOffices({ ...footerOffices, [loc]: { ...footerOffices[loc], enabled: !footerOffices[loc].enabled } })} style={{ accentColor: '#227056' }} />
+            <span>{loc.toUpperCase()}</span>
           </label>
         ))}
       </div>
 
-      <div className="field">
+      <div className="field" style={{ marginTop: '20px' }}>
         <label>Valor do Pagamento</label>
-        <input type="text" value={paymentValue} onChange={(e) => setPaymentValue(e.target.value)} placeholder="Ex: R$ 0,20 (vinte centavos)" />
+        <input type="text" value={paymentValue} onChange={(e) => setPaymentValue(e.target.value)} placeholder="Ex: R$ 0,20 (vinte centavos)" style={{ borderRadius: '8px', border: '1px solid #ccc' }} />
       </div>
 
-      <div className="actions">
-        <button className="btn primary" onClick={onSaveProposal}>
+      <div className="actions" style={{ marginTop: '30px' }}>
+        <button className="btn primary" onClick={onSaveProposal} style={{ width: '100%', padding: '14px' }}>
           <Save size={18} /> Salvar Proposta
         </button>
         <div style={{ display: 'flex', gap: '8px' }}>
-          <button className="btn secondary" style={{ flex: 1 }} onClick={onDownloadDocx} disabled={loadingDocx}>
+          <button className="btn secondary" style={{ flex: 1, fontSize: '13px' }} onClick={onDownloadDocx} disabled={loadingDocx}>
             {loadingDocx ? "Gerando..." : <><Download size={18} /> .docx</>}
           </button>
-          <button className="btn secondary" style={{ flex: 1 }} onClick={onDownloadPdf} disabled={loadingPdf}>
+          <button className="btn secondary" style={{ flex: 1, fontSize: '13px' }} onClick={onDownloadPdf} disabled={loadingPdf}>
             {loadingPdf ? "Gerando..." : <><Download size={18} /> PDF</>}
           </button>
         </div>
@@ -396,36 +396,54 @@ const ProposalDocument = ({ options, prazo, services, customCabimentos, customEs
 
     return (
       <div className="page-footer-container" style={{ marginTop: 'auto', paddingTop: '20px' }}>
-        <div className="regua-decorativa"></div>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', textAlign: 'center', fontSize: '9px', color: '#333' }}>
+        <div className="regua-decorativa" style={{ height: '1px', background: '#ccc', marginBottom: '15px' }}></div>
+        <div style={{ display: 'grid', gridTemplateColumns: `repeat(${enabledOffices.length}, 1fr)`, gap: '15px', textAlign: 'center', fontSize: '8px', color: '#555', lineHeight: '1.3' }}>
           {enabledOffices.map((off, i) => (
             <div key={i}>
-              <div style={{ fontWeight: 'bold' }}>{off.cidade}</div>
+              <div style={{ fontWeight: 'bold', color: '#000', marginBottom: '2px', textTransform: 'uppercase' }}>{off.cidade.split(' - ')[0]}</div>
               <div>{off.linha1}</div>
               <div>{off.linha2}</div>
               <div>{off.linha3}</div>
             </div>
           ))}
         </div>
-        <div style={{ textAlign: 'center', marginTop: '10px', fontSize: '10px', letterSpacing: '1px', fontWeight: 'bold', color: '#666' }}>
-          w w w . c a v a l c a n t e r e i s . a d v . b r
+        <div style={{ textAlign: 'center', marginTop: '15px', fontSize: '9px', letterSpacing: '2px', fontWeight: 'bold', color: '#227056', textTransform: 'uppercase' }}>
+          www.cavalcantereis.adv.br
         </div>
       </div>
     );
   };
 
   const Page = ({ children, pageNumber, isCover = false, FooterComponent }: any) => (
-    <div className="pdf-page-render" data-page={pageNumber}>
+    <div className="pdf-page-render" data-page={pageNumber} style={{ 
+      boxShadow: '0 0 20px rgba(0,0,0,0.1)', 
+      margin: '0 auto 30px',
+      background: 'white',
+      padding: '20mm 20mm 15mm 25mm'
+    }}>
       {!isCover && (
-        <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-          <img src="/logo-cavalcante-reis.png" alt="Logo" style={{ width: '140px' }} />
+        <div style={{ textAlign: 'center', marginBottom: '35px' }}>
+          <img src="/logo-cavalcante-reis.png" alt="Logo" style={{ width: '130px' }} />
         </div>
       )}
-      <div style={{ flex: 1 }}>{children}</div>
-      <div style={{ marginTop: 'auto' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>{children}</div>
+      <div style={{ marginTop: '20px' }}>
         <FooterComponent />
       </div>
-      {pageNumber && <div style={{ position: 'absolute', bottom: '15mm', right: '20mm', fontSize: '10px', fontWeight: 'bold' }}>Página | {pageNumber}</div>}
+      {pageNumber && (
+        <div style={{ 
+          position: 'absolute', 
+          bottom: '10mm', 
+          right: '15mm', 
+          fontSize: '10px', 
+          fontWeight: 'bold',
+          color: '#333',
+          borderTop: '1px solid #eee',
+          paddingTop: '5px'
+        }}>
+          Página | {pageNumber}
+        </div>
+      )}
     </div>
   );
 
@@ -434,27 +452,37 @@ const ProposalDocument = ({ options, prazo, services, customCabimentos, customEs
   return (
     <div id="preview" className="preview" style={{ fontFamily: "'EB Garamond', serif" }}>
       <Page isCover={true} FooterComponent={FooterComp} data-page={1}>
-        <div style={{ textAlign: "center", marginTop: '80px' }}>
-          <img src="/logo-cavalcante-reis.png" alt="Logo" style={{ width: "180px" }} />
+        <div style={{ textAlign: "center", marginTop: '60px' }}>
+          <img src="/logo-cavalcante-reis.png" alt="Logo" style={{ width: "200px" }} />
         </div>
-        <div style={{ marginTop: '150px', textAlign: "right", borderTop: '1px solid #000', paddingTop: '20px', maxWidth: '60%', marginLeft: 'auto' }}>
-          <p><strong>Proponente:</strong></p>
-          <p>Cavalcante Reis Advogados</p>
-          <p style={{ marginTop: '20px' }}><strong>Destinatário:</strong></p>
-          <p>Prefeitura Municipal de {options.municipio || "[Nome do Município]"}</p>
-          <div style={{ marginTop: '40px', borderTop: '1px solid #000', paddingTop: '10px' }}>
-            <p style={{ fontSize: '18px', fontWeight: 'bold' }}>{options.data || "2025"}</p>
+        <div style={{ marginTop: '120px', textAlign: "right", borderRight: '4px solid #227056', paddingRight: '25px', maxWidth: '80%', marginLeft: 'auto' }}>
+          <p style={{ fontSize: '14px', color: '#666', marginBottom: '5px' }}>Proponente:</p>
+          <p style={{ fontSize: '18px', fontWeight: 'bold', color: '#227056' }}>Cavalcante Reis Advogados</p>
+          
+          <p style={{ fontSize: '14px', color: '#666', marginTop: '30px', marginBottom: '5px' }}>Destinatário:</p>
+          <p style={{ fontSize: '18px', fontWeight: 'bold', color: '#333' }}>Prefeitura Municipal de {options.municipio || "[Nome do Município]"}</p>
+          
+          <div style={{ marginTop: '60px' }}>
+            <p style={{ fontSize: '24px', fontWeight: 'bold', color: '#227056' }}>{options.data || "2025"}</p>
           </div>
         </div>
       </Page>
 
       <Page pageNumber={2} FooterComponent={FooterComp}>
-        <h2 style={{ fontSize: '22px', borderBottom: '2px solid #000', paddingBottom: '10px', marginBottom: '30px' }}>Sumário</h2>
-        <div style={{ lineHeight: '2.5', fontSize: '14px' }}>
-          {["1. Objeto da Proposta", "2. Análise da Questão", "3. Honorários e Condições", "4. Prazo e Cronograma", "5. Experiência e Equipe", "6. Disposições Finais"].map((item, i) => (
-            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dotted #ccc' }}>
-              <strong>{item}</strong>
-              <span>Pág. {String(i + 3).padStart(2, '0')}</span>
+        <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#227056', borderBottom: '2px solid #227056', paddingBottom: '10px', marginBottom: '40px', textAlign: 'center' }}>SUMÁRIO</h2>
+        <div style={{ lineHeight: '3', fontSize: '15px', maxWidth: '85%', margin: '0 auto' }}>
+          {[
+            { t: "1. Objeto da Proposta", p: 3 },
+            { t: "2. Análise da Questão", p: 4 },
+            { t: "3. Dos Honorários e Condições", p: 4 + activeServices.length },
+            { t: "4. Prazo e Cronograma de Execução", p: 4 + activeServices.length },
+            { t: "5. Experiência e Equipe Responsável", p: 5 + activeServices.length },
+            { t: "6. Disposições Finais", p: 6 + activeServices.length }
+          ].map((item, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'baseline', gap: '10px' }}>
+              <strong style={{ whiteSpace: 'nowrap' }}>{item.t}</strong>
+              <div style={{ flex: 1, borderBottom: '1px dotted #aaa', height: '1px' }}></div>
+              <span style={{ fontWeight: 'bold', color: '#227056' }}>Pág. {String(item.p).padStart(2, '0')}</span>
             </div>
           ))}
         </div>
