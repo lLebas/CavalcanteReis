@@ -11,14 +11,34 @@ async function bootstrap() {
     ? process.env.FRONTEND_URL.split(',').map(url => url.trim())
     : ['http://localhost:3000'];
   
+  const isDevelopment = process.env.NODE_ENV !== 'production';
+  
   app.enableCors({
     origin: (origin, callback) => {
-      // Permite requisições sem origem (mobile apps, Postman, etc) em desenvolvimento
-      if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
+      // Permite requisições sem origem apenas em desenvolvimento (mobile apps, Postman, etc)
+      if (!origin) {
+        if (isDevelopment) {
+          callback(null, true);
+        } else {
+          callback(new Error('CORS: Origin header required in production'));
+        }
+        return;
       }
+
+      // Sempre verifica a whitelist primeiro
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      // Em desenvolvimento, permite localhost para facilitar testes locais
+      if (isDevelopment && origin.startsWith('http://localhost:')) {
+        callback(null, true);
+        return;
+      }
+
+      // Rejeita todas as outras origens
+      callback(new Error(`CORS: Origin '${origin}' not allowed by CORS policy`));
     },
     credentials: true,
   });
