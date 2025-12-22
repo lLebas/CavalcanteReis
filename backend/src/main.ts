@@ -7,12 +7,12 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // Enable CORS for Next.js frontend
-  const allowedOrigins = process.env.FRONTEND_URL 
+  const allowedOrigins = process.env.FRONTEND_URL
     ? process.env.FRONTEND_URL.split(',').map(url => url.trim())
     : ['http://localhost:3000'];
-  
+
   const isDevelopment = process.env.NODE_ENV !== 'production';
-  
+
   app.enableCors({
     origin: (origin, callback) => {
       // Permite requisições sem origem apenas em desenvolvimento (mobile apps, Postman, etc)
