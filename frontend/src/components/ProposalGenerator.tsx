@@ -715,14 +715,14 @@ const ProposalDocument = ({ options, prazo, services, customCabimentos, customEs
         </p>
 
         <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', color: '#000' }}>
-          Nossa contratação, portanto, devido à altíssima qualificação e experiência, aliada à singularidade do objeto da demanda, bem como os diferenciais já apresentados acima, está inserida dentre as hipóteses do art. 6°, XVIII "e" e art. 74, III, "e", da Lei n.º 14.133/2021.
+          Nossa contratação, portanto, devido à altíssima qualificação e experiência, aliada à singularidade do objeto da demanda, bem como os diferenciais já apresentados acima, está inserida dentre as hipóteses do art. 6°, XVIII &quot;e&quot; e art. 74, III, &quot;e&quot;, da Lei n.º 14.133/2021.
         </p>
       </Page>
 
       <Page pageNumber={6 + serviceGroups.length} FooterComponent={FooterComp}>
         <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#000', borderBottom: '1px solid #000', paddingBottom: '8px', marginBottom: '20px' }}>6. Disposições Finais</h2>
         <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', color: '#000', marginBottom: '15px' }}>
-          Nesse sentido, ficamos no aguardo da manifestação deste Município para promover os ajustes contratuais que entenderem necessários, sendo mantida a mesma forma de remuneração aqui proposta, com fundamento no art. 6º, XVIII, "e" e art. 74, III, "e", da Lei n.º 14.133/2021.
+          Nesse sentido, ficamos no aguardo da manifestação deste Município para promover os ajustes contratuais que entenderem necessários, sendo mantida a mesma forma de remuneração aqui proposta, com fundamento no art. 6º, XVIII, &quot;e&quot; e art. 74, III, &quot;e&quot;, da Lei n.º 14.133/2021.
         </p>
         <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', color: '#000', marginBottom: '15px' }}>
           A presente proposta tem validade de 60 (sessenta) dias.
