@@ -290,8 +290,13 @@ const ControlsSidebar = ({
       </div>
 
       <div className="field">
-        <label>Município Destinatário</label>
+        <label>Município</label>
         <input name="municipio" value={options.municipio} onChange={handleOptionChange} placeholder="Nome do Município" style={{ borderRadius: '8px', border: '1px solid #ccc' }} />
+      </div>
+
+      <div className="field">
+        <label>Destinatário *</label>
+        <input name="destinatario" value={options.destinatario} onChange={handleOptionChange} placeholder="Ex: Prefeitura Municipal de..." style={{ borderRadius: '8px', border: '1px solid #ccc' }} />
       </div>
 
       <div className="field">
