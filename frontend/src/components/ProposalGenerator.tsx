@@ -7,6 +7,8 @@ import { Settings, FileText, Eye, X, ArrowLeft, LogOut, Download, Save, RefreshC
 import { saveAs } from "file-saver";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
+// @ts-ignore - html-docx-js não tem tipos TypeScript
+import htmlDocx from "html-docx-js/dist/html-docx";
 
 const allServices: Record<string, string> = {
   folhaPagamento: "Folha de pagamento, recuperação de verbas indenizatórias e contribuições previdenciárias",
@@ -410,59 +412,70 @@ const ProposalDocument = ({ options, prazo, services, customCabimentos, customEs
     if (footerOffices.am.enabled) enabledOffices.push(footerOffices.am);
 
     return (
-      <div className="page-footer-container" style={{ marginTop: 'auto', paddingTop: '20px' }}>
-        <div className="regua-decorativa" style={{ height: '1px', background: '#ccc', marginBottom: '15px' }}></div>
-        <div style={{ display: 'grid', gridTemplateColumns: `repeat(${enabledOffices.length}, 1fr)`, gap: '15px', textAlign: 'center', fontSize: '8px', color: '#555', lineHeight: '1.3' }}>
+      <div className="page-footer-container" style={{ marginTop: 'auto', paddingTop: '25px' }}>
+        <div className="regua-decorativa" style={{ height: '1px', background: '#ccc', marginBottom: '20px' }}></div>
+        <div style={{ display: 'grid', gridTemplateColumns: `repeat(${enabledOffices.length}, 1fr)`, gap: '20px', textAlign: 'center', fontSize: '13px', color: '#555', lineHeight: '1.4', fontFamily: "'EB Garamond', serif" }}>
           {enabledOffices.map((off, i) => (
             <div key={i}>
-              <div style={{ fontWeight: 'bold', color: '#000', marginBottom: '2px', textTransform: 'uppercase' }}>{off.cidade.split(' - ')[0]}</div>
+              <div style={{ fontWeight: 'bold', color: '#000', marginBottom: '4px', textTransform: 'uppercase' }}>{off.cidade.split(' - ')[0]}</div>
               <div>{off.linha1}</div>
               <div>{off.linha2}</div>
               <div>{off.linha3}</div>
             </div>
           ))}
         </div>
-        <div style={{ textAlign: 'center', marginTop: '15px', fontSize: '9px', letterSpacing: '2px', fontWeight: 'bold', color: '#000', textTransform: 'uppercase' }}>
+        <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '13px', letterSpacing: '2px', fontWeight: 'bold', color: '#000', textTransform: 'uppercase', fontFamily: "'EB Garamond', serif" }}>
           www.cavalcante-reis.adv.br
         </div>
       </div>
     );
   };
 
-  const Page = ({ children, pageNumber, isCover = false, FooterComponent }: any) => (
-    <div className="pdf-page-render" data-page={pageNumber} style={{
-      boxShadow: '0 0 20px rgba(0,0,0,0.1)',
-      margin: '0 auto 30px',
-      background: 'white',
-      padding: '20mm 20mm 15mm 25mm',
-      width: '210mm',
-      minHeight: '297mm',
-      position: 'relative',
-      boxSizing: 'border-box'
-    }}>
-      {!isCover && (
-        <div style={{ textAlign: 'center', marginBottom: '35px' }}>
-          <img src="/logo-cavalcante-reis.png" alt="Logo" style={{ width: '130px' }} crossOrigin="anonymous" />
+  const Page = ({ children, pageNumber, isCover = false, FooterComponent }: any) => {
+    // Padding diferente para capa vs páginas internas
+    const padding = isCover ? '20mm 20mm 20mm 20mm' : '20mm 20mm 20mm 25mm';
+
+    return (
+      <div className="pdf-page-render" data-page={pageNumber} style={{
+        boxShadow: '0 0 20px rgba(0,0,0,0.1)',
+        margin: '0 auto',
+        marginBottom: '20px',
+        background: 'white',
+        padding: padding,
+        width: '210mm',
+        height: '297mm',
+        position: 'relative',
+        boxSizing: 'border-box',
+        display: 'flex',
+        flexDirection: 'column',
+        pageBreakAfter: 'always',
+        overflow: 'hidden'
+      }}>
+        {!isCover && (
+          <div style={{ textAlign: 'center', marginBottom: '25px', flexShrink: 0 }}>
+            <img src="/logo-cavalcante-reis.png" alt="Logo" style={{ width: '120px', height: 'auto', display: 'block', margin: '0 auto' }} crossOrigin="anonymous" onError={(e) => { console.error('Erro ao carregar logo'); }} />
+          </div>
+        )}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>{children}</div>
+        <div style={{ marginTop: 'auto', paddingTop: '20px', flexShrink: 0 }}>
+          <FooterComponent />
         </div>
-      )}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>{children}</div>
-      <div style={{ marginTop: '20px' }}>
-        <FooterComponent />
+        {pageNumber && (
+          <div style={{
+            position: 'absolute',
+            top: '10mm',
+            right: '15mm',
+            fontSize: '13px',
+            fontWeight: 'bold',
+            color: '#333',
+            fontFamily: "'EB Garamond', serif"
+          }}>
+            {pageNumber}-
+          </div>
+        )}
       </div>
-      {pageNumber && (
-        <div style={{
-          position: 'absolute',
-          top: '10mm',
-          right: '15mm',
-          fontSize: '10px',
-          fontWeight: 'bold',
-          color: '#333'
-        }}>
-          {pageNumber}-
-        </div>
-      )}
-    </div>
-  );
+    );
+  };
 
   const activeServices = Object.keys(services).filter(k => services[k]);
 
@@ -540,72 +553,73 @@ const ProposalDocument = ({ options, prazo, services, customCabimentos, customEs
   return (
     <div id="preview" className="preview" style={{ fontFamily: "'EB Garamond', serif" }}>
       <Page isCover={true} FooterComponent={FooterComp} data-page={1}>
-        <div style={{ textAlign: "center", marginTop: '60px' }}>
-          <img src="/logo-cavalcante-reis.png" alt="Logo" style={{ width: "130px" }} crossOrigin="anonymous" />
+        <div style={{ textAlign: "center", marginTop: '20px', marginBottom: '0' }}>
+          <img src="/logo-cavalcante-reis.png" alt="Logo" style={{ width: "120px", height: 'auto', display: 'block', margin: '0 auto' }} crossOrigin="anonymous" onError={(e) => { console.error('Erro ao carregar logo na capa'); }} />
         </div>
-        <div style={{ marginTop: '120px', textAlign: "right", paddingRight: '25px', maxWidth: '80%', marginLeft: 'auto' }}>
-          <p style={{ fontSize: '14px', color: '#666', marginBottom: '5px' }}>Proponente:</p>
-          <p style={{ fontSize: '18px', fontWeight: 'bold', color: '#000' }}>Cavalcante Reis Advogados</p>
+        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', flex: 1, paddingTop: '80px', paddingBottom: '80px' }}>
+          <div style={{ textAlign: "center", width: '100%' }}>
+            <p style={{ fontSize: '13px', color: '#666', marginBottom: '5px', fontFamily: "'EB Garamond', serif" }}>Proponente:</p>
+            <p style={{ fontSize: '13px', fontWeight: 'bold', color: '#000', marginBottom: '50px', fontFamily: "'EB Garamond', serif" }}>Cavalcante Reis Advogados</p>
 
-          <p style={{ fontSize: '14px', color: '#666', marginTop: '30px', marginBottom: '5px' }}>Destinatário:</p>
-          <p style={{ fontSize: '18px', fontWeight: 'bold', color: '#000' }}>Prefeitura Municipal de {options.municipio || "[Nome do Município]"}</p>
+            <p style={{ fontSize: '13px', color: '#666', marginTop: '0', marginBottom: '5px', fontFamily: "'EB Garamond', serif" }}>Destinatário:</p>
+            <p style={{ fontSize: '13px', fontWeight: 'bold', color: '#000', marginBottom: '0', fontFamily: "'EB Garamond', serif" }}>{options.destinatario || "[Nome do Destinatário]"}</p>
 
-          <div style={{ marginTop: '60px' }}>
-            <p style={{ fontSize: '24px', fontWeight: 'bold', color: '#000' }}>{options.data || "2025"}</p>
+            <div style={{ marginTop: '60px' }}>
+              <p style={{ fontSize: '13px', fontWeight: 'bold', color: '#000', fontFamily: "'EB Garamond', serif" }}>{options.data || "2025"}</p>
+            </div>
           </div>
         </div>
       </Page>
 
       <Page pageNumber={2} FooterComponent={FooterComp}>
-        <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#000', marginBottom: '30px' }}>Sumário</h2>
-        <div style={{ lineHeight: '2.5', fontSize: '15px' }}>
-          <div style={{ marginBottom: '15px', color: '#000' }}><strong>1. Objeto da Proposta</strong></div>
-          <div style={{ marginBottom: '15px', color: '#000' }}><strong>2. Análise da Questão</strong></div>
-          <div style={{ marginBottom: '15px', color: '#000' }}><strong>3. Dos Honorários, das Condições de Pagamento e Despesas</strong></div>
-          <div style={{ marginBottom: '15px', color: '#000' }}><strong>4. Prazo e Cronograma de Execução dos Serviços</strong></div>
-          <div style={{ marginBottom: '15px', color: '#000' }}><strong>5. Experiência em atuação em favor de Municípios e da Equipe Responsável</strong></div>
-          <div style={{ marginBottom: '15px', color: '#000' }}><strong>6. Disposições Finais</strong></div>
+        <h2 style={{ fontSize: '13px', fontWeight: 'bold', color: '#000', marginBottom: '20px', marginTop: '0', fontFamily: "'EB Garamond', serif" }}>Sumário</h2>
+        <div style={{ lineHeight: '20pt', fontSize: '13px', fontFamily: "'EB Garamond', serif" }}>
+          <div style={{ marginBottom: '6px', marginTop: '0', color: '#000' }}><strong>1. Objeto da Proposta</strong></div>
+          <div style={{ marginBottom: '6px', marginTop: '0', color: '#000' }}><strong>2. Análise da Questão</strong></div>
+          <div style={{ marginBottom: '6px', marginTop: '0', color: '#000' }}><strong>3. Dos Honorários, das Condições de Pagamento e Despesas</strong></div>
+          <div style={{ marginBottom: '6px', marginTop: '0', color: '#000' }}><strong>4. Prazo e Cronograma de Execução dos Serviços</strong></div>
+          <div style={{ marginBottom: '6px', marginTop: '0', color: '#000' }}><strong>5. Experiência em atuação em favor de Municípios e da Equipe Responsável</strong></div>
+          <div style={{ marginBottom: '0', marginTop: '0', color: '#000' }}><strong>6. Disposições Finais</strong></div>
         </div>
       </Page>
 
       <Page pageNumber={3} FooterComponent={FooterComp}>
-        <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#000', borderBottom: '1px solid #000', paddingBottom: '8px', marginBottom: '20px' }}>1. Objeto da Proposta</h2>
-        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', marginBottom: '20px', color: '#000' }}>
+        <h2 style={{ fontSize: '13px', fontWeight: 'bold', color: '#000', borderBottom: '1px solid #000', paddingBottom: '8px', marginBottom: '20px', marginTop: '0', fontFamily: "'EB Garamond', serif" }}>1. Objeto da Proposta</h2>
+        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '17pt', marginBottom: '15px', marginTop: '0', color: '#000', fontFamily: "'EB Garamond', serif" }}>
           É objeto do presente contrato o desenvolvimento de serviços advocatícios especializados por parte da Proponente, Cavalcante Reis Advogados, ao Aceitante, Município de <strong>{options.municipio || "[MUNICÍPIO]"}</strong>, a fim de prestação de serviços de assessoria técnica e jurídica nas áreas de Direito Público, Tributário, Econômico, Financeiro, Previdenciário, atuando perante o Ministério da Fazenda e os seus órgãos administrativos, em especial para alcançar o incremento de receitas, ficando responsável pelo ajuizamento, acompanhamento e eventuais intervenções de terceiro em ações de interesse do Município.
         </p>
 
-        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', marginBottom: '15px', color: '#000' }}>
+        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '17pt', marginBottom: '20px', marginTop: '0', color: '#000', fontFamily: "'EB Garamond', serif" }}>
           A proposta inclui os seguintes objetos:
         </p>
 
-        <table className="proposal-table" style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #000', marginBottom: '20px' }}>
+        <table className="proposal-table" style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #000', marginBottom: '20px', marginTop: '0', fontFamily: "'EB Garamond', serif" }}>
           <thead>
             <tr style={{ background: '#f9f9f9' }}>
-              <th style={{ border: '1px solid #000', padding: '10px', fontSize: '12px', color: '#000', fontWeight: 'bold' }}>TESE</th>
-              <th style={{ border: '1px solid #000', padding: '10px', fontSize: '12px', color: '#000', textAlign: 'center', fontWeight: 'bold' }}>CABIMENTO</th>
+              <th style={{ border: '1px solid #000', padding: '10px', fontSize: '13px', color: '#000', fontWeight: 'bold' }}>TESE</th>
+              <th style={{ border: '1px solid #000', padding: '10px', fontSize: '13px', color: '#000', textAlign: 'center', fontWeight: 'bold' }}>CABIMENTO</th>
             </tr>
           </thead>
           <tbody>
             {activeServices.map(k => (
               <tr key={k}>
-                <td style={{ border: '1px solid #000', padding: '8px', fontSize: '11px', color: '#000' }}><strong>{allServices[k]}</strong></td>
-                <td style={{ border: '1px solid #000', padding: '8px', fontSize: '11px', textAlign: 'center', color: '#000' }}>{customCabimentos[k] || "Cabível"}</td>
+                <td style={{ border: '1px solid #000', padding: '8px', fontSize: '13px', color: '#000' }}><strong>{allServices[k]}</strong></td>
+                <td style={{ border: '1px solid #000', padding: '8px', fontSize: '13px', textAlign: 'center', color: '#000' }}>{customCabimentos[k] || "Cabível"}</td>
               </tr>
             ))}
           </tbody>
         </table>
 
-        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', marginBottom: '15px', color: '#000' }}>
+        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '17pt', marginBottom: '15px', marginTop: '0', color: '#000', fontFamily: "'EB Garamond', serif" }}>
           Além disso, a proposta também tem como objeto:
         </p>
 
-        <div style={{ fontSize: '13px', lineHeight: '1.8', color: '#000', marginBottom: '20px' }}>
-          <p style={{ marginBottom: '10px', textAlign: 'justify' }}>(i) Análise do caso concreto, com a elaboração dos estudos pertinentes ao Município de {options.municipio || "[MUNICÍPIO]"};</p>
-          <p style={{ marginBottom: '10px', textAlign: 'justify' }}>(ii) Análise e coleta dos documentos fornecidos pela municipalidade que irão gerar subsídios para os pleitos do incremento de receita relativo ao CFEM no critério de produção afetação e/ou limítrofe;</p>
-          <p style={{ marginBottom: '10px', textAlign: 'justify' }}>(iii) Ingresso de medida administrativa perante a ANM e/ou judicial, com posterior acompanhamento do processo durante sua tramitação, com realização de defesas, diligências, manifestação em razão de intimações, produção de provas, recursos e demais atos necessários ao deslinde dos feitos;</p>
-          <p style={{ marginBottom: '10px', textAlign: 'justify' }}>(iv) Atuação perante a Justiça Federal seja na condição de recorrente ou recorrido, bem como interposição de recursos ou apresentação de contrarrazões aos Tribunais Superiores, se necessário for;</p>
-          <p style={{ marginBottom: '10px', textAlign: 'justify' }}>(v) Acompanhamento processual completo, até o trânsito em Julgado da Sentença administrativa e/ou judicial;</p>
-          <p style={{ marginBottom: '10px', textAlign: 'justify' }}>(vi) Acompanhamento do cumprimento das medidas administrativas e/ou judiciais junto aos órgãos administrativos, sobretudo na ANM.</p>
+        <div style={{ fontSize: '13px', lineHeight: '17pt', color: '#000', marginBottom: '0', marginTop: '0', fontFamily: "'EB Garamond', serif" }}>
+          <p style={{ marginBottom: '8px', marginTop: '0', textAlign: 'justify' }}>(i) Análise do caso concreto, com a elaboração dos estudos pertinentes ao Município de {options.municipio || "[MUNICÍPIO]"};</p>
+          <p style={{ marginBottom: '8px', marginTop: '0', textAlign: 'justify' }}>(ii) Ingresso de medida administrativa perante e/ou judicial, com posterior acompanhamento do processo durante sua tramitação, com realização de defesas, diligências, manifestação em razão de intimações, produção de provas, recursos e demais atos necessários ao deslinde dos feitos;</p>
+          <p style={{ marginBottom: '8px', marginTop: '0', textAlign: 'justify' }}>(iii) Atuação perante a Justiça Federal seja na condição de recorrente ou recorrido, bem como interposição de recursos ou apresentação de contrarrazões aos Tribunais Superiores, se necessário for;</p>
+          <p style={{ marginBottom: '8px', marginTop: '0', textAlign: 'justify' }}>(iv) Acompanhamento processual completo, até o trânsito em Julgado da Sentença administrativa e/ou judicial;</p>
+          <p style={{ marginBottom: '0', marginTop: '0', textAlign: 'justify' }}>(v) Acompanhamento do cumprimento das medidas administrativas e/ou judiciais junto aos órgãos administrativos.</p>
         </div>
       </Page>
 
@@ -620,17 +634,17 @@ const ProposalDocument = ({ options, prazo, services, customCabimentos, customEs
 
         return (
           <Page key={`group-${groupIndex}`} pageNumber={pageNumber} FooterComponent={FooterComp}>
-            {isFirstGroup && <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#000', borderBottom: '1px solid #000', paddingBottom: '8px', marginBottom: '25px' }}>2. Análise da Questão</h2>}
+            {isFirstGroup && <h2 style={{ fontSize: '13px', fontWeight: 'bold', color: '#000', borderBottom: '1px solid #000', paddingBottom: '8px', marginBottom: '25px', marginTop: '0', fontFamily: "'EB Garamond', serif" }}>2. Análise da Questão</h2>}
             {group.map((serviceKey, itemIndex) => {
               const currentSectionNumber = sectionStartNumber + itemIndex;
               const isFirstInGroup = itemIndex === 0 && !isFirstGroup;
 
               return (
-                <div key={serviceKey} style={{ marginBottom: itemIndex < group.length - 1 ? '30px' : '0' }}>
-                  <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: '#000', marginBottom: '15px', marginTop: (isFirstInGroup ? '0' : itemIndex === 0 ? '0' : '20px') }}>
+                <div key={serviceKey} style={{ marginBottom: itemIndex < group.length - 1 ? '35px' : '0' }}>
+                  <h3 style={{ fontSize: '13px', fontWeight: 'bold', color: '#000', marginBottom: '10px', marginTop: '0', fontFamily: "'EB Garamond', serif" }}>
                     2.{currentSectionNumber} – {allServices[serviceKey]}
                   </h3>
-                  <div style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', color: '#000' }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(serviceTextDatabase[serviceKey] || "") }} />
+                  <div style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '17pt', color: '#000', fontFamily: "'EB Garamond', serif" }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(serviceTextDatabase[serviceKey] || "") }} />
                 </div>
               );
             })}
@@ -638,115 +652,126 @@ const ProposalDocument = ({ options, prazo, services, customCabimentos, customEs
         );
       })}
 
-      <Page pageNumber={4 + activeServices.length} FooterComponent={FooterComp}>
-        <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#000', borderBottom: '1px solid #000', paddingBottom: '8px', marginBottom: '20px' }}>3. Dos Honorários, das Condições de Pagamento e Despesas</h2>
+      <Page pageNumber={4 + serviceGroups.length} FooterComponent={FooterComp}>
+        <h2 style={{ fontSize: '13px', fontWeight: 'bold', color: '#000', borderBottom: '1px solid #000', paddingBottom: '8px', marginBottom: '20px', marginTop: '0', fontFamily: "'EB Garamond', serif" }}>3. Dos Honorários, das Condições de Pagamento e Despesas</h2>
 
-        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', color: '#000', marginBottom: '20px' }}>
+        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '17pt', marginBottom: '15px', marginTop: '0', color: '#000', fontFamily: "'EB Garamond', serif" }}>
           Os valores levantados a título de incremento são provisórios, baseados em informações preliminares, podendo, ao final, representar valores a maior ou a menor.
         </p>
 
-        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', color: '#000', marginBottom: '20px' }}>
+        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '17pt', marginBottom: '20px', marginTop: '0', color: '#000', fontFamily: "'EB Garamond', serif" }}>
           Considerando a necessidade de manutenção do equilíbrio econômico-financeiro do contrato administrativo, propõe o escritório CAVALCANTE REIS ADVOGADOS que esta Municipalidade pague ao Proponente da seguinte forma:
         </p>
 
-        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', color: '#000', marginBottom: '15px' }}>
-          <strong>3.1.1.</strong> Para todos os demais itens descritos nesta Proposta será efetuado o pagamento de honorários advocatícios à CAVALCANTE REIS ADVOGADOS pela execução dos serviços de recuperação de créditos, <strong>ad êxito</strong> na ordem de <strong>R$ 0,12 (doze centavos)</strong> para cada R$ 1,00 (um real) do montante referente ao incremento financeiro, ou seja, com base nos valores que entrarem nos cofres do CONTRATANTE;
+        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '17pt', marginBottom: '15px', marginTop: '0', color: '#000', fontFamily: "'EB Garamond', serif" }}>
+          <strong>3.1.1.</strong> Para todos os demais itens descritos nesta Proposta será efetuado o pagamento de honorários advocatícios à CAVALCANTE REIS ADVOGADOS pela execução dos serviços de recuperação de créditos, <strong>ad êxito</strong> na ordem de <strong>{paymentValue || "R$ 0,12 (doze centavos)"}</strong> para cada R$ 1,00 (um real) do montante referente ao incremento financeiro, ou seja, com base nos valores que entrarem nos cofres do CONTRATANTE;
         </p>
 
-        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', color: '#000', marginBottom: '15px' }}>
-          <strong>3.1.2.</strong> Em caso de valores retroativos recuperados em favor da municipalidade, que consiste nos valores não repassados em favor do Contratante nos últimos 5 (cinco) anos (prescrição quinquenal) ou não abarcados pela prescrição, também serão cobrados honorários advocatícios na ordem de <strong>R$ 0,12 (doze centavos)</strong> para cada R$ 1,00 (um real) do montante recuperado aos Cofres Municipais.
+        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '17pt', marginBottom: '15px', marginTop: '0', color: '#000', fontFamily: "'EB Garamond', serif" }}>
+          <strong>3.1.2.</strong> Em caso de valores retroativos recuperados em favor da municipalidade, que consiste nos valores não repassados em favor do Contratante nos últimos 5 (cinco) anos (prescrição quinquenal) ou não abarcados pela prescrição, também serão cobrados honorários advocatícios na ordem de <strong>{paymentValue || "R$ 0,12 (doze centavos)"}</strong> para cada R$ 1,00 (um real) do montante recuperado aos Cofres Municipais.
         </p>
 
-        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', color: '#000', marginBottom: '20px' }}>
+        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '17pt', marginBottom: '30px', marginTop: '0', color: '#000', fontFamily: "'EB Garamond', serif" }}>
           <strong>3.1.3.</strong> Sendo um contrato <strong>AD EXITUM</strong>, acaso o incremento financeiro em favor deste Município supere o valor mencionado na cláusula que trata do valor do contrato, os desembolsos não poderão ser previstos por dotação orçamentária, posto que terão origem na <strong>REDUÇÃO DE DESPESAS/INCREMENTO DE RECEITAS</strong>, como consequência da prestação dos serviços.
         </p>
 
-        <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#000', borderBottom: '1px solid #000', paddingBottom: '8px', marginTop: '40px', marginBottom: '20px' }}>4. Prazo e Cronograma de Execução dos Serviços</h2>
-        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', color: '#000' }}>
-          O prazo de execução será de <strong>{prazo} (vinte e quatro) meses</strong> ou pelo tempo que perdurar os processos judiciais, podendo ser prorrogado por interesse das partes, com base no art. 107 da Lei n.º 14.133/21.
+        <h2 style={{ fontSize: '13px', fontWeight: 'bold', color: '#000', borderBottom: '1px solid #000', paddingBottom: '8px', marginTop: '0', marginBottom: '20px', fontFamily: "'EB Garamond', serif" }}>4. Prazo e Cronograma de Execução dos Serviços</h2>
+        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '17pt', marginBottom: '0', marginTop: '0', color: '#000', fontFamily: "'EB Garamond', serif" }}>
+          O prazo de execução será de <strong>{prazo} (vinte e quatro) meses</strong>, podendo ser prorrogado por interesse das partes, com base no art. 107 da Lei n.º 14.133/21.
         </p>
       </Page>
 
-      <Page pageNumber={5 + serviceGroups.length} FooterComponent={FooterComp}>
-        <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#000', borderBottom: '1px solid #000', paddingBottom: '8px', marginBottom: '20px' }}>5. Experiência em atuação em favor de Municípios e da Equipe Responsável</h2>
-        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', color: '#000', marginBottom: '20px' }}>
-          No portfólio de serviços executados e/ou em execução, constam os seguintes Municípios contratantes:
-        </p>
+      {/* Tópico 5 - Dividido em múltiplas páginas */}
+      {(() => {
+        const basePageNumber = 4 + serviceGroups.length;
+        const professionals = [
+          {
+            name: "IURI DO LAGO NOGUEIRA CAVALCANTE REIS",
+            bio: "Doutorando em Direito e Mestre em Direito Econômico e Desenvolvimento pelo Instituto Brasileiro de Ensino, Desenvolvimento e Pesquisa (IDP/Brasília). LLM (Master of Laws) em Direito Empresarial pela Fundação Getúlio Vargas (FGV/RJ). Integrante da Comissão de Juristas do Senado Federal criada para consolidar a proposta do novo Código Comercial Brasileiro. Autor e Coautor de livros, pareceres e artigos jurídicos na área do direito público. Sócio-diretor do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: iuri@cavalcantereis.adv.br)."
+          },
+          {
+            name: "GABRIEL GAUDÊNCIO ZANCHETTA CALIMAN",
+            bio: "Graduado em Direito pelo Centro Universitário de Brasília (UniCeub). Especialista em Gestão Pública e Tributária pelo Gran Centro Universitário. Membro da Comissão de Assuntos Tributários da OAB/DF. Advogado associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: gabrielcaliman@cavalcantereis.adv.br)."
+          },
+          {
+            name: "FELIPE NOBREGA ROCHA",
+            bio: "Graduado em Direito pela Universidade Presbiteriana Mackenzie. LLM (Master of Laws) em Direito Empresarial pela Fundação Getúlio Vargas (FGV). Mestrado Profissional em Direito pelo Instituto Brasileiro de Ensino, Desenvolvimento e Pesquisa (IDP). Advogado associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: felipe@cavalcantereis.adv.br)."
+          },
+          {
+            name: "RYSLHAINY DOS SANTOS CORDEIRO",
+            bio: "Graduada em Direito pelo Centro Universitário ICESP. Pós-graduada em Direito Civil e Processo Civil, Direito Tributário e Processo Tributário e Planejamento Tributário (Faculdade Legale). Advogada associada do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: ryslhainy@cavalcantereis.adv.br)."
+          }
+        ];
 
-        {/* Imagens das duas páginas de municípios - menores */}
-        <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '30px' }}>
-          <img src="/munincipios01.png" style={{ maxWidth: '60%', height: 'auto', margin: '0 auto' }} alt="Municípios 1" crossOrigin="anonymous" />
-          <img src="/Munincipios02.png" style={{ maxWidth: '60%', height: 'auto', margin: '0 auto' }} alt="Municípios 2" crossOrigin="anonymous" />
-        </div>
+        return (
+          <>
+            {/* Página 1 do Tópico 5: Título, texto introdutório e imagens dos municípios */}
+            <Page key="section5-page1" pageNumber={basePageNumber} FooterComponent={FooterComp}>
+              <h2 style={{ fontSize: '13px', fontWeight: 'bold', color: '#000', borderBottom: '1px solid #000', paddingBottom: '8px', marginBottom: '15px', marginTop: '0', fontFamily: "'EB Garamond', serif" }}>5. Experiência em atuação em favor de Municípios e da Equipe Responsável</h2>
+              <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '17pt', marginBottom: '20px', marginTop: '0', color: '#000', fontFamily: "'EB Garamond', serif" }}>
+                No portfólio de serviços executados e/ou em execução, constam os seguintes Municípios contratantes:
+              </p>
+              <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '30px' }}>
+                <img src="/munincipios01.png" style={{ maxWidth: '70%', height: 'auto', margin: '0 auto', display: 'block' }} alt="Municípios 1" crossOrigin="anonymous" onError={(e) => { console.error('Erro ao carregar municípios 1'); }} />
+                <img src="/Munincipios02.png" style={{ maxWidth: '70%', height: 'auto', margin: '0 auto', display: 'block' }} alt="Municípios 2" crossOrigin="anonymous" onError={(e) => { console.error('Erro ao carregar municípios 2'); }} />
+              </div>
+              <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '17pt', marginBottom: '0', marginTop: '0', color: '#000', fontFamily: "'EB Garamond', serif" }}>
+                Para coordenar os trabalhos de consultoria propostos neste documento, a CAVALCANTE REIS ADVOGADOS alocará os seguintes profissionais:
+              </p>
+            </Page>
 
-        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', color: '#000', marginBottom: '20px' }}>
-          Para coordenar os trabalhos de consultoria propostos neste documento, a CAVALCANTE REIS ADVOGADOS alocará os seguintes profissionais:
-        </p>
+            {/* Páginas dos profissionais */}
+            {professionals.map((prof, index) => (
+              <Page key={`section5-prof-${index}`} pageNumber={basePageNumber + 1 + index} FooterComponent={FooterComp}>
+                <div style={{ fontSize: '13px', lineHeight: '17pt', color: '#000', marginBottom: '0', marginTop: '0', fontFamily: "'EB Garamond', serif" }}>
+                  <p style={{ fontWeight: 'bold', marginBottom: '8px', marginTop: '0', fontSize: '13px', lineHeight: '17pt', fontFamily: "'EB Garamond', serif" }}>{prof.name}</p>
+                  <p style={{ marginBottom: '0', marginTop: '0', textAlign: 'justify', fontSize: '13px', lineHeight: '17pt', fontFamily: "'EB Garamond', serif" }}>{prof.bio}</p>
+                </div>
+              </Page>
+            ))}
 
-        <div style={{ fontSize: '12px', lineHeight: '1.8', color: '#000', marginBottom: '15px' }}>
-          <p style={{ fontWeight: 'bold', marginBottom: '5px' }}>IURI DO LAGO NOGUEIRA CAVALCANTE REIS</p>
-          <p style={{ marginBottom: '10px', textAlign: 'justify' }}>
-            Doutorando em Direito e Mestre em Direito Econômico e Desenvolvimento pelo Instituto Brasileiro de Ensino, Desenvolvimento e Pesquisa (IDP/Brasília). LLM (Master of Laws) em Direito Empresarial pela Fundação Getúlio Vargas (FGV/RJ). Integrante da Comissão de Juristas do Senado Federal criada para consolidar a proposta do novo Código Comercial Brasileiro. Autor e Coautor de livros, pareceres e artigos jurídicos na área do direito público. Sócio-diretor do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: iuri@cavalcantereis.adv.br).
-          </p>
+            {/* Última página do Tópico 5: Textos finais */}
+            <Page key="section5-final" pageNumber={basePageNumber + 1 + professionals.length} FooterComponent={FooterComp}>
+              <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '17pt', marginBottom: '15px', marginTop: '0', color: '#000', fontFamily: "'EB Garamond', serif" }}>
+                Além desses profissionais, a CAVALCANTE REIS ADVOGADOS alocará uma equipe de profissionais pertencentes ao seu quadro técnico, utilizando, também, caso necessário, o apoio técnico especializado de terceiros, pessoas físicas ou jurídicas, que deverão atuar sob sua orientação, cabendo à CAVALCANTE REIS ADVOGADOS a responsabilidade técnica pela execução das tarefas.
+              </p>
+              <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '17pt', marginBottom: '0', marginTop: '0', color: '#000', fontFamily: "'EB Garamond', serif" }}>
+                Nossa contratação, portanto, devido à altíssima qualificação e experiência, aliada à singularidade do objeto da demanda, bem como os diferenciais já apresentados acima, está inserida dentre as hipóteses do art. 6°, XVIII &quot;e&quot; e art. 74, III, &quot;e&quot;, da Lei n.º 14.133/2021.
+              </p>
+            </Page>
+          </>
+        );
+      })()}
 
-          <p style={{ fontWeight: 'bold', marginBottom: '5px' }}>PEDRO AFONSO FIGUEIREDO DE SOUZA</p>
-          <p style={{ marginBottom: '10px', textAlign: 'justify' }}>
-            Graduado em Direito pela Pontifícia Universidade Católica de Minas Gerais. Especialista em Direito Penal e Processo Penal pela Academia Brasileira de Direito Constitucional. Mestre em Direito nas Relações Econômicas e Sociais pela Faculdade de Direito Milton Campos. Diretor de Comunicação e Conselheiro Consultivo, Científico e Fiscal do Instituto de Ciências Penais. Autor de artigos e capítulos de livros jurídicos. Advogado associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: pedro@cavalcantereis.adv.br).
-          </p>
+      {(() => {
+        // Número da página do tópico 6: basePageNumber (4 + serviceGroups.length) + 1 (página 1 do tópico 5) + 4 (4 profissionais) + 1 (página final do tópico 5) = basePageNumber + 6
+        const section6PageNumber = 4 + serviceGroups.length + 6;
+        return (
+          <Page pageNumber={section6PageNumber} FooterComponent={FooterComp}>
+            <h2 style={{ fontSize: '13px', fontWeight: 'bold', color: '#000', borderBottom: '1px solid #000', paddingBottom: '8px', marginBottom: '20px', marginTop: '0', fontFamily: "'EB Garamond', serif" }}>6. Disposições Finais</h2>
+            <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '17pt', marginBottom: '15px', marginTop: '0', color: '#000', fontFamily: "'EB Garamond', serif" }}>
+              Nesse sentido, ficamos no aguardo da manifestação deste Município para promover os ajustes contratuais que entenderem necessários, sendo mantida a mesma forma de remuneração aqui proposta, com fundamento no art. 6º, XVIII, &quot;e&quot; e art. 74, III, &quot;e&quot;, da Lei n.º 14.133/2021.
+            </p>
+            <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '17pt', marginBottom: '15px', marginTop: '0', color: '#000', fontFamily: "'EB Garamond', serif" }}>
+              A presente proposta tem validade de 60 (sessenta) dias.
+            </p>
+            <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '17pt', marginBottom: '40px', marginTop: '0', color: '#000', fontFamily: "'EB Garamond', serif" }}>
+              Sendo o que se apresenta para o momento, aguardamos posicionamento da parte de V. Exa., colocando-nos, desde já, à inteira disposição para dirimir quaisquer dúvidas eventualmente existentes.
+            </p>
 
-          <p style={{ fontWeight: 'bold', marginBottom: '5px' }}>SÉRGIO RICARDO ALVES DE JESUS FILHO</p>
-          <p style={{ marginBottom: '10px', textAlign: 'justify' }}>
-            Graduado em Direito pelo Centro Universitário de Brasília (UniCEUB). Graduando em Ciências Contábeis pelo Centro Universitário de Brasília (UniCEUB). Pós-graduando em Direito Tributário pelo Instituto Brasileiro de Ensino, Desenvolvimento e Pesquisa (IDP). Membro da Comissão de Assuntos Tributários da OAB/DF. Advogado Associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: sergio@cavalcantereis.adv.br).
-          </p>
+            <p style={{ textAlign: 'right', fontSize: '13px', lineHeight: '17pt', marginBottom: '30px', marginTop: '0', color: '#000', fontFamily: "'EB Garamond', serif" }}>Brasília-DF, {options.data || new Date().toLocaleDateString('pt-BR')}.</p>
 
-          <p style={{ fontWeight: 'bold', marginBottom: '5px' }}>GABRIEL GAUDÊNCIO ZANCHETTA CALIMAN</p>
-          <p style={{ marginBottom: '10px', textAlign: 'justify' }}>
-            Graduado em Direito pelo Centro Universitário de Brasília (UniCeub). Especialista em Gestão Pública e Tributária pelo Gran Centro Universitário. Membro da Comissão de Assuntos Tributários da OAB/DF. Advogado associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: gabrielcaliman@cavalcantereis.adv.br).
-          </p>
+            <div style={{ textAlign: 'right', marginBottom: '30px', marginTop: '0' }}>
+              <p style={{ fontSize: '13px', lineHeight: '17pt', marginBottom: '0', marginTop: '0', color: '#000', fontFamily: "'EB Garamond', serif" }}>Atenciosamente,</p>
+            </div>
 
-          <p style={{ fontWeight: 'bold', marginBottom: '5px' }}>FELIPE NOBREGA ROCHA</p>
-          <p style={{ marginBottom: '10px', textAlign: 'justify' }}>
-            Graduado em Direito pela Universidade Presbiteriana Mackenzie. LLM (Master of Laws) em Direito Empresarial pela Fundação Getúlio Vargas (FGV). Mestrado Profissional em Direito pelo Instituto Brasileiro de Ensino, Desenvolvimento e Pesquisa (IDP). Advogado associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: felipe@cavalcantereis.adv.br).
-          </p>
-
-          <p style={{ fontWeight: 'bold', marginBottom: '5px' }}>RYSLHAINY DOS SANTOS CORDEIRO</p>
-          <p style={{ marginBottom: '10px', textAlign: 'justify' }}>
-            Graduada em Direito pelo Centro Universitário ICESP. Pós-graduada em Direito Civil e Processo Civil, Direito Tributário e Processo Tributário e Planejamento Tributário pela Faculdade Legale. Advogada associada do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: ryslhainy@cavalcantereis.adv.br).
-          </p>
-        </div>
-
-        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', color: '#000', marginTop: '20px', marginBottom: '10px' }}>
-          Além desses profissionais, a CAVALCANTE REIS ADVOGADOS alocará uma equipe de profissionais pertencentes ao seu quadro técnico, utilizando, também, caso necessário, o apoio técnico especializado de terceiros, pessoas físicas ou jurídicas, que deverão atuar sob sua orientação, cabendo à CAVALCANTE REIS ADVOGADOS a responsabilidade técnica pela execução das tarefas.
-        </p>
-
-        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', color: '#000' }}>
-          Nossa contratação, portanto, devido à altíssima qualificação e experiência, aliada à singularidade do objeto da demanda, bem como os diferenciais já apresentados acima, está inserida dentre as hipóteses do art. 6°, XVIII &quot;e&quot; e art. 74, III, &quot;e&quot;, da Lei n.º 14.133/2021.
-        </p>
-      </Page>
-
-      <Page pageNumber={6 + serviceGroups.length} FooterComponent={FooterComp}>
-        <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#000', borderBottom: '1px solid #000', paddingBottom: '8px', marginBottom: '20px' }}>6. Disposições Finais</h2>
-        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', color: '#000', marginBottom: '15px' }}>
-          Nesse sentido, ficamos no aguardo da manifestação deste Município para promover os ajustes contratuais que entenderem necessários, sendo mantida a mesma forma de remuneração aqui proposta, com fundamento no art. 6º, XVIII, &quot;e&quot; e art. 74, III, &quot;e&quot;, da Lei n.º 14.133/2021.
-        </p>
-        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', color: '#000', marginBottom: '15px' }}>
-          A presente proposta tem validade de 60 (sessenta) dias.
-        </p>
-        <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '1.6', color: '#000', marginBottom: '40px' }}>
-          Sendo o que se apresenta para o momento, aguardamos posicionamento da parte de V. Exa., colocando-nos, desde já, à inteira disposição para dirimir quaisquer dúvidas eventualmente existentes.
-        </p>
-
-        <p style={{ textAlign: 'right', fontSize: '14px', marginBottom: '20px', color: '#000' }}>Brasília-DF, {options.data || new Date().toLocaleDateString('pt-BR')}.</p>
-
-        <div style={{ textAlign: 'right', marginBottom: '20px' }}>
-          <p style={{ fontSize: '14px', marginBottom: '10px', color: '#000' }}>Atenciosamente,</p>
-        </div>
-
-        <div style={{ textAlign: 'center', marginTop: '40px' }}>
-          <img src="/Assinatura.png" style={{ width: '180px', margin: '10px auto' }} alt="Assinatura" crossOrigin="anonymous" />
-          <h3 style={{ fontWeight: 'bold', color: '#000', fontSize: '16px', marginTop: '10px' }}>CAVALCANTE REIS ADVOGADOS</h3>
-        </div>
-      </Page>
+            <div style={{ textAlign: 'center', marginTop: '0', marginBottom: '0' }}>
+              <img src="/Assinatura.png" style={{ width: '180px', height: 'auto', margin: '10px auto', display: 'block' }} alt="Assinatura" crossOrigin="anonymous" onError={(e) => { console.error('Erro ao carregar assinatura'); }} />
+              <h3 style={{ fontWeight: 'bold', color: '#000', fontSize: '13px', lineHeight: '17pt', marginTop: '15px', marginBottom: '0', fontFamily: "'EB Garamond', serif" }}>CAVALCANTE REIS ADVOGADOS</h3>
+            </div>
+          </Page>
+        );
+      })()}
     </div>
   );
 };
@@ -885,26 +910,50 @@ export default function ProposalGenerator({ onBackToHome, onLogout }: ProposalGe
           }
 
           let loadedCount = 0;
+          let errorCount = 0;
           const totalImages = images.length;
 
           const checkComplete = () => {
             loadedCount++;
             if (loadedCount === totalImages) {
+              console.log(`Todas as ${totalImages} imagens carregadas (${errorCount} com erro)`);
               resolve();
             }
           };
 
-          images.forEach((img) => {
-            if (img.complete) {
+          images.forEach((img, index) => {
+            // Forçar recarregamento se necessário
+            if (img.src && !img.complete) {
+              const originalSrc = img.src;
+              img.src = '';
+              img.src = originalSrc;
+            }
+
+            if (img.complete && img.naturalHeight !== 0) {
               checkComplete();
             } else {
-              img.onload = checkComplete;
-              img.onerror = checkComplete; // Continua mesmo se houver erro na imagem
+              img.onload = () => {
+                checkComplete();
+              };
+              img.onerror = () => {
+                console.warn(`Erro ao carregar imagem ${index + 1}:`, img.src);
+                errorCount++;
+                checkComplete(); // Continua mesmo se houver erro na imagem
+              };
+              // Se a imagem já tinha src mas não estava completa, pode já ter disparado os eventos
+              if (img.src && img.complete) {
+                setTimeout(checkComplete, 100);
+              }
             }
           });
 
-          // Timeout de segurança
-          setTimeout(resolve, 3000);
+          // Timeout de segurança aumentado
+          setTimeout(() => {
+            if (loadedCount < totalImages) {
+              console.warn(`Timeout: apenas ${loadedCount}/${totalImages} imagens carregadas`);
+              resolve();
+            }
+          }, 5000);
         });
       };
 
@@ -922,13 +971,14 @@ export default function ProposalGenerator({ onBackToHome, onLogout }: ProposalGe
         return;
       }
 
-      // Aguardar imagens carregarem
+      // Aguardar imagens carregarem em todas as páginas
+      console.log('Aguardando carregamento de imagens...');
       for (let i = 0; i < pages.length; i++) {
         await waitForImages(pages[i] as HTMLElement);
       }
 
       // Aguardar um pouco mais para garantir renderização completa
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       for (let i = 0; i < pages.length; i++) {
         if (i > 0) {
@@ -938,37 +988,84 @@ export default function ProposalGenerator({ onBackToHome, onLogout }: ProposalGe
         const pageElement = pages[i] as HTMLElement;
 
         try {
+          // Forçar estilo de overflow antes de capturar
+          const originalOverflow = pageElement.style.overflow;
+          pageElement.style.overflow = 'hidden';
+
           const canvas = await html2canvas(pageElement, {
             scale: 2,
             useCORS: true,
-            allowTaint: false,
+            allowTaint: true,
             logging: false,
             backgroundColor: '#ffffff',
-            width: pageElement.scrollWidth || 794, // 210mm em pixels (210mm * 3.779527559 = ~794px)
-            height: pageElement.scrollHeight || 1123, // 297mm em pixels
-            windowWidth: pageElement.scrollWidth || 794,
-            windowHeight: pageElement.scrollHeight || 1123,
+            width: 794, // 210mm em pixels (210mm * 3.779527559 = ~794px)
+            height: 1123, // 297mm em pixels (297mm * 3.779527559 = ~1123px)
+            windowWidth: 794,
+            windowHeight: 1123,
           });
+
+          // Restaurar overflow original
+          pageElement.style.overflow = originalOverflow;
 
           const imgData = canvas.toDataURL('image/jpeg', 0.95);
           const imgWidth = 210; // A4 width in mm
-          const imgHeight = (canvas.height * imgWidth) / canvas.width;
+          const imgHeight = 297; // A4 height in mm (fixo)
 
-          // Limitar altura máxima para A4
-          const maxHeight = 297; // A4 height in mm
-          if (imgHeight > maxHeight) {
-            const ratio = maxHeight / imgHeight;
-            pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth * ratio, maxHeight);
-          } else {
-            pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
-          }
+          pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
         } catch (pageError) {
           console.error(`Erro ao processar página ${i + 1}:`, pageError);
           // Continua para próxima página mesmo se uma falhar
         }
       }
 
-      pdf.save(`Proposta_${options.municipio || "CR"}.pdf`);
+      // Formato do nome: DD.MM.YYYY - Proposta de Serviços Advocatícios - Município de NOME - UF (êxito).pdf
+      const formatDateForFilename = (dateStr: string) => {
+        if (!dateStr) {
+          const today = new Date();
+          return `${String(today.getDate()).padStart(2, '0')}.${String(today.getMonth() + 1).padStart(2, '0')}.${today.getFullYear()}`;
+        }
+
+        // Tenta extrair data no formato brasileiro: "04 de dezembro de 2025"
+        const dateMatch = dateStr.match(/(\d{1,2})\s+de\s+(\w+)\s+de\s+(\d{4})/);
+        if (dateMatch) {
+          const months: Record<string, string> = {
+            'janeiro': '01', 'fevereiro': '02', 'março': '03', 'abril': '04',
+            'maio': '05', 'junho': '06', 'julho': '07', 'agosto': '08',
+            'setembro': '09', 'outubro': '10', 'novembro': '11', 'dezembro': '12'
+          };
+          const day = dateMatch[1].padStart(2, '0');
+          const month = months[dateMatch[2].toLowerCase()] || '01';
+          const year = dateMatch[3];
+          return `${day}.${month}.${year}`;
+        }
+
+        // Se já estiver no formato DD/MM/YYYY ou DD.MM.YYYY
+        const dateMatch2 = dateStr.match(/(\d{1,2})[./](\d{1,2})[./](\d{4})/);
+        if (dateMatch2) {
+          const day = dateMatch2[1].padStart(2, '0');
+          const month = dateMatch2[2].padStart(2, '0');
+          const year = dateMatch2[3];
+          return `${day}.${month}.${year}`;
+        }
+
+        return dateStr.replace(/\//g, '.').replace(/\s+/g, '_');
+      };
+
+      const filenameDate = formatDateForFilename(options.data || '');
+      const municipio = options.municipio || 'CR';
+
+      // Extrai UF do município se estiver no formato "Nome - UF"
+      const municipioParts = municipio.split(' - ');
+      const nomeMunicipio = municipioParts[0];
+      const uf = municipioParts[1] || '';
+
+      let filename = `${filenameDate} - Proposta de Serviços Advocatícios - Município de ${nomeMunicipio}`;
+      if (uf) {
+        filename += ` - ${uf}`;
+      }
+      filename += ' (êxito).pdf';
+
+      pdf.save(filename);
 
       setModal({
         open: true,
@@ -1033,39 +1130,78 @@ export default function ProposalGenerator({ onBackToHome, onLogout }: ProposalGe
     }
 
     setLoadingDocx(true);
-    try {
-      const payload = {
-        municipio: options.municipio,
-        data: options.data,
-        prazo,
-        paymentValue,
-        services: activeServicesList.map(k => ({
-          label: allServices[k],
-          content: serviceTextDatabase[k],
-          cabimento: customCabimentos[k] || "Cabível"
-        })),
-        footerOffices
-      };
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const response = await fetch(`${apiUrl}/documents/generate-docx`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+    const container = document.getElementById("preview");
+    if (!container) {
+      setModal({
+        open: true,
+        title: "Erro",
+        message: "Container de preview não encontrado.",
+        type: "error"
       });
+      setLoadingDocx(false);
+      return;
+    }
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        let errorMessage = "Erro ao gerar o documento.";
-        try {
-          const errorJson = JSON.parse(errorText);
-          errorMessage = errorJson.message || errorMessage;
-        } catch {
-          errorMessage = errorText || errorMessage;
-        }
-        throw new Error(errorMessage);
-      }
+    try {
+      // Aguardar um pouco para garantir que todas as imagens estejam carregadas
+      await new Promise(resolve => setTimeout(resolve, 500));
 
-      const blob = await response.blob();
+      // Obter o HTML completo da prévia diretamente do container
+      const htmlContent = container.innerHTML;
+
+      // Adicionar estilos inline para melhor formatação no Word
+      const styledHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <style>
+            body { 
+              font-family: 'EB Garamond', serif; 
+              margin: 0;
+              padding: 20mm 20mm 15mm 25mm;
+            }
+            .pdf-page-render {
+              page-break-after: always;
+              margin-bottom: 30px;
+            }
+            .pdf-page-render:last-child {
+              page-break-after: auto;
+            }
+            img {
+              max-width: 100%;
+              height: auto;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+            }
+            th, td {
+              border: 1px solid #000;
+              padding: 8px;
+            }
+            p {
+              text-align: justify;
+              margin: 0;
+              padding: 0;
+              font-size: 13px;
+              line-height: 17pt;
+              font-family: 'EB Garamond', serif;
+            }
+            h2, h3 {
+              font-size: 13px;
+              font-family: 'EB Garamond', serif;
+            }
+          </style>
+        </head>
+        <body>
+          ${htmlContent}
+        </body>
+        </html>
+      `;
+
+      // Converter HTML para DOCX
+      const blob = htmlDocx.asBlob(styledHtml);
       saveAs(blob, `Proposta_${options.municipio || "CR"}.docx`);
 
       setModal({
@@ -1075,11 +1211,11 @@ export default function ProposalGenerator({ onBackToHome, onLogout }: ProposalGe
         type: "success"
       });
     } catch (e: any) {
-      console.error(e);
+      console.error('Erro ao gerar DOCX:', e);
       setModal({
         open: true,
         title: "Erro",
-        message: `Erro ao gerar DOCX: ${e.message || 'Erro desconhecido'}. Verifique se o backend está rodando.`,
+        message: `Erro ao gerar DOCX: ${e.message || 'Erro desconhecido'}. Tente novamente.`,
         type: "error"
       });
     } finally {

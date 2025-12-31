@@ -78,6 +78,7 @@ export class DocumentsService {
   async generateFromData(data: any): Promise<Buffer> {
     const {
       municipio,
+      destinatario,
       data: dataProposta,
       prazo,
       paymentValue,
@@ -161,7 +162,7 @@ export class DocumentsService {
           new TextRun({ text: 'Proponente:', bold: true, font: defaultFont, size: 24 }),
           new TextRun({ break: 1, text: 'Cavalcante Reis Advogados', font: defaultFont, size: 24 }),
           new TextRun({ break: 2, text: 'Destinatário:', bold: true, font: defaultFont, size: 24 }),
-          new TextRun({ break: 1, text: `Prefeitura Municipal de ${municipio}`, font: defaultFont, size: 24 }),
+          new TextRun({ break: 1, text: destinatario || `Prefeitura Municipal de ${municipio}`, font: defaultFont, size: 24 }),
         ],
       }),
       new Paragraph({

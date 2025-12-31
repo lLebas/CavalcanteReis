@@ -360,14 +360,46 @@ html,
 .pdf-page-render {
   background: white;
   width: 210mm;
-  min-height: 297mm;
-  padding: 25mm 20mm 20mm 25mm;
+  height: 297mm;
+  padding: 20mm 20mm 15mm 25mm;
   box-sizing: border-box;
   position: relative;
   display: flex;
   flex-direction: column;
   page-break-after: always;
-  margin-bottom: 20px;
+  margin-bottom: 0;
+  overflow: hidden !important;
+}
+
+/* Estilos globais para textos dentro da prévia */
+.pdf-page-render p {
+  text-align: justify !important;
+  font-size: 13px !important;
+  line-height: 17pt !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  font-family: 'EB Garamond', serif !important;
+}
+
+.pdf-page-render h2, .pdf-page-render h3 {
+  font-size: 13px !important;
+  font-family: 'EB Garamond', serif !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* Garantir que parágrafos dentro de divs também tenham o espaçamento correto */
+.pdf-page-render div p {
+  text-align: justify !important;
+  font-size: 13px !important;
+  line-height: 17pt !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  font-family: 'EB Garamond', serif !important;
 }
 
 .preview-title {
