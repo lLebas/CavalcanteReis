@@ -105,14 +105,40 @@ export class DocumentsService {
         if (footerOffices.am?.enabled) enabledOffices.push(footerOffices.am);
       }
 
+      // Se não houver escritórios habilitados, usa apenas DF como padrão
+      if (enabledOffices.length === 0) {
+        enabledOffices.push({
+          cidade: 'Brasília - DF',
+          linha1: 'SHIS QL 10, Conj. 06, Casa 19',
+          linha2: 'Lago Sul,',
+          linha3: 'CEP: 71630-065'
+        });
+      }
+
       const footerCells = enabledOffices.map(office =>
         new TableCell({
           borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } },
           children: [
-            new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: office.cidade, bold: true, font: defaultFont, size: 18 })] }),
-            new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: office.linha1, font: defaultFont, size: 16 })] }),
-            new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: office.linha2, font: defaultFont, size: 16 })] }),
-            new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: office.linha3, font: defaultFont, size: 16 })] }),
+            new Paragraph({
+              alignment: AlignmentType.CENTER,
+              spacing: { after: 100 },
+              children: [new TextRun({ text: office.cidade, bold: true, font: defaultFont, size: 18 })]
+            }),
+            new Paragraph({
+              alignment: AlignmentType.CENTER,
+              spacing: { after: 50 },
+              children: [new TextRun({ text: office.linha1, font: defaultFont, size: 16 })]
+            }),
+            new Paragraph({
+              alignment: AlignmentType.CENTER,
+              spacing: { after: 50 },
+              children: [new TextRun({ text: office.linha2, font: defaultFont, size: 16 })]
+            }),
+            new Paragraph({
+              alignment: AlignmentType.CENTER,
+              spacing: { after: 0 },
+              children: [new TextRun({ text: office.linha3, font: defaultFont, size: 16 })]
+            }),
           ],
         })
       );
@@ -126,14 +152,14 @@ export class DocumentsService {
           }),
           new Paragraph({
             alignment: AlignmentType.CENTER,
-            spacing: { before: 200 },
+            spacing: { before: 150, after: 0 },
             children: [
               new TextRun({
-                text: 'www.cavalcante-reis.adv.br',
+                text: 'WWW.CAVALCANTE-REIS.ADV.BR',
                 bold: true,
                 font: defaultFont,
                 size: 18,
-                color: '666666',
+                color: '000000', // Preto
               }),
             ],
           }),
@@ -153,22 +179,53 @@ export class DocumentsService {
         })
       );
     }
-    
+
+    // Linha superior (curta, alinhada à direita)
     docChildren.push(
       new Paragraph({
+        text: '________________________',
         alignment: AlignmentType.RIGHT,
-        spacing: { before: 3000 },
-        children: [
-          new TextRun({ text: 'Proponente:', bold: true, font: defaultFont, size: 24 }),
-          new TextRun({ break: 1, text: 'Cavalcante Reis Advogados', font: defaultFont, size: 24 }),
-          new TextRun({ break: 2, text: 'Destinatário:', bold: true, font: defaultFont, size: 24 }),
-          new TextRun({ break: 1, text: destinatario || `Prefeitura Municipal de ${municipio}`, font: defaultFont, size: 24 }),
-        ],
+        spacing: { before: 2000, after: 100 },
+      })
+    );
+
+    // Proponente (alinhado à direita)
+    docChildren.push(
+      new Paragraph({
+        children: [new TextRun({ text: 'Proponente:', bold: true, font: defaultFont, size: 24 })],
+        alignment: AlignmentType.RIGHT,
+      }),
+      new Paragraph({
+        text: 'Cavalcante Reis Advogados',
+        alignment: AlignmentType.RIGHT,
+        spacing: { after: 200 },
+      })
+    );
+
+    // Destinatário (alinhado à direita)
+    docChildren.push(
+      new Paragraph({
+        children: [new TextRun({ text: 'Destinatário:', bold: true, font: defaultFont, size: 24 })],
+        alignment: AlignmentType.RIGHT,
+      }),
+      new Paragraph({
+        text: destinatario || `Prefeitura Municipal de ${municipio}`,
+        alignment: AlignmentType.RIGHT,
+        spacing: { after: 200 },
+      })
+    );
+
+    // Linha inferior (curta, alinhada à direita) com ano colado
+    docChildren.push(
+      new Paragraph({
+        text: '________________________',
+        alignment: AlignmentType.RIGHT,
+        spacing: { after: 0 },
       }),
       new Paragraph({
         alignment: AlignmentType.RIGHT,
-        spacing: { before: 1000 },
-        children: [new TextRun({ text: dataProposta || '2025', bold: true, font: defaultFont, size: 32 })],
+        spacing: { before: 0 },
+        children: [new TextRun({ text: dataProposta || new Date().getFullYear().toString(), bold: true, font: defaultFont, size: 32 })],
       }),
       new Paragraph({ children: [new PageBreak()] })
     );
@@ -450,15 +507,138 @@ export class DocumentsService {
         border: { bottom: { color: '000000', space: 1, style: BorderStyle.SINGLE, size: 6 } },
         children: [new TextRun({ text: '5. Experiência e Equipe Responsável', bold: true, font: defaultFont, size: titleSize })],
       }),
+      new Paragraph({
+        alignment: AlignmentType.JUSTIFIED,
+        spacing: { before: 200, after: 200 },
+        children: [
+          new TextRun({
+            text: 'No portfólio de serviços executados e/ou em execução, constam os seguintes Municípios contratantes:',
+            font: defaultFont,
+            size: defaultSize,
+          }),
+        ],
+      }),
       ...(mun01Buffer ? [new Paragraph({
         alignment: AlignmentType.CENTER,
+        spacing: { before: 200, after: 200 },
         children: [new ImageRun({ data: mun01Buffer, transformation: { width: 500, height: 250 } })],
       })] : []),
       ...(mun02Buffer ? [new Paragraph({
         alignment: AlignmentType.CENTER,
-        spacing: { before: 400 },
+        spacing: { before: 200, after: 200 },
         children: [new ImageRun({ data: mun02Buffer, transformation: { width: 500, height: 180 } })],
       })] : []),
+      new Paragraph({
+        alignment: AlignmentType.JUSTIFIED,
+        spacing: { before: 200, after: 200 },
+        children: [
+          new TextRun({
+            text: 'Para coordenar os trabalhos de consultoria propostos neste documento, a CAVALCANTE REIS ADVOGADOS alocará os seguintes profissionais:',
+            font: defaultFont,
+            size: defaultSize,
+          }),
+        ],
+      }),
+
+      // Profissional 1: IURI DO LAGO NOGUEIRA CAVALCANTE REIS
+      new Paragraph({
+        children: [
+          new TextRun({ text: 'IURI DO LAGO NOGUEIRA CAVALCANTE REIS', bold: true, font: defaultFont, size: 24 }),
+        ],
+        spacing: { before: 200, after: 0 },
+      }),
+      new Paragraph({
+        alignment: AlignmentType.JUSTIFIED,
+        spacing: { before: 0, after: 150 },
+        children: [
+          new TextRun({
+            text: 'Doutorando em Direito e Mestre em Direito Econômico e Desenvolvimento pelo Instituto Brasileiro de Ensino, Desenvolvimento e Pesquisa (IDP/Brasília). LLM (Master of Laws) em Direito Empresarial pela Fundação Getúlio Vargas (FGV/RJ). Integrante da Comissão de Juristas do Senado Federal criada para consolidar a proposta do novo Código Comercial Brasileiro. Autor e Coautor de livros, pareceres e artigos jurídicos na área do direito público. Sócio-diretor do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: iuri@cavalcantereis.adv.br).',
+            font: defaultFont,
+            size: defaultSize,
+          }),
+        ],
+      }),
+
+      // Profissional 2: GABRIEL GAUDÊNCIO ZANCHETTA CALIMAN
+      new Paragraph({
+        children: [
+          new TextRun({ text: 'GABRIEL GAUDÊNCIO ZANCHETTA CALIMAN', bold: true, font: defaultFont, size: 24 }),
+        ],
+        spacing: { before: 100, after: 0 },
+      }),
+      new Paragraph({
+        alignment: AlignmentType.JUSTIFIED,
+        spacing: { before: 0, after: 150 },
+        children: [
+          new TextRun({
+            text: 'Graduado em Direito pelo Centro Universitário de Brasília (UniCeub). Especialista em Gestão Pública e Tributária pelo Gran Centro Universitário. Membro da Comissão de Assuntos Tributários da OAB/DF. Advogado associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: gabrielcaliman@cavalcantereis.adv.br).',
+            font: defaultFont,
+            size: defaultSize,
+          }),
+        ],
+      }),
+
+      // Profissional 3: FELIPE NOBREGA ROCHA
+      new Paragraph({
+        children: [
+          new TextRun({ text: 'FELIPE NOBREGA ROCHA', bold: true, font: defaultFont, size: 24 }),
+        ],
+        spacing: { before: 100, after: 0 },
+      }),
+      new Paragraph({
+        alignment: AlignmentType.JUSTIFIED,
+        spacing: { before: 0, after: 150 },
+        children: [
+          new TextRun({
+            text: 'Graduado em Direito pela Universidade Presbiteriana Mackenzie. LLM (Master of Laws) em Direito Empresarial pela Fundação Getúlio Vargas (FGV). Mestrado Profissional em Direito pelo Instituto Brasileiro de Ensino, Desenvolvimento e Pesquisa (IDP). Advogado associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: felipe@cavalcantereis.adv.br).',
+            font: defaultFont,
+            size: defaultSize,
+          }),
+        ],
+      }),
+
+      // Profissional 4: RYSLHAINY DOS SANTOS CORDEIRO
+      new Paragraph({
+        children: [
+          new TextRun({ text: 'RYSLHAINY DOS SANTOS CORDEIRO', bold: true, font: defaultFont, size: 24 }),
+        ],
+        spacing: { before: 100, after: 0 },
+      }),
+      new Paragraph({
+        alignment: AlignmentType.JUSTIFIED,
+        spacing: { before: 0, after: 200 },
+        children: [
+          new TextRun({
+            text: 'Graduada em Direito pelo Centro Universitário ICESP. Pós-graduada em Direito Civil e Processo Civil, Direito Tributário e Processo Tributário e Planejamento Tributário (Faculdade Legale). Advogada associada do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: ryslhainy@cavalcantereis.adv.br).',
+            font: defaultFont,
+            size: defaultSize,
+          }),
+        ],
+      }),
+
+      // Texto "Além desses profissionais..."
+      new Paragraph({
+        alignment: AlignmentType.JUSTIFIED,
+        spacing: { before: 0, after: 200 },
+        children: [
+          new TextRun({
+            text: 'Além desses profissionais, a CAVALCANTE REIS ADVOGADOS alocará uma equipe de profissionais pertencentes ao seu quadro técnico, utilizando, também, caso necessário, o apoio técnico especializado de terceiros, pessoas físicas ou jurídicas, que deverão atuar sob sua orientação, cabendo à CAVALCANTE REIS ADVOGADOS a responsabilidade técnica pela execução das tarefas.',
+            font: defaultFont,
+            size: defaultSize,
+          }),
+        ],
+      }),
+      new Paragraph({
+        alignment: AlignmentType.JUSTIFIED,
+        spacing: { before: 0, after: 200 },
+        children: [
+          new TextRun({
+            text: 'Nossa contratação, portanto, devido à altíssima qualificação e experiência, aliada à singularidade do objeto da demanda, bem como os diferenciais já apresentados acima, está inserida dentre as hipóteses do art. 6°, XVIII "e" e art. 74, III, "e", da Lei n.º 14.133/2021.',
+            font: defaultFont,
+            size: defaultSize,
+          }),
+        ],
+      }),
       new Paragraph({ children: [new PageBreak()] }),
 
       new Paragraph({

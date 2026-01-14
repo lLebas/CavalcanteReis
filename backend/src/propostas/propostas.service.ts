@@ -23,11 +23,11 @@ export class PropostasService {
     await fs.writeFile(this.dataFile, JSON.stringify(data, null, 2), 'utf-8');
   }
 
-  private isOlderThan7Days(iso: string): boolean {
+  private isOlderThan365Days(iso: string): boolean {
     const date = new Date(iso);
     const now = new Date();
     const diff = now.getTime() - date.getTime();
-    return diff > 7 * 24 * 60 * 60 * 1000;
+    return diff > 365 * 24 * 60 * 60 * 1000; // 365 dias
   }
 
   async create(createPropostaDto: CreatePropostaDto) {
@@ -45,8 +45,8 @@ export class PropostasService {
 
   async findAll() {
     const items = await this.readData();
-    // Cleanup: remove items older than 7 days
-    const filtered = items.filter((i) => !this.isOlderThan7Days(i.createdAt));
+    // Cleanup: remove items older than 365 days
+    const filtered = items.filter((i) => !this.isOlderThan365Days(i.createdAt));
     if (filtered.length !== items.length) {
       await this.writeData(filtered);
     }
