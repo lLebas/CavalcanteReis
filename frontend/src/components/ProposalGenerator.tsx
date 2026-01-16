@@ -10,6 +10,7 @@ import { jsPDF } from "jspdf"; // Biblioteca para gerar PDF
 import html2canvas from "html2canvas"; // Biblioteca para converter HTML em canvas/imagem
 // @ts-ignore - html-docx-js não tem tipos TypeScript
 import htmlDocx from "html-docx-js/dist/html-docx"; // Biblioteca para converter HTML em DOCX
+import { propostasApi, Proposta } from "../lib/api"; // API para salvar/carregar propostas no backend
 
 // ========== CONSTANTES: LISTA DE SERVIÇOS DISPONÍVEIS ==========
 // Dicionário com todos os serviços/teses que podem ser incluídos na proposta
@@ -221,6 +222,7 @@ energia elétrica da Distribuidora do Estado com relação ao município.</p>
 interface ProposalGeneratorProps {
   onBackToHome: () => void; // Função para voltar para a página inicial
   onLogout: () => void; // Função para fazer logout
+  propostaToLoad?: string | null; // ID da proposta para carregar automaticamente (opcional)
 }
 
 // ========== COMPONENTE: BARRA LATERAL DE CONTROLES ==========
@@ -242,6 +244,8 @@ const ControlsSidebar = ({
   setFooterOffices,
   paymentValue,
   setPaymentValue,
+  retentionPeriod,
+  setRetentionPeriod,
   savedProposals,
   onLoadProposal,
   onDeleteProposal,
@@ -250,6 +254,7 @@ const ControlsSidebar = ({
   onSaveProposal,
   onDownloadDocx,
   loadingDocx,
+  loadingProposals,
 }: any) => {
   // ========== HANDLERS: FUNÇÕES DE CONTROLE ==========
 
@@ -283,7 +288,12 @@ const ControlsSidebar = ({
   // Atualiza campos de opções gerais (município, destinatário, data)
   const handleOptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setOptions((prev: any) => ({ ...prev, [name]: value }));
+    // Se o município for alterado, atualiza também o destinatário
+    if (name === 'municipio') {
+      setOptions((prev: any) => ({ ...prev, [name]: value, destinatario: value }));
+    } else {
+      setOptions((prev: any) => ({ ...prev, [name]: value }));
+    }
   };
 
   // ========== RENDERIZAÇÃO: BARRA LATERAL ==========
@@ -371,44 +381,35 @@ const ControlsSidebar = ({
         <input type="text" value={paymentValue} onChange={(e) => setPaymentValue(e.target.value)} placeholder="Ex: R$ 0,12 (doze centavos)" style={{ borderRadius: '8px', border: '1px solid #ccc' }} />
       </div>
 
+      <div className="field" style={{ marginTop: '16px' }}>
+        <label>Período de Retenção (Opcional)</label>
+        <select
+          value={retentionPeriod}
+          onChange={(e) => setRetentionPeriod(Number(e.target.value))}
+          style={{ borderRadius: '8px', border: '1px solid #ccc', padding: '8px', width: '100%', fontSize: '14px' }}
+        >
+          <option value={15}>15 dias (teste rápido)</option>
+          <option value={30}>1 mês</option>
+          <option value={90}>3 meses</option>
+          <option value={180}>6 meses</option>
+          <option value={365}>1 ano (padrão)</option>
+          <option value={730}>2 anos</option>
+        </select>
+        <p style={{ fontSize: '11px', color: '#666', marginTop: '4px', marginBottom: '0' }}>
+          Tempo que a proposta ficará salva no servidor. Se não escolher, será 1 ano.
+        </p>
+      </div>
+
       {/* Seção: Botões de ação (Salvar, Baixar DOCX) */}
       <div className="actions" style={{ marginTop: '30px' }}>
-        <button className="btn primary" onClick={onSaveProposal} style={{ width: '100%', padding: '14px' }}>
-          <Save size={18} /> Salvar Proposta
+        <button className="btn primary" onClick={onSaveProposal} style={{ width: '100%', padding: '14px' }} disabled={loadingProposals}>
+          {loadingProposals ? "Salvando..." : <><Save size={18} /> Salvar Proposta</>}
         </button>
         <button className="btn secondary" style={{ width: '100%', padding: '14px' }} onClick={onDownloadDocx} disabled={loadingDocx}>
           {loadingDocx ? "Gerando..." : <><Download size={18} /> .docx</>}
         </button>
       </div>
 
-      {/* Seção: Lista de propostas salvas no localStorage */}
-      <div className="saved-proposals">
-        <h3>Propostas Salvas</h3>
-        <div className="proposals-list">
-          {savedProposals.length === 0 ? <p style={{ fontSize: '13px', color: '#999' }}>Nenhuma proposta salva.</p> :
-            savedProposals.map((p: any) => {
-              const expiresAt = p.expiresAt ? new Date(p.expiresAt) : null;
-              const daysUntilExpiry = expiresAt ? Math.ceil((expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : null;
-
-              return (
-                <div key={p.id} className="proposal-item">
-                  <div style={{ fontWeight: 'bold', fontSize: '14px', marginBottom: '4px' }}>{p.municipio || "Sem nome"}</div>
-                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>{p.data}</div>
-                  {daysUntilExpiry && daysUntilExpiry > 0 && (
-                    <div style={{ fontSize: '11px', color: '#999', marginBottom: '8px' }}>
-                      Expira em {daysUntilExpiry} dia{daysUntilExpiry > 1 ? 's' : ''}
-                    </div>
-                  )}
-                  <div style={{ display: 'flex', gap: '6px' }}>
-                    <button onClick={() => onLoadProposal(p)} className="btn-small load">Carregar</button>
-                    <button onClick={() => onDeleteProposal(p.id)} className="btn-small delete">Excluir</button>
-                  </div>
-                </div>
-              );
-            })
-          }
-        </div>
-      </div>
     </aside>
   );
 };
@@ -446,6 +447,44 @@ const ProposalDocument = ({ options, prazo, services, customCabimentos, customEs
     return dateStr;
   };
 
+  // ========== FUNÇÃO: FORMATAR DATA APENAS COM NÚMEROS ==========
+  // Converte a data para o formato "DD/MM/YYYY" (ex: "15/10/2026")
+  const formatDateNumeric = (dateStr: string): string => {
+    if (!dateStr) {
+      const today = new Date();
+      const day = String(today.getDate()).padStart(2, '0');
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const year = today.getFullYear();
+      return `${day}/${month}/${year}`;
+    }
+
+    // Se já estiver no formato DD/MM/YYYY ou DD.MM.YYYY, normaliza para DD/MM/YYYY
+    const dateMatch = dateStr.match(/(\d{1,2})[./](\d{1,2})[./](\d{4})/);
+    if (dateMatch) {
+      const day = dateMatch[1].padStart(2, '0');
+      const month = dateMatch[2].padStart(2, '0');
+      const year = dateMatch[3];
+      return `${day}/${month}/${year}`;
+    }
+
+    // Se estiver no formato "DD de mês de YYYY", converte para DD/MM/YYYY
+    const dateMatch2 = dateStr.match(/(\d{1,2})\s+de\s+(\w+)\s+de\s+(\d{4})/);
+    if (dateMatch2) {
+      const day = dateMatch2[1].padStart(2, '0');
+      const months: Record<string, string> = {
+        'janeiro': '01', 'fevereiro': '02', 'março': '03', 'abril': '04',
+        'maio': '05', 'junho': '06', 'julho': '07', 'agosto': '08',
+        'setembro': '09', 'outubro': '10', 'novembro': '11', 'dezembro': '12'
+      };
+      const month = months[dateMatch2[2].toLowerCase()] || '01';
+      const year = dateMatch2[3];
+      return `${day}/${month}/${year}`;
+    }
+
+    // Se não conseguir converter, retorna a data original
+    return dateStr;
+  };
+
   // ========== COMPONENTE INTERNO: RODAPÉ ==========
   // Componente que renderiza o rodapé de cada página com endereços dos escritórios
   const FooterComp = () => {
@@ -456,18 +495,37 @@ const ProposalDocument = ({ options, prazo, services, customCabimentos, customEs
     if (footerOffices.am.enabled) enabledOffices.push(footerOffices.am);
 
     return (
-      <div className="page-footer-container" style={{ marginTop: 'auto', paddingTop: '20px' }}>
-        {/* Grid com 3 colunas de escritórios */}
-        <div style={{ display: 'grid', gridTemplateColumns: `repeat(${enabledOffices.length || 1}, 1fr)`, gap: '10px', textAlign: 'center', fontSize: '10px', color: '#000', lineHeight: '1.1', fontFamily: "'Garamond', serif", marginBottom: '10px' }}>
+      <div className="page-footer-container" style={{ marginTop: 'auto', paddingTop: '20px', width: '100%' }}>
+        {/* Container com flexbox para escritórios lado a lado */}
+        <div style={{
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'space-around',
+          alignItems: 'flex-start',
+          gap: '15px',
+          textAlign: 'center',
+          fontSize: '10px',
+          color: '#000',
+          lineHeight: '1.1',
+          fontFamily: "'Garamond', serif",
+          marginBottom: '10px',
+          flexWrap: 'wrap'
+        }}>
           {enabledOffices.length > 0 ? enabledOffices.map((off: any, i: number) => (
-            <div key={i}>
+            <div key={i} style={{
+              flex: '1',
+              minWidth: '150px',
+              maxWidth: '200px',
+              wordWrap: 'break-word',
+              overflowWrap: 'break-word'
+            }}>
               <div style={{ fontWeight: 'bold', color: '#000', marginBottom: '1px', textTransform: 'uppercase', fontSize: '9px' }}>{off.cidade}</div>
               <div style={{ fontSize: '9.9px' }}>{off.linha1}</div>
               <div style={{ fontSize: '10px' }}>{off.linha2}</div>
               <div style={{ fontSize: '10px' }}>{off.linha3}</div>
             </div>
           )) : (
-            <div>
+            <div style={{ flex: '1', minWidth: '150px', maxWidth: '200px' }}>
               <div style={{ fontWeight: 'bold', color: '#000', marginBottom: '1px', textTransform: 'uppercase', fontSize: '9px' }}>Brasília - DF</div>
               <div style={{ fontSize: '10px' }}>SHIS QL 10, Conj. 06, Casa 19</div>
               <div style={{ fontSize: '10px' }}>Lago Sul,</div>
@@ -475,20 +533,22 @@ const ProposalDocument = ({ options, prazo, services, customCabimentos, customEs
             </div>
           )}
         </div>
-        {/* Site em caixa com bordas arredondadas */}
-        <div style={{ textAlign: 'center', marginTop: '5px' }}>
+        {/* Linha horizontal e Site em caixa com bordas arredondadas */}
+        <div style={{ textAlign: 'center', marginTop: '5px', width: '100%' }}>
+          <hr style={{ width: '100%', border: 'none', borderTop: '1px solid #d0d0d0', marginBottom: '5px' }} />
           <div style={{
             display: 'inline-block',
-            padding: '1px 216px',
+            padding: '2px 8px',
             border: '1px solid #d0d0d0',
-            borderRadius: '10px',
+            borderRadius: '4px',
             backgroundColor: '#ffffff',
             fontSize: '10px',
             fontWeight: 'normal',
             color: '#000000',
             fontFamily: "'Garamond', serif",
             letterSpacing: '1px',
-            textTransform: 'uppercase'
+            textTransform: 'uppercase',
+            whiteSpace: 'nowrap'
           }}>
             WWW.CAVALCANTE-REIS.ADV.BR
           </div>
@@ -632,24 +692,28 @@ const ProposalDocument = ({ options, prazo, services, customCabimentos, customEs
           {/* Container interno - contém as informações da capa (Proponente, Destinatário, etc.) */}
           <div style={{ textAlign: "right", width: 'auto', maxWidth: '35%', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
 
-            {/* Linha horizontal superior (separador) */}
-            <div style={{ width: '280%', borderBottom: '1.8px solid #000', marginBottom: 'px' }}></div>
+            {/* Linha horizontal superior (separador) - BORDA PRETA SUPERIOR GRANDE */}
+            <div style={{ width: '180%', borderTop: '2px solid #000', marginBottom: '10px' }}></div>
 
-            {/* Seção Proponente - Label */}
-            <p style={{ fontSize: '13px', fontWeight: 'bold', color: '#000', marginBottom: '5px', fontFamily: "'Garamond', serif", textAlign: 'right', whiteSpace: 'nowrap' }}>Proponente:</p>
-            {/* Seção Proponente - Nome do escritório */}
-            <p style={{ fontSize: '13px', color: '#000', marginBottom: '30px', fontFamily: "'Garamond', serif", textAlign: 'right', whiteSpace: 'nowrap' }}>Cavalcante Reis Advogados</p>
+            {/* Seção Proponente - Container com bordas */}
+            <div style={{ width: '100%', paddingBottom: '2px', borderBottom: '1px solid #ddd' }}>
+              <p style={{ fontSize: '13px', fontWeight: 'bold', color: '#000', marginBottom: '5px', fontFamily: "'Garamond', serif", textAlign: 'right', whiteSpace: 'nowrap' }}>Proponente:</p>
+              <p style={{ fontSize: '13px', color: '#000', marginBottom: '0', fontFamily: "'Garamond', serif", textAlign: 'right', whiteSpace: 'nowrap' }}>Cavalcante Reis Advogados</p>
+            </div>
 
-            {/* Seção Destinatário - Label */}
-            <p style={{ fontSize: '13px', fontWeight: 'bold', color: '#000', marginTop: '0', marginBottom: '5px', fontFamily: "'Garamond', serif", textAlign: 'right', whiteSpace: 'nowrap' }}>Destinatário:</p>
-            {/* Seção Destinatário - Nome do cliente/município */}
-            <p style={{ fontSize: '13px', color: '#000', marginBottom: '20px', fontFamily: "'Garamond', serif", textAlign: 'right', whiteSpace: 'nowrap' }}>{options.destinatario || "[Nome do Destinatário]"}</p>
+            {/* Seção Destinatário - Container com bordas */}
+            <div style={{ width: '100%', paddingTop: '10px', paddingBottom: '10px', borderBottom: '1px solid #ddd' }}>
+              <p style={{ fontSize: '13px', fontWeight: 'bold', color: '#000', marginTop: '0', marginBottom: '5px', fontFamily: "'Garamond', serif", textAlign: 'right', whiteSpace: 'nowrap' }}>Destinatário:</p>
+              <p style={{ fontSize: '13px', color: '#000', marginBottom: '0', fontFamily: "'Garamond', serif", textAlign: 'right', whiteSpace: 'nowrap' }}>{options.destinatario || options.municipio || "[Nome do Destinatário]"}</p>
+            </div>
 
-            {/* Linha horizontal inferior (separador) */}
-            <div style={{ width: '280%', borderBottom: '1.8px solid #000', marginTop: '10px', marginBottom: '0' }}></div>
+            {/* Linha horizontal inferior (separador) - BORDA PRETA INFERIOR GRANDE */}
+            <div style={{ width: '180%', borderBottom: '2px solid #000', marginTop: '10px', marginBottom: '10px' }}></div>
 
-            {/* Ano da proposta */}
-            <p style={{ fontSize: '13px', fontWeight: 'bold', color: '#000', fontFamily: "'Garamond', serif", textAlign: 'right', marginTop: '0', whiteSpace: 'nowrap' }}>{options.data || "2025"}</p>
+            {/* Data da proposta (apenas números na capa) */}
+            <p style={{ fontSize: '13px', fontWeight: 'bold', color: '#000', fontFamily: "'Garamond', serif", textAlign: 'right', marginTop: '10px', whiteSpace: 'nowrap' }}>
+              {formatDateNumeric(options.data || "") || new Date().getFullYear().toString()}
+            </p>
           </div>
         </div>
       </Page>
@@ -907,15 +971,23 @@ const ProposalDocument = ({ options, prazo, services, customCabimentos, customEs
                   26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: iuri@cavalcantereis.adv.br).
                 </p>
                 <br />
-                {/* Todos os profissionais na mesma página com espaçamento otimizado */}
-                {professionals.map((prof, index) => (
-                  <React.Fragment key={`prof-${index}`}>
-                    {index > 0 && <br />}
-                    <p style={{ marginBottom: '0', marginTop: index === 0 ? '15px' : '0', textAlign: 'justify', fontSize: '13px', lineHeight: '20pt', fontFamily: "'Garamond', serif" }}>
-                      <strong>{prof.name}</strong> - {prof.bio}
-                    </p>
-                  </React.Fragment>
-                ))}
+                {/* TODOS os profissionais LADO A LADO */}
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  gap: '15px',
+                  flexWrap: 'wrap',
+                  alignItems: 'flex-start',
+                  width: '100%'
+                }}>
+                  {professionals.map((prof, index) => (
+                    <div key={`prof-${index}`} style={{ flex: '1', minWidth: '45%', maxWidth: '48%' }}>
+                      <p style={{ marginBottom: '0', marginTop: '15px', textAlign: 'justify', fontSize: '13px', lineHeight: '20pt', fontFamily: "'Garamond', serif" }}>
+                        <strong>{prof.name}</strong> - {prof.bio}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               </div>
             </Page>
           </>
@@ -928,12 +1000,28 @@ const ProposalDocument = ({ options, prazo, services, customCabimentos, customEs
         return (
           <Page pageNumber={section6PageNumber} FooterComponent={FooterComp}>
             {/* Container centralizado com margens maiores nas laterais */}
-            <div style={{ maxWidth: '128mm', margin: '0 auto', width: '100%' }}>
-              <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '17pt', marginBottom: '15px', marginTop: '0', color: '#000', fontFamily: "'Garamond', serif" }}>CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: felipe@cavalcantereis.adv.br).</p>
-            </div>
-            <br />
-            <div style={{ maxWidth: '128mm', margin: '0 auto', width: '100%' }}>
-              <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '17pt', marginBottom: '60px', marginTop: '0', color: '#000', fontFamily: "'Garamond', serif" }}><strong>RYSLHAINY DOS SANTOS CORDEIRO</strong> - Advogada associada do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: ryslhainy@cavalcantereis.adv.br).</p>
+            {/* Advogados lado a lado (Felipe e Ryslhainy) */}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'row',
+              gap: '20px',
+              maxWidth: '160mm',
+              margin: '0 auto',
+              width: '100%',
+              alignItems: 'flex-start'
+            }}>
+              {/* Felipe - lado esquerdo */}
+              <div style={{ flex: '1', minWidth: '0' }}>
+                <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '17pt', marginBottom: '15px', marginTop: '0', color: '#000', fontFamily: "'Garamond', serif" }}>
+                  <strong>FELIPE NOBREGA ROCHA</strong> - CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: felipe@cavalcantereis.adv.br).
+                </p>
+              </div>
+              {/* Ryslhainy - lado direito */}
+              <div style={{ flex: '1', minWidth: '0' }}>
+                <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '17pt', marginBottom: '60px', marginTop: '0', color: '#000', fontFamily: "'Garamond', serif" }}>
+                  <strong>RYSLHAINY DOS SANTOS CORDEIRO</strong> - Advogada associada do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: ryslhainy@cavalcantereis.adv.br).
+                </p>
+              </div>
             </div>
             <br />
             <div style={{ maxWidth: '135mm', margin: '0 auto', width: '100%' }}>              {/* Textos antes do tópico 6 */}
@@ -977,7 +1065,7 @@ const ProposalDocument = ({ options, prazo, services, customCabimentos, customEs
 };
 
 // ========== COMPONENTE PRINCIPAL: GERADOR DE PROPOSTAS ==========
-export default function ProposalGenerator({ onBackToHome, onLogout }: ProposalGeneratorProps) {
+export default function ProposalGenerator({ onBackToHome, onLogout, propostaToLoad }: ProposalGeneratorProps) {
   // ========== ESTADOS: DADOS DA PROPOSTA ==========
   const [isLoading, setIsLoading] = useState(true); // Controla tela de loading inicial
   const [options, setOptions] = useState({ municipio: "", destinatario: "", data: "" }); // Informações básicas
@@ -993,61 +1081,274 @@ export default function ProposalGenerator({ onBackToHome, onLogout }: ProposalGe
   }); // Configuração dos escritórios no rodapé (quais aparecem e seus endereços)
   const [rppsImage, setRppsImage] = useState<string | null>(null); // Imagem customizada para RPPS (não usado no momento)
   const [paymentValue, setPaymentValue] = useState("R$ 0,12 (doze centavos)"); // Valor dos honorários
-  const [savedProposals, setSavedProposals] = useState<any[]>([]); // Lista de propostas salvas no localStorage
+  const [retentionPeriod, setRetentionPeriod] = useState<number>(365); // Período de retenção em dias (padrão: 1 ano = 365 dias)
+  const [savedProposals, setSavedProposals] = useState<Proposta[]>([]); // Lista de propostas salvas no backend
   const [loadingPdf, setLoadingPdf] = useState(false); // Estado de loading ao gerar PDF
   const [loadingDocx, setLoadingDocx] = useState(false); // Estado de loading ao gerar DOCX
+  const [loadingProposals, setLoadingProposals] = useState(false); // Estado de loading ao carregar propostas
   const containerRef = useRef<HTMLDivElement>(null); // Referência ao container principal (não usado no momento)
   const [modal, setModal] = useState<any>({ open: false, title: "", message: "", type: "info" }); // Estado do modal de notificações
 
   // ========== FUNÇÕES AUXILIARES: PERSISTÊNCIA ==========
 
-  // Remove propostas salvas que já passaram de 365 dias (1 ano) do localStorage
-  const deleteExpiredProposals = () => {
-    const saved = localStorage.getItem("savedPropostas");
-    if (!saved) return [];
-
-    const proposals = JSON.parse(saved);
-    const oneYearAgo = new Date();
-    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-
-    const validProposals = proposals.filter((p: any) => {
-      const createdAt = new Date(p.createdAt);
-      return createdAt > oneYearAgo;
-    });
-
-    if (validProposals.length !== proposals.length) {
-      localStorage.setItem("savedPropostas", JSON.stringify(validProposals));
+  // Carrega propostas salvas do backend
+  const loadSavedProposals = async () => {
+    try {
+      setLoadingProposals(true);
+      const proposals = await propostasApi.getAll();
+      setSavedProposals(proposals);
+    } catch (error: any) {
+      console.error('Erro ao carregar propostas:', error);
+      setModal({
+        open: true,
+        title: "Erro",
+        message: `Erro ao carregar propostas salvas: ${error.message || 'Erro desconhecido'}. Tentando usar localStorage como fallback...`,
+        type: "error"
+      });
+      // Fallback para localStorage em caso de erro
+      const saved = localStorage.getItem("savedPropostas");
+      if (saved) {
+        try {
+          const proposals = JSON.parse(saved);
+          setSavedProposals(proposals);
+        } catch (e) {
+          setSavedProposals([]);
+        }
+      }
+    } finally {
+      setLoadingProposals(false);
     }
-
-    return validProposals;
   };
 
   // ========== EFFECT: INICIALIZAÇÃO ==========
   useEffect(() => {
-    // Ao montar o componente: deleta propostas expiradas e carrega as válidas
-    const validProposals = deleteExpiredProposals();
-    setSavedProposals(validProposals);
+    // Se houver uma proposta para carregar, carrega ela primeiro
+    if (propostaToLoad) {
+      const loadProposta = async () => {
+        try {
+          const proposta = await propostasApi.getById(propostaToLoad);
+          setOptions({
+            municipio: proposta.municipio || "",
+            data: proposta.data || "",
+            destinatario: proposta.destinatario || proposta.municipio || ""
+          });
+          setPrazo(proposta.prazo || "24");
+          setServices(proposta.services || {});
+          setCustomCabimentos(proposta.customCabimentos || {});
+          setCustomEstimates(proposta.customEstimates || {});
+          if (proposta.footerOffices) setFooterOffices(proposta.footerOffices);
+          if (proposta.paymentValue) setPaymentValue(proposta.paymentValue);
 
-    // Simular loading inicial
-    setTimeout(() => setIsLoading(false), 800); // Simula delay de carregamento
-  }, []);
+          // Calcula o período de retenção baseado na data de expiração
+          if (proposta.expiresAt) {
+            const expiresAt = new Date(proposta.expiresAt);
+            const now = new Date();
+            const diffDays = Math.ceil((expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+            const periods = [15, 30, 90, 180, 365, 730];
+            const closestPeriod = periods.reduce((prev, curr) =>
+              Math.abs(curr - diffDays) < Math.abs(prev - diffDays) ? curr : prev
+            );
+            setRetentionPeriod(closestPeriod);
+          }
+
+          setModal({
+            open: true,
+            title: "Sucesso",
+            message: "Proposta carregada com sucesso!",
+            type: "success"
+          });
+        } catch (error: any) {
+          console.error('Erro ao carregar proposta:', error);
+          setModal({
+            open: true,
+            title: "Erro",
+            message: `Erro ao carregar proposta: ${error.message || 'Erro desconhecido'}`,
+            type: "error"
+          });
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      loadProposta();
+    } else {
+      // Simular loading inicial
+      setTimeout(() => setIsLoading(false), 800); // Simula delay de carregamento
+    }
+  }, [propostaToLoad]);
+
+  // ========== HANDLER: CARREGAR PROPOSTA ==========
+  // Carrega uma proposta salva e preenche o formulário
+  const handleLoadProposal = async (p: Proposta) => {
+    try {
+      // Se a proposta não tiver todos os campos, tenta carregar do backend
+      if (!p.services || !p.customCabimentos) {
+        const fullProposta = await propostasApi.getById(p.id!);
+        p = fullProposta;
+      }
+
+      setOptions({
+        municipio: p.municipio || "",
+        data: p.data || "",
+        destinatario: p.destinatario || p.municipio || ""
+      });
+      setPrazo(p.prazo || "24");
+      setServices(p.services || {});
+      setCustomCabimentos(p.customCabimentos || {});
+      setCustomEstimates(p.customEstimates || {});
+      if (p.footerOffices) setFooterOffices(p.footerOffices);
+      if (p.paymentValue) setPaymentValue(p.paymentValue);
+
+      // Calcula o período de retenção baseado na data de expiração
+      if (p.expiresAt) {
+        const expiresAt = new Date(p.expiresAt);
+        const now = new Date();
+        const diffDays = Math.ceil((expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        // Define o período mais próximo das opções disponíveis
+        const periods = [15, 30, 90, 180, 365, 730];
+        const closestPeriod = periods.reduce((prev, curr) =>
+          Math.abs(curr - diffDays) < Math.abs(prev - diffDays) ? curr : prev
+        );
+        setRetentionPeriod(closestPeriod);
+      }
+
+      setModal({
+        open: true,
+        title: "Sucesso",
+        message: "Proposta carregada com sucesso!",
+        type: "success"
+      });
+    } catch (error: any) {
+      console.error('Erro ao carregar proposta:', error);
+      setModal({
+        open: true,
+        title: "Erro",
+        message: `Erro ao carregar proposta: ${error.message || 'Erro desconhecido'}`,
+        type: "error"
+      });
+    }
+  };
+
+  // ========== HANDLER: DELETAR PROPOSTA ==========
+  // Deleta uma proposta do backend
+  const handleDeleteProposal = async (id: string) => {
+    try {
+      setLoadingProposals(true);
+      await propostasApi.delete(id);
+
+      // Atualiza a lista local
+      setSavedProposals(savedProposals.filter(p => p.id !== id));
+
+      setModal({
+        open: true,
+        title: "Sucesso",
+        message: "Proposta deletada com sucesso!",
+        type: "success"
+      });
+    } catch (error: any) {
+      console.error('Erro ao deletar proposta:', error);
+      setModal({
+        open: true,
+        title: "Erro",
+        message: `Erro ao deletar proposta: ${error.message || 'Erro desconhecido'}. Tentando deletar localmente...`,
+        type: "error"
+      });
+      // Fallback para localStorage em caso de erro
+      const saved = localStorage.getItem("savedPropostas");
+      if (saved) {
+        try {
+          const proposals = JSON.parse(saved).filter((p: any) => p.id !== id);
+          localStorage.setItem("savedPropostas", JSON.stringify(proposals));
+          setSavedProposals(savedProposals.filter(p => p.id !== id));
+        } catch (e) {
+          // Ignora erro de localStorage
+        }
+      }
+    } finally {
+      setLoadingProposals(false);
+    }
+  };
 
   // ========== HANDLER: SALVAR PROPOSTA ==========
-  // Salva a proposta atual no localStorage com validade de 365 dias
-  const handleSaveProposal = () => {
-    const newProp = {
-      id: Date.now(),
-      municipio: options.municipio,
-      data: options.data,
-      services,
-      customCabimentos,
-      createdAt: new Date().toISOString(),
-      expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString() // 1 ano
-    };
-    const updated = [...savedProposals, newProp];
-    setSavedProposals(updated);
-    localStorage.setItem("savedPropostas", JSON.stringify(updated));
-    setModal({ open: true, title: "Sucesso", message: "Proposta salva localmente! Ela será deletada automaticamente em 1 ano.", type: "success" });
+  // Salva a proposta atual no backend com o tempo de retenção escolhido (padrão: 1 ano)
+  const handleSaveProposal = async () => {
+    if (!options.municipio || !options.municipio.trim()) {
+      setModal({
+        open: true,
+        title: "Atenção",
+        message: "Por favor, preencha o nome do município antes de salvar.",
+        type: "error"
+      });
+      return;
+    }
+
+    try {
+      setLoadingProposals(true);
+
+      // Calcula a data de expiração baseada no período de retenção escolhido
+      const now = new Date();
+      const expiresAtDate = new Date(now);
+      expiresAtDate.setDate(expiresAtDate.getDate() + retentionPeriod);
+      const expiresAt = expiresAtDate.toISOString();
+
+      const newProp = await propostasApi.create({
+        municipio: options.municipio,
+        data: options.data || "",
+        destinatario: options.destinatario || options.municipio,
+        prazo: prazo || "24",
+        services,
+        customCabimentos,
+        customEstimates,
+        footerOffices,
+        paymentValue,
+        expiresAt
+      });
+
+      // Recarrega a lista de propostas
+      await loadSavedProposals();
+
+      // Mensagem personalizada baseada no período escolhido
+      const periodNames: Record<number, string> = {
+        15: "15 dias",
+        30: "1 mês",
+        90: "3 meses",
+        180: "6 meses",
+        365: "1 ano",
+        730: "2 anos"
+      };
+      const periodName = periodNames[retentionPeriod] || `${retentionPeriod} dias`;
+
+      setModal({
+        open: true,
+        title: "Sucesso",
+        message: `Proposta salva com sucesso no servidor! Ela será mantida por ${periodName}.`,
+        type: "success"
+      });
+    } catch (error: any) {
+      console.error('Erro ao salvar proposta:', error);
+      setModal({
+        open: true,
+        title: "Erro",
+        message: `Erro ao salvar proposta: ${error.message || 'Erro desconhecido'}. Tentando salvar localmente...`,
+        type: "error"
+      });
+      // Fallback para localStorage em caso de erro
+      const fallbackProp = {
+        id: Date.now().toString(),
+        municipio: options.municipio,
+        data: options.data,
+        services,
+        customCabimentos,
+        createdAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
+      };
+      const saved = localStorage.getItem("savedPropostas");
+      const proposals = saved ? JSON.parse(saved) : [];
+      proposals.push(fallbackProp);
+      localStorage.setItem("savedPropostas", JSON.stringify(proposals));
+      setSavedProposals([...savedProposals, fallbackProp]);
+    } finally {
+      setLoadingProposals(false);
+    }
   };
 
   const handleDownloadPdf = async () => {
@@ -1337,36 +1638,254 @@ export default function ProposalGenerator({ onBackToHome, onLogout }: ProposalGe
       // Aguarda um pouco para garantir que todas as imagens estejam carregadas
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      // ========== CONVERSÃO: HTML PARA DOCX ==========
-      // Obtém o HTML completo da prévia diretamente do container
-      const htmlContent = container.innerHTML;
+      // ========== FUNÇÃO AUXILIAR: CONVERTER IMAGEM PARA BASE64 ==========
+      // Converte uma imagem (URL ou caminho) para base64 com tamanho controlado
+      const imageToBase64 = (img: HTMLImageElement): Promise<string> => {
+        return new Promise((resolve, reject) => {
+          if (!img.src || img.src.startsWith('data:')) {
+            // Se já for base64, retorna como está
+            resolve(img.src);
+            return;
+          }
+
+          // Determina o tamanho alvo baseado no tipo de imagem
+          let targetWidth = 150; // Padrão
+          if (img.src.includes('logo-cavalcante-reis') || img.alt?.toLowerCase().includes('logo')) {
+            targetWidth = 170; // Logo 170px
+          } else if (img.src.includes('munincipios') || img.src.includes('Municipios')) {
+            targetWidth = 400; // Imagens de municípios (mantém proporção)
+          } else if (img.src.includes('Assinatura') || img.alt?.toLowerCase().includes('assinatura')) {
+            targetWidth = 150; // Assinatura 150px
+          }
+
+          // Cria um canvas para converter a imagem com tamanho controlado
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+
+          if (!ctx) {
+            reject(new Error('Não foi possível criar contexto do canvas'));
+            return;
+          }
+
+          // Calcula dimensões mantendo proporção
+          const originalWidth = img.naturalWidth || img.width || targetWidth;
+          const originalHeight = img.naturalHeight || img.height || (originalWidth * 0.75);
+          const aspectRatio = originalHeight / originalWidth;
+
+          // Define dimensões do canvas (máximo targetWidth, mantém proporção)
+          const finalWidth = Math.min(originalWidth, targetWidth);
+          const finalHeight = finalWidth * aspectRatio;
+
+          canvas.width = finalWidth;
+          canvas.height = finalHeight;
+
+          // Desenha a imagem redimensionada no canvas
+          ctx.drawImage(img, 0, 0, finalWidth, finalHeight);
+
+          try {
+            // Converte para base64
+            const dataUrl = canvas.toDataURL('image/png', 0.95);
+            resolve(dataUrl);
+          } catch (error) {
+            // Se falhar, tenta carregar via fetch sem redimensionar
+            fetch(img.src)
+              .then(response => response.blob())
+              .then(blob => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result as string);
+                reader.onerror = () => reject(new Error('Erro ao ler imagem'));
+                reader.readAsDataURL(blob);
+              })
+              .catch(() => reject(new Error('Erro ao carregar imagem')));
+          }
+        });
+      };
+
+      // Aguarda todas as imagens carregarem e converte para base64
+      const images = container.querySelectorAll('img');
+      const imagePromises: Promise<void>[] = [];
+
+      images.forEach((img, index) => {
+        const promise = new Promise<void>((resolve) => {
+          if (img.complete && img.naturalHeight > 0) {
+            // Imagem já carregada
+            imageToBase64(img)
+              .then((base64) => {
+                img.src = base64;
+                resolve();
+              })
+              .catch((error) => {
+                console.warn(`Erro ao converter imagem ${index + 1} para base64:`, error);
+                resolve(); // Continua mesmo se falhar
+              });
+          } else {
+            // Aguarda carregar
+            img.onload = () => {
+              imageToBase64(img)
+                .then((base64) => {
+                  img.src = base64;
+                  resolve();
+                })
+                .catch((error) => {
+                  console.warn(`Erro ao converter imagem ${index + 1} para base64:`, error);
+                  resolve(); // Continua mesmo se falhar
+                });
+            };
+            img.onerror = () => {
+              console.warn(`Erro ao carregar imagem ${index + 1}:`, img.src);
+              resolve(); // Continua mesmo se falhar
+            };
+
+            // Timeout de segurança
+            setTimeout(() => resolve(), 3000);
+          }
+        });
+        imagePromises.push(promise);
+      });
+
+      // Aguarda todas as imagens serem convertidas
+      await Promise.all(imagePromises);
+
+      // Aguarda mais um pouco para garantir que as alterações foram aplicadas
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      // ========== PROCESSAMENTO: AJUSTAR HTML PARA DOCX ==========
+      // ========== PROCESSAMENTO: AJUSTAR HTML PARA DOCX ==========
+      // Processa o HTML antes de converter, ajustando tamanhos de imagem e estilos
+      const processHTMLForDocx = (htmlString: string): string => {
+        // Usa DOMParser para processar o HTML sem afetar o DOM
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlString, 'text/html');
+
+        // Ajusta todas as imagens para tamanhos fixos em pixels
+        const allImages = doc.querySelectorAll('img');
+        allImages.forEach((img) => {
+          let targetWidth = 150; // Padrão
+
+          // Detecta tipo de imagem pelo src ou alt
+          const src = img.getAttribute('src') || '';
+          if (src.includes('logo-cavalcante-reis') || img.getAttribute('alt')?.toLowerCase().includes('logo')) {
+            targetWidth = 170; // Logo 170px
+          } else if (src.includes('munincipios') || src.includes('Municipios')) {
+            targetWidth = 400; // Imagens de municípios
+          } else if (src.includes('Assinatura') || img.getAttribute('alt')?.toLowerCase().includes('assinatura')) {
+            targetWidth = 150; // Assinatura 150px
+          }
+
+          // Define largura fixa em pixels (Word lê melhor assim)
+          img.setAttribute('width', targetWidth.toString());
+          img.setAttribute('style', `width: ${targetWidth}px; height: auto; max-width: ${targetWidth}px;`);
+          img.removeAttribute('height');
+        });
+
+        // Garante que parágrafos com text-align tenham o estilo inline
+        const allParagraphs = doc.querySelectorAll('p');
+        allParagraphs.forEach((p) => {
+          const computedAlign = p.style.textAlign || '';
+          if (computedAlign) {
+            p.setAttribute('style', (p.getAttribute('style') || '') + ` text-align: ${computedAlign};`);
+          } else {
+            // Verifica pelo estilo aplicado via classe ou estilo inline existente
+            const existingStyle = p.getAttribute('style') || '';
+            if (existingStyle.includes('text-align')) {
+              // Já tem, mantém
+            } else {
+              // Adiciona justify como padrão para parágrafos de texto
+              p.setAttribute('style', existingStyle + ' text-align: justify;');
+            }
+          }
+        });
+
+        // Garante que divs com centralização tenham o estilo
+        const allDivs = doc.querySelectorAll('div');
+        allDivs.forEach((div) => {
+          const existingStyle = div.getAttribute('style') || '';
+          if (existingStyle.includes('text-align: center') || existingStyle.includes('textAlign: center')) {
+            div.setAttribute('style', existingStyle.replace(/textAlign:\s*center/g, 'text-align: center'));
+          }
+          if (existingStyle.includes('text-align: right') || existingStyle.includes('textAlign: right')) {
+            div.setAttribute('style', existingStyle.replace(/textAlign:\s*right/g, 'text-align: right'));
+          }
+        });
+
+        return doc.body.innerHTML;
+      };
+
+      // Obtém o HTML e processa antes de converter
+      const rawHtml = container.innerHTML;
+      const htmlContent = processHTMLForDocx(rawHtml);
 
       // Adiciona estilos inline para melhor formatação no Word
       const styledHtml = `
         <!DOCTYPE html>
-        <html>
+        <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
         <head>
           <meta charset="UTF-8">
+          <meta name="ProgId" content="Word.Document">
+          <meta name="Generator" content="Microsoft Word">
+          <meta name="Originator" content="Microsoft Word">
           <style>
-            body { 
-              font-family: 'Garamond', serif; 
+            * {
               margin: 0;
-              padding: 20mm 20mm 15mm 25mm;
+              padding: 0;
+              box-sizing: border-box;
+            }
+            @page {
+              size: A4;
+              margin: 20mm 20mm 20mm 25mm;
+            }
+            body { 
+              font-family: 'Garamond', 'Times New Roman', serif; 
+              margin: 0;
+              padding: 0;
+              font-size: 13px;
+              line-height: 17pt;
+              color: #000000;
+              background: #ffffff;
             }
             .pdf-page-render {
               page-break-after: always;
-              margin-bottom: 30px;
+              page-break-before: auto;
+              margin: 0;
+              padding: 56.7pt 70.9pt 56.7pt 70.9pt; /* 20mm = 56.7pt, 25mm = 70.9pt */
+              width: 595.3pt; /* 210mm = 595.3pt */
+              min-height: 841.9pt; /* 297mm = 841.9pt */
+              box-sizing: border-box;
+              background: white;
+            }
+            .pdf-page-render[data-page="1"] {
+              padding: 56.7pt; /* 20mm = 56.7pt */
             }
             .pdf-page-render:last-child {
               page-break-after: auto;
             }
             img {
-              max-width: 100%;
-              height: auto;
+              display: block;
+              page-break-inside: avoid;
+              margin: 0 auto;
+            }
+            /* Logos: máximo 170px */
+            img[src*="logo"] {
+              max-width: 170px !important;
+              width: 170px !important;
+              height: auto !important;
+            }
+            /* Imagens de municípios: máximo 400px de largura */
+            img[src*="munincipios"], img[src*="Municipios"] {
+              max-width: 400px !important;
+              width: auto !important;
+              height: auto !important;
+            }
+            /* Assinatura: 150px fixo */
+            img[src*="Assinatura"] {
+              max-width: 150px !important;
+              width: 150px !important;
+              height: auto !important;
             }
             table {
               width: 100%;
               border-collapse: collapse;
+              page-break-inside: avoid;
             }
             th, td {
               border: 1px solid #000;
@@ -1378,11 +1897,25 @@ export default function ProposalGenerator({ onBackToHome, onLogout }: ProposalGe
               padding: 0;
               font-size: 13px;
               line-height: 17pt;
-              font-family: 'Garamond', serif;
+              font-family: 'Garamond', 'Times New Roman', serif;
+              page-break-inside: avoid;
+              margin-bottom: 12pt;
             }
-            h2, h3 {
+            p[style*="text-align: center"] {
+              text-align: center !important;
+            }
+            p[style*="text-align: right"] {
+              text-align: right !important;
+            }
+            h1, h2, h3 {
               font-size: 13px;
               font-family: 'Garamond', serif;
+              page-break-after: avoid;
+            }
+            .page-footer-container {
+              margin-top: auto;
+              padding-top: 20px;
+              page-break-inside: avoid;
             }
           </style>
         </head>
@@ -1452,14 +1985,13 @@ export default function ProposalGenerator({ onBackToHome, onLogout }: ProposalGe
             rppsImage={rppsImage} setRppsImage={setRppsImage}
             footerOffices={footerOffices} setFooterOffices={setFooterOffices}
             paymentValue={paymentValue} setPaymentValue={setPaymentValue}
-            savedProposals={savedProposals}
-            onLoadProposal={(p: any) => { setOptions({ municipio: p.municipio, data: p.data, destinatario: "" }); setServices(p.services); setCustomCabimentos(p.customCabimentos || {}); }}
-            onDeleteProposal={(id: any) => { const up = savedProposals.filter(x => x.id !== id); setSavedProposals(up); localStorage.setItem("savedPropostas", JSON.stringify(up)); }}
+            retentionPeriod={retentionPeriod} setRetentionPeriod={setRetentionPeriod}
             onStartFromScratch={() => { setOptions({ municipio: "", data: "", destinatario: "" }); setServices({}); }}
             onImportDocx={() => alert("Função em desenvolvimento para a nova arquitetura")}
             onSaveProposal={handleSaveProposal}
             onDownloadDocx={handleDownloadDocx}
             loadingDocx={loadingDocx}
+            loadingProposals={loadingProposals}
           />
           <div className="content">
             <h2 className="preview-title">Prévia da Proposta</h2>

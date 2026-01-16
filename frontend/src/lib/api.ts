@@ -11,9 +11,14 @@ export interface Proposta {
   id?: string;
   municipio: string;
   data?: string;
+  destinatario?: string;
+  prazo?: string;
   services?: Record<string, boolean>;
   customCabimentos?: Record<string, string>;
   customEstimates?: Record<string, string>;
+  footerOffices?: Record<string, any>;
+  paymentValue?: string;
+  expiresAt?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -58,6 +63,26 @@ export const documentsApi = {
       },
     });
 
+    return response.data;
+  },
+
+  generatePropostaDocx: async (data: any): Promise<Blob> => {
+    const response = await api.post('/documents/generate-proposta-docx', data, {
+      responseType: 'blob',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data;
+  },
+
+  generateMinutaDocx: async (data: any): Promise<Blob> => {
+    const response = await api.post('/documents/generate-minuta-docx', data, {
+      responseType: 'blob',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
     return response.data;
   },
 };

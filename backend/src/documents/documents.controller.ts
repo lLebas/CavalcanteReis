@@ -82,4 +82,21 @@ export class DocumentsController {
     res.setHeader('Content-Length', buffer.length.toString());
     res.send(buffer);
   }
+
+  @Post('generate-minuta-docx')
+  @ApiOperation({ summary: 'Gerar arquivo DOCX da Minuta de Contrato' })
+  async generateMinutaDocx(@Body() data: any, @Res() res: Response) {
+    const buffer = await this.documentsService.generateMinutaDocx(data);
+
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    );
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename=Minuta_${data.municipio || 'Contrato'}.docx`,
+    );
+    res.setHeader('Content-Length', buffer.length.toString());
+    res.send(buffer);
+  }
 }

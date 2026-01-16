@@ -23,20 +23,40 @@ export class PropostasService {
     await fs.writeFile(this.dataFile, JSON.stringify(data, null, 2), 'utf-8');
   }
 
-  private isOlderThan365Days(iso: string): boolean {
-    const date = new Date(iso);
+  // Verifica se a proposta expirou (padrão: 1 ano = 365 dias)
+  private isExpired(proposta: any): boolean {
     const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    return diff > 365 * 24 * 60 * 60 * 1000; // 365 dias
+    const expiresAt = proposta.expiresAt ? new Date(proposta.expiresAt) : null;
+    
+    if (expiresAt) {
+      return now > expiresAt;
+    }
+    
+    // Se não tiver expiresAt, usa regra padrão de 365 dias
+    const createdAt = new Date(proposta.createdAt);
+    const diff = now.getTime() - createdAt.getTime();
+    const oneYearInMs = 365 * 24 * 60 * 60 * 1000;
+    return diff > oneYearInMs;
   }
 
   async create(createPropostaDto: CreatePropostaDto) {
     const items = await this.readData();
+    const now = new Date();
+    
+    // Define expiresAt: usa o fornecido ou cria um padrão de 1 ano
+    let expiresAt = createPropostaDto.expiresAt;
+    if (!expiresAt) {
+      const oneYearLater = new Date(now);
+      oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
+      expiresAt = oneYearLater.toISOString();
+    }
+    
     const newProposta = {
       id: Date.now().toString(),
       ...createPropostaDto,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      expiresAt,
+      createdAt: now.toISOString(),
+      updatedAt: now.toISOString(),
     };
     items.push(newProposta);
     await this.writeData(items);
@@ -45,8 +65,8 @@ export class PropostasService {
 
   async findAll() {
     const items = await this.readData();
-    // Cleanup: remove items older than 365 days
-    const filtered = items.filter((i) => !this.isOlderThan365Days(i.createdAt));
+    // Cleanup: remove propostas expiradas
+    const filtered = items.filter((i) => !this.isExpired(i));
     if (filtered.length !== items.length) {
       await this.writeData(filtered);
     }

@@ -8,6 +8,14 @@ export class CreatePropostaDto {
   @IsOptional()
   data?: string;
 
+  @IsString()
+  @IsOptional()
+  destinatario?: string;
+
+  @IsString()
+  @IsOptional()
+  prazo?: string;
+
   @IsObject()
   @IsOptional()
   services?: Record<string, boolean>;
@@ -19,5 +27,17 @@ export class CreatePropostaDto {
   @IsObject()
   @IsOptional()
   customEstimates?: Record<string, string>;
+
+  @IsObject()
+  @IsOptional()
+  footerOffices?: Record<string, any>;
+
+  @IsString()
+  @IsOptional()
+  paymentValue?: string;
+
+  @IsString()
+  @IsOptional()
+  expiresAt?: string; // Data de expiração (opcional, padrão: 1 ano)
 }
 
