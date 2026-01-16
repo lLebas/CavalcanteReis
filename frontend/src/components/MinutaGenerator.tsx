@@ -436,7 +436,7 @@ const ModalTabela45 = ({ open, onClose, tabelaItems, onUpdate }: any) => {
               {Object.keys(items).length === 0 && (
                 <tr>
                   <td colSpan={4} style={{ padding: '20px', textAlign: 'center', color: '#999' }}>
-                    Nenhum item adicionado. Clique em "Adicionar Item" para começar.
+                    Nenhum item adicionado. Clique em &quot;Adicionar Item&quot; para começar.
                   </td>
                 </tr>
               )}
@@ -741,7 +741,7 @@ const ModalTabela171 = ({ open, onClose, dotacaoItems, onUpdate }: any) => {
               {items.length === 0 && (
                 <tr>
                   <td colSpan={3} style={{ padding: '20px', textAlign: 'center', color: '#999' }}>
-                    Nenhuma linha adicionada. Clique em "Adicionar Linha" para começar.
+                    Nenhuma linha adicionada. Clique em &quot;Adicionar Linha&quot; para começar.
                   </td>
                 </tr>
               )}
