@@ -4,11 +4,14 @@ import { useState } from 'react';
 import Login from '@/components/Login';
 import Home from '@/components/Home';
 import ProposalGenerator from '@/components/ProposalGenerator';
+import SavedProposals from '@/components/SavedProposals';
+import MinutaGenerator from '@/components/MinutaGenerator';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState('login');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [propostaToLoad, setPropostaToLoad] = useState<string | null>(null); // ID da proposta para carregar
 
   const handleLogin = () => {
     setIsNavigating(true);
@@ -54,7 +57,38 @@ export default function App() {
   }
 
   if (currentPage === 'gerador-propostas') {
-    return <ProposalGenerator onBackToHome={() => handleNavigate('home')} onLogout={handleLogout} />;
+    return (
+      <ProposalGenerator
+        onBackToHome={() => {
+          setPropostaToLoad(null);
+          handleNavigate('home');
+        }}
+        onLogout={handleLogout}
+        propostaToLoad={propostaToLoad}
+      />
+    );
+  }
+
+  if (currentPage === 'propostas-salvas') {
+    return (
+      <SavedProposals
+        onBackToHome={() => handleNavigate('home')}
+        onLogout={handleLogout}
+        onLoadProposal={(propostaId: string) => {
+          setPropostaToLoad(propostaId);
+          handleNavigate('gerador-propostas');
+        }}
+      />
+    );
+  }
+
+  if (currentPage === 'gerador-minuta') {
+    return (
+      <MinutaGenerator
+        onBackToHome={() => handleNavigate('home')}
+        onLogout={handleLogout}
+      />
+    );
   }
 
   return <Home onNavigate={handleNavigate} onLogout={handleLogout} />;

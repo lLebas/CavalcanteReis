@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { FileText, Box, Settings, Users, LogOut, Sparkles, X } from 'lucide-react';
+import { FileText, Box, Save, Users, LogOut, Sparkles, X } from 'lucide-react';
 
 interface HomeProps {
   onNavigate: (page: string) => void;
@@ -21,31 +21,31 @@ export default function Home({ onNavigate, onLogout }: HomeProps) {
       title: 'Gerador de Propostas',
       description: 'Crie propostas personalizadas para seus clientes',
       icon: FileText,
-      color: '#227056',
+      color: '#227056', // Verde principal (mantém identidade)
       action: () => onNavigate('gerador-propostas'),
     },
     {
-      id: 'exemplo-2',
-      title: 'Exemplo 2',
-      description: 'Funcionalidade em desenvolvimento',
-      icon: Box,
-      color: '#3498db',
-      action: () => setShowComingSoonModal(true),
+      id: 'gerador-minuta',
+      title: 'Gerador de Minuta',
+      description: 'Crie minutas de contrato personalizadas',
+      icon: FileText,
+      color: '#1e3a5f', // Azul escuro (inspirado no cabeçalho)
+      action: () => onNavigate('gerador-minuta'),
     },
     {
-      id: 'exemplo-3',
-      title: 'Exemplo 3',
-      description: 'Funcionalidade em desenvolvimento',
-      icon: Settings,
-      color: '#e74c3c',
-      action: () => setShowComingSoonModal(true),
+      id: 'propostas-salvas',
+      title: 'Propostas Salvas',
+      description: 'Visualize e gerencie suas propostas salvas',
+      icon: Save,
+      color: '#2ecc71', // Verde vivo para destacar funcionalidade de salvamento
+      action: () => onNavigate('propostas-salvas'),
     },
     {
       id: 'exemplo-4',
       title: 'Exemplo 4',
       description: 'Funcionalidade em desenvolvimento',
       icon: Users,
-      color: '#f39c12',
+      color: '#f39c12', // Laranja (mantém)
       action: () => setShowComingSoonModal(true),
     },
   ];

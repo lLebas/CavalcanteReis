@@ -2781,11 +2781,7 @@ export default function MinutaGenerator({ onBackToHome, onLogout }: MinutaGenera
         percentual: percentual || ""
       };
 
-      // Fix: use correct API method name 'processDocx' instead of 'generateMinutaDocx'
-      const blob = await documentsApi.processDocx(
-        // Ajuste: processDocx espera um arquivo (File), não um objeto de dados.
-        // Use um método diferente, como 'generateMinutaDocx', caso exista, que aceite dados estruturados.
-        const blob = await documentsApi.generateMinutaDocx(minutaData);
+      const blob = await documentsApi.generateMinutaDocx(minutaData);
       saveAs(blob, `Minuta_BARROCAS.docx`);
 
       setModal({
