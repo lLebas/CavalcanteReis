@@ -6,7 +6,9 @@ import Modal from "./Modal";
 import DOMPurify from "dompurify";
 import { Settings, FileText, ArrowLeft, LogOut, Download, RefreshCw, X, ChevronRight, Plus, Trash2 } from "lucide-react";
 import { saveAs } from "file-saver";
-import { documentsApi } from "../lib/api";
+// ========== IMPORTS: BIBLIOTECA DOCX ==========
+import { Document, Packer, Paragraph, TextRun, ImageRun, Header, AlignmentType, PageBreak, Table, TableRow, TableCell, WidthType, HeadingLevel, SectionType } from "docx";
+import { createSimpleParagraph } from "../lib/docxHelper"; // Helper para criação de parágrafos simples
 
 // ========== CONSTANTES: ESTRUTURA COMPLETA DAS CLÁUSULAS ==========
 
@@ -1114,8 +1116,13 @@ const ControlsSidebar = ({
 
       {/* Botões de ação */}
       <div className="actions" style={{ marginTop: '30px' }}>
-        <button className="btn secondary" style={{ width: '100%', padding: '14px' }} onClick={onDownloadDocx} disabled={loadingDocx}>
-          {loadingDocx ? "Gerando..." : <><Download size={18} /> Baixar .docx</>}
+        <button
+          className="btn secondary"
+          style={{ width: '100%', padding: '14px' }}
+          onClick={onDownloadDocx}
+          disabled={loadingDocx}
+        >
+          {loadingDocx ? "Gerando..." : <><Download size={18} /> Docs</>}
         </button>
       </div>
     </aside>
@@ -2740,7 +2747,7 @@ export default function MinutaGenerator({ onBackToHome, onLogout }: MinutaGenera
     dotacao17: []
   });
   const [percentual, setPercentual] = useState("R$ 0,20 (vinte centavos)");
-  const [loadingDocx, setLoadingDocx] = useState(false);
+  const [loadingDocx, setLoadingDocx] = useState(false); // Estado de loading ao gerar DOCX
   const [modal, setModal] = useState<any>({ open: false, title: "", message: "", type: "info" });
   const [modal45Open, setModal45Open] = useState(false);
   const [modal171Open, setModal171Open] = useState(false);
@@ -2767,38 +2774,448 @@ export default function MinutaGenerator({ onBackToHome, onLogout }: MinutaGenera
     setClauseData((prev: any) => ({ ...prev, [key]: value }));
   };
 
+  // ========== HANDLER: BAIXAR DOCX DA MINUTA ==========
+  // ========== DESCRIÇÃO GERAL ==========
+  // Esta função gera um arquivo DOCX (Word) profissional usando a biblioteca docx
+  // O documento é construído programaticamente, garantindo fidelidade total ao formato Word
+  // ========== ESTRUTURA ==========
+  // Seção 1: Capa (sem cabeçalho/rodapé padrão)
+  // Seção 2: Todas as cláusulas (com cabeçalho mas SEM rodapé)
+  // O Word quebra páginas automaticamente quando o conteúdo chega no limite A4
+  // ========== DIFERENÇAS DA PROPOSTA ==========
+  // - NÃO tem rodapé (apenas cabeçalho com logo)
+  // - Usa imagem /barrocas.png no cabeçalho
+  // - Conteúdo flui automaticamente sem quebras manuais
   const handleDownloadDocx = async () => {
+    // ========== VALIDAÇÃO: CAMPOS OBRIGATÓRIOS ==========
+    if (!options.numeroContrato || !options.numeroContrato.trim()) {
+      setModal({
+        open: true,
+        title: "Atenção",
+        message: "Por favor, preencha o número do contrato.",
+        type: "error"
+      });
+      return;
+    }
+
+    if (!options.numeroInexigibilidade || !options.numeroInexigibilidade.trim()) {
+      setModal({
+        open: true,
+        title: "Atenção",
+        message: "Por favor, preencha o número da inexigibilidade.",
+        type: "error"
+      });
+      return;
+    }
+
+    if (!options.numeroProcesso || !options.numeroProcesso.trim()) {
+      setModal({
+        open: true,
+        title: "Atenção",
+        message: "Por favor, preencha o número do processo administrativo.",
+        type: "error"
+      });
+      return;
+    }
+
+    // ========== INICIALIZAÇÃO: ESTADO ==========
     setLoadingDocx(true);
 
     try {
-      const minutaData = {
-        municipio: 'BARROCAS',
-        numeroContrato: options.numeroContrato || "",
-        numeroInexigibilidade: options.numeroInexigibilidade || "",
-        numeroProcesso: options.numeroProcesso || "",
-        textoPartes: DEFAULT_TEXT_PARTES,
-        clauseData: clauseData,
-        percentual: percentual || ""
+      // ========== CARREGAMENTO: IMAGEM DO CABEÇALHO ==========
+      // Carrega a imagem Barrocas para o cabeçalho (específica da Minuta)
+      // IMPORTANTE: Minuta usa /barrocas.png, NÃO o logo Cavalcante Reis
+      const loadImageAsBuffer = async (url: string): Promise<ArrayBuffer | null> => {
+        try {
+          const response = await fetch(url);
+          if (!response.ok) {
+            console.warn(`Erro ao carregar imagem: ${url}`);
+            return null;
+          }
+          return await response.arrayBuffer();
+        } catch (error) {
+          console.warn(`Erro ao carregar imagem ${url}:`, error);
+          return null;
+        }
       };
 
-      const blob = await documentsApi.generateMinutaDocx(minutaData);
+      // Minuta usa APENAS a imagem barrocas.png (não usa logo Cavalcante Reis)
+      const barrocasBuffer = await loadImageAsBuffer('/barrocas.png');
+
+      // ========== CONSTRUÇÃO: CABEÇALHOS (DIFERENTES PARA CAPA E CONTEÚDO) ==========
+      // Cabeçalho da CAPA: Imagem Barrocas maior (~220px) para destacar na primeira página
+      const headerCapa = new Header({
+        children: barrocasBuffer ? [
+          new Paragraph({
+            children: [
+              new ImageRun({
+                data: barrocasBuffer,
+                transformation: {
+                  width: 220 * 9525, // 220px em EMUs (imagem grande na capa)
+                  height: (220 * 9525) * 0.34, // Proporção aproximada (75px de altura)
+                },
+              }),
+            ],
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 800 }, // Mais espaço após a imagem grande
+          }),
+        ] : [
+          new Paragraph({ text: "" }) // Parágrafo vazio se não houver imagem
+        ],
+      });
+
+      // Cabeçalho do CONTEÚDO: Imagem Barrocas menor/padrão (~100px) para não ocupar muito espaço
+      const headerConteudo = new Header({
+        children: barrocasBuffer ? [
+          new Paragraph({
+            children: [
+              new ImageRun({
+                data: barrocasBuffer,
+                transformation: {
+                  width: 100 * 9525, // 100px em EMUs (imagem padrão no conteúdo)
+                  height: (100 * 9525) * 0.35, // Proporção aproximada (35px de altura)
+                },
+              }),
+            ],
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 400 }, // Espaço padrão após a imagem menor
+          }),
+        ] : [
+          new Paragraph({ text: "" }) // Parágrafo vazio se não houver imagem
+        ],
+      });
+
+      // ========== CONSTRUÇÃO: SEÇÃO 1 - CAPA ==========
+      const capaChildren: any[] = [];
+
+      capaChildren.push(
+        createSimpleParagraph(`CONTRATO N° ${options.numeroContrato || "____________"}`, { bold: true }),
+        createSimpleParagraph(`INEXIGIBILIDADE DE LICITAÇÃO N° ${options.numeroInexigibilidade || "_____________"}`, { bold: true }),
+        createSimpleParagraph(`PROCESSO ADMINISTRATIVO N° ${options.numeroProcesso || "_____________________"}`, { bold: true, spacingAfter: 600 }),
+        new Paragraph({ text: "", spacing: { after: 600 } }), // Espaço
+        createSimpleParagraph(FIXED_COVER_TEXT, { alignment: AlignmentType.JUSTIFIED, spacingAfter: 600 }),
+        new Paragraph({ text: "", spacing: { after: 600 } }), // Espaço
+        createSimpleParagraph(DEFAULT_TEXT_PARTES, { alignment: AlignmentType.JUSTIFIED })
+      );
+
+      // ========== CONSTRUÇÃO: SEÇÃO 2 - CLÁUSULAS (COM CABEÇALHO, SEM RODAPÉ) ==========
+      // Array que conterá todo o conteúdo das cláusulas
+      // O Word vai quebrar páginas automaticamente quando chegar no limite A4
+      const clausulasChildren: any[] = [];
+
+      // Função auxiliar para processar texto com quebras de linha
+      const processTextWithLineBreaks = (texto: string, keyPrefix?: string): Paragraph[] => {
+        const lines = texto.split('\n');
+        return lines
+          .filter(line => line.trim() !== "")
+          .map((line, idx) => {
+            // Primeira linha pode ter o prefixo (ex: "1.1 - ")
+            const content = idx === 0 && keyPrefix ? `${keyPrefix} ${line}` : line;
+            return createSimpleParagraph(content || "\u00A0", {
+              alignment: AlignmentType.JUSTIFIED,
+              spacingAfter: idx === lines.length - 1 ? 300 : 200
+            });
+          });
+      };
+
+      // ========== CLÁUSULA 1 ==========
+      const clause1Selected = Object.entries(clauseData.clause1 || {}).sort(([a], [b]) => a.localeCompare(b));
+      if (clause1Selected.length > 0) {
+        clausulasChildren.push(
+          new Paragraph({
+            text: "CLÁUSULA 1ª - DO OBJETO",
+            heading: HeadingLevel.HEADING_2,
+            spacing: { after: 400 },
+          }),
+          createSimpleParagraph(
+            "É objeto do presente contrato o desenvolvimento de serviços advocatícios especializados por parte da CONTRATADA, CAVALCANTE REIS ADVOGADOS, ao CONTRATANTE, Município de BARROCAS, a fim de prestação de serviços de assessoria técnica e jurídica nas áreas de Direito Público, Tributário, Econômico, Financeiro e Previdenciário, atuando perante o Ministério da Fazenda e os seus órgãos administrativos, em especial para alcançar o incremento de receitas, ficando responsável pelo ajuizamento, acompanhamento e eventuais intervenções de terceiro em ações de interesse do Município.",
+            { alignment: AlignmentType.JUSTIFIED, spacingAfter: 300 }
+          )
+        );
+
+        clause1Selected.forEach(([key, item]: [string, any]) => {
+          const texto = item.texto || item;
+          if (typeof texto === 'string') {
+            const paragraphs = processTextWithLineBreaks(texto, key);
+            clausulasChildren.push(...paragraphs);
+          }
+        });
+
+        clausulasChildren.push(new Paragraph({ text: "", spacing: { after: 400 } }));
+      }
+
+      // ========== CLÁUSULA 2 ==========
+      const clause2Selected = Object.entries(clauseData.clause2 || {}).sort(([a], [b]) => a.localeCompare(b));
+      if (clause2Selected.length > 0) {
+        clausulasChildren.push(
+          new Paragraph({
+            text: "CLÁUSULA 2ª - DETALHAMENTO DO OBJETO E ESPECIFICAÇÕES DOS SERVIÇOS A SEREM EXECUTADOS",
+            heading: HeadingLevel.HEADING_2,
+            spacing: { before: 400, after: 400 },
+          })
+        );
+
+        clause2Selected.forEach(([key, item]: [string, any]) => {
+          const texto = item.texto || item;
+          if (typeof texto === 'string') {
+            const paragraphs = processTextWithLineBreaks(texto, `${key}-`);
+            clausulasChildren.push(...paragraphs);
+          }
+        });
+
+        clausulasChildren.push(new Paragraph({ text: "", spacing: { after: 400 } }));
+      }
+
+      // ========== CLÁUSULAS 3-18 ==========
+      const sortSubItems = (entries: [string, any][]): [string, any][] => {
+        return entries.sort(([a], [b]) => {
+          const numA = parseFloat(a.replace(/\D/g, ''));
+          const numB = parseFloat(b.replace(/\D/g, ''));
+          return numA - numB;
+        });
+      };
+
+      // Usa valores padrão se não houver dados salvos
+      const tabela45ItemsData = Object.keys(clauseData.tabela45 || {}).length > 0
+        ? (clauseData.tabela45 || {})
+        : tabela45Items;
+      const dotacao17 = clauseData.dotacao17 || [];
+
+      // Processa cada cláusula de 3 a 18
+      for (const num of ['3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18']) {
+        const clauseSelected = clauseData[`clause${num}`] || {};
+        if (Object.keys(clauseSelected).length > 0) {
+          const clauseInfo = allClauses[num];
+          if (clauseInfo) {
+            clausulasChildren.push(
+              new Paragraph({
+                text: clauseInfo.titulo,
+                heading: HeadingLevel.HEADING_2,
+                spacing: { before: 400, after: 400 },
+              })
+            );
+
+            const sortedItems = sortSubItems(Object.entries(clauseSelected));
+
+            // Caso especial: Cláusula 4.6 - inclui tabela
+            if (num === '4') {
+              sortedItems.forEach(([key, item]: [string, any]) => {
+                const texto = item.texto || item;
+                if (typeof texto === 'string') {
+                  if (key === '4.6') {
+                    // Processa texto do 4.6
+                    const paragraphs = processTextWithLineBreaks(texto, `${key}-`);
+                    clausulasChildren.push(...paragraphs);
+
+                    // Adiciona tabela 4.6 se houver itens
+                    if (Object.keys(tabela45ItemsData).length > 0) {
+                      const tableRows = [
+                        new TableRow({
+                          children: [
+                            new TableCell({
+                              children: [createSimpleParagraph("DESCRIÇÃO", { bold: true, alignment: AlignmentType.CENTER })],
+                              shading: { fill: "F9F9F9" },
+                            }),
+                            new TableCell({
+                              children: [createSimpleParagraph("CABIMENTO", { bold: true, alignment: AlignmentType.CENTER })],
+                              shading: { fill: "F9F9F9" },
+                            }),
+                          ],
+                        }),
+                        ...Object.entries(tabela45ItemsData).map(([itemKey, item]: [string, any]) =>
+                          new TableRow({
+                            children: [
+                              new TableCell({
+                                children: [createSimpleParagraph(item.descricao || item, { alignment: AlignmentType.JUSTIFIED })],
+                              }),
+                              new TableCell({
+                                children: [createSimpleParagraph(item.cabimento || "", { alignment: AlignmentType.JUSTIFIED })],
+                              }),
+                            ],
+                          })
+                        ),
+                      ];
+
+                      const tabela46Table = new Table({
+                        rows: tableRows,
+                        width: { size: 100, type: WidthType.PERCENTAGE },
+                        borders: {
+                          top: { style: "single", size: 1, color: "000000" },
+                          bottom: { style: "single", size: 1, color: "000000" },
+                          left: { style: "single", size: 1, color: "000000" },
+                          right: { style: "single", size: 1, color: "000000" },
+                          insideHorizontal: { style: "single", size: 1, color: "000000" },
+                          insideVertical: { style: "single", size: 1, color: "000000" },
+                        },
+                      });
+
+                      clausulasChildren.push(tabela46Table);
+                      clausulasChildren.push(new Paragraph({ text: "", spacing: { after: 300 } }));
+                    }
+                  } else {
+                    const paragraphs = processTextWithLineBreaks(texto, `${key}-`);
+                    clausulasChildren.push(...paragraphs);
+                  }
+                }
+              });
+            }
+            // Caso especial: Cláusula 17 - inclui dotação orçamentária
+            else if (num === '17') {
+              sortedItems.forEach(([key, item]: [string, any]) => {
+                const texto = item.texto || item;
+                if (typeof texto === 'string') {
+                  if (key === '17.1') {
+                    clausulasChildren.push(
+                      createSimpleParagraph(`${key}- ${texto}`, { alignment: AlignmentType.JUSTIFIED, spacingAfter: 300 })
+                    );
+
+                    // Adiciona itens da dotação se houver
+                    if (Array.isArray(dotacao17) && dotacao17.length > 0) {
+                      dotacao17.forEach((dotacao: any, idx: number) => {
+                        clausulasChildren.push(
+                          createSimpleParagraph(`${dotacao.descricao || dotacao}`, { alignment: AlignmentType.LEFT, spacingAfter: 200 })
+                        );
+                      });
+                      clausulasChildren.push(new Paragraph({ text: "", spacing: { after: 300 } }));
+                    }
+                  } else {
+                    const paragraphs = processTextWithLineBreaks(texto, `${key}-`);
+                    clausulasChildren.push(...paragraphs);
+                  }
+                }
+              });
+            }
+            // Cláusulas normais
+            else {
+              sortedItems.forEach(([key, item]: [string, any]) => {
+                const texto = item.texto || item;
+                if (typeof texto === 'string') {
+                  const paragraphs = processTextWithLineBreaks(texto, `${key}-`);
+                  clausulasChildren.push(...paragraphs);
+                }
+              });
+            }
+
+            clausulasChildren.push(new Paragraph({ text: "", spacing: { after: 400 } }));
+          }
+        }
+      }
+
+      // ========== ASSINATURAS (Cláusulas 16-18 ou final) ==========
+      // Verifica se há cláusulas 16, 17 ou 18 para incluir assinaturas
+      const hasClause16 = Object.keys(clauseData.clause16 || {}).length > 0;
+      const hasClause17 = Object.keys(clauseData.clause17 || {}).length > 0;
+      const hasClause18 = Object.keys(clauseData.clause18 || {}).length > 0;
+
+      if (hasClause16 || hasClause17 || hasClause18) {
+        clausulasChildren.push(
+          createSimpleParagraph("Barrocas/BA_____ de dezembro de 2025.", { spacingAfter: 800 }),
+          createSimpleParagraph("MUNICÍPIO DE BARROCAS/BA, representado por seu Prefeito,", { alignment: AlignmentType.CENTER, spacingAfter: 200 }),
+          createSimpleParagraph("Sr. JOSÉ ALMIR ARAÚJO QUEIROZ", { alignment: AlignmentType.CENTER, spacingAfter: 600 }),
+          createSimpleParagraph("CAVALCANTE REIS ADVOGADOS, representado pelo sócio-diretor, Sr.", { alignment: AlignmentType.CENTER, spacingAfter: 200 }),
+          createSimpleParagraph("IURI DO LAGO NOGUEIRA CAVALCANTE REIS,", { alignment: AlignmentType.CENTER, spacingAfter: 600 }),
+          createSimpleParagraph("Testemunhas:", { spacingAfter: 600 }),
+          createSimpleParagraph("1ª___________________________", { alignment: AlignmentType.CENTER, spacingAfter: 200 }),
+          createSimpleParagraph("CPF nº:", { alignment: AlignmentType.CENTER, spacingAfter: 600 }),
+          createSimpleParagraph("2ª___________________________", { alignment: AlignmentType.CENTER, spacingAfter: 200 }),
+          createSimpleParagraph("CPF nº:", { alignment: AlignmentType.CENTER })
+        );
+      }
+
+      // ========== CRIAÇÃO: DOCUMENTO WORD COM MÚLTIPLAS SEÇÕES ==========
+      // Cria o documento final com seções separadas para capa e cláusulas
+      const doc = new Document({
+        sections: [
+          // ========== SEÇÃO 1: CAPA (COM cabeçalho GRANDE, SEM rodapé) ==========
+          {
+            properties: {
+              type: SectionType.NEXT_PAGE, // Garante que a próxima seção comece em nova página
+              page: {
+                size: {
+                  orientation: "portrait",
+                  width: 11906, // A4 width em twips (210mm)
+                  height: 16838, // A4 height em twips (297mm)
+                },
+                margin: {
+                  top: 1440, // 25mm em twips (reservando espaço para cabeçalho GRANDE)
+                  right: 1417, // 25mm em twips
+                  bottom: 1134, // 20mm em twips (SEM reserva para rodapé)
+                  left: 1417, // 25mm em twips
+                },
+              },
+            },
+            // Cabeçalho com logo GRANDE (~220px) na capa
+            headers: {
+              default: headerCapa,
+            },
+            // NOTA: Não definimos 'footers', então NÃO terá rodapé (como solicitado)
+            // Conteúdo da capa
+            children: capaChildren,
+          },
+          // ========== SEÇÃO 2: CLÁUSULAS (com cabeçalho PEQUENO mas SEM rodapé) ==========
+          // O Word vai quebrar páginas automaticamente quando o conteúdo chegar no limite A4
+          {
+            properties: {
+              type: SectionType.CONTINUOUS, // Continua da página anterior
+              page: {
+                size: {
+                  orientation: "portrait",
+                  width: 11906, // A4 width em twips (210mm)
+                  height: 16838, // A4 height em twips (297mm)
+                },
+                margin: {
+                  top: 1134, // 20mm em twips (reservando espaço para cabeçalho PEQUENO)
+                  right: 1417, // 25mm em twips
+                  bottom: 1134, // 20mm em twips (SEM reserva para rodapé)
+                  left: 1417, // 25mm em twips
+                },
+              },
+            },
+            // Cabeçalho com logo PEQUENO/PADRÃO (~100px) no conteúdo
+            headers: {
+              default: headerConteudo,
+            },
+            // NOTA: Não definimos 'footers', então NÃO terá rodapé (como solicitado)
+            // Todo o conteúdo das cláusulas: o Word quebra páginas automaticamente
+            children: clausulasChildren,
+          },
+        ],
+        styles: {
+          default: {
+            document: {
+              run: {
+                font: "Garamond",
+                size: 26, // 13pt (docx usa meios-pontos: 13 * 2 = 26)
+              },
+            },
+          },
+        },
+      });
+
+      // ========== GERAÇÃO E DOWNLOAD: DOCX ==========
+      // Gera o blob do documento e faz o download
+      const blob = await Packer.toBlob(doc);
       saveAs(blob, `Minuta_BARROCAS.docx`);
 
+      // ========== FEEDBACK: SUCESSO ==========
       setModal({
         open: true,
         title: "Sucesso",
         message: "Minuta gerada e baixada com sucesso!",
         type: "success"
       });
+
     } catch (e: any) {
+      // ========== TRATAMENTO: ERRO ==========
       console.error('Erro ao gerar Minuta:', e);
       setModal({
         open: true,
         title: "Erro",
-        message: `Erro ao gerar Minuta: ${e.response?.data?.message || e.message || 'Erro desconhecido'}. Tente novamente.`,
+        message: `Erro ao gerar Minuta: ${e.message || 'Erro desconhecido'}. Tente novamente.`,
         type: "error"
       });
     } finally {
+      // ========== FINALIZAÇÃO: DESATIVA LOADING ==========
       setLoadingDocx(false);
     }
   };
@@ -2878,7 +3295,7 @@ export default function MinutaGenerator({ onBackToHome, onLogout }: MinutaGenera
 
             {/* Preview */}
             <div className="content" style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
-              <h2 className="preview-title">Prévia da Minuta</h2>
+              <h2 className="preview-title">Documento da Minuta</h2>
               <MinutaDocument
                 key={JSON.stringify(clauseData)} // Força re-renderização quando clauseData muda
                 options={options}

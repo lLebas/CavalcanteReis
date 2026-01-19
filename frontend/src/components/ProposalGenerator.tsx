@@ -8,8 +8,9 @@ import { Settings, FileText, Eye, X, ArrowLeft, LogOut, Download, Save, RefreshC
 import { saveAs } from "file-saver"; // Biblioteca para fazer download de arquivos
 import { jsPDF } from "jspdf"; // Biblioteca para gerar PDF
 import html2canvas from "html2canvas"; // Biblioteca para converter HTML em canvas/imagem
-// @ts-ignore - html-docx-js não tem tipos TypeScript
-import htmlDocx from "html-docx-js/dist/html-docx"; // Biblioteca para converter HTML em DOCX
+// ========== IMPORTS: BIBLIOTECA DOCX ==========
+import { Document, Packer, Paragraph, TextRun, ImageRun, Header, Footer, AlignmentType, PageBreak, Table, TableRow, TableCell, WidthType, HeadingLevel, Spacing, SectionType } from "docx";
+import { parseHtmlToDocx, createSimpleParagraph, createMixedParagraph } from "../lib/docxHelper"; // Helper para conversão HTML -> docx
 import { propostasApi, Proposta } from "../lib/api"; // API para salvar/carregar propostas no backend
 
 // ========== CONSTANTES: LISTA DE SERVIÇOS DISPONÍVEIS ==========
@@ -406,7 +407,7 @@ const ControlsSidebar = ({
           {loadingProposals ? "Salvando..." : <><Save size={18} /> Salvar Proposta</>}
         </button>
         <button className="btn secondary" style={{ width: '100%', padding: '14px' }} onClick={onDownloadDocx} disabled={loadingDocx}>
-          {loadingDocx ? "Gerando..." : <><Download size={18} /> .docx</>}
+          {loadingDocx ? "Gerando..." : <><Download size={18} /> Docs</>}
         </button>
       </div>
 
@@ -1351,8 +1352,27 @@ export default function ProposalGenerator({ onBackToHome, onLogout, propostaToLo
     }
   };
 
+  // ========== HANDLER: BAIXAR PDF ==========
+  // ========== DESCRIÇÃO GERAL ==========
+  // Esta função converte a prévia HTML do documento da proposta em um arquivo PDF
+  // utilizando as bibliotecas jsPDF e html2canvas. O processo envolve:
+  // 1. Validação dos campos obrigatórios (município, data, serviços selecionados)
+  // 2. Aguardar carregamento completo de todas as imagens
+  // 3. Captura de cada página como canvas usando html2canvas
+  // 4. Conversão de cada canvas em imagem JPEG e adição ao PDF
+  // 5. Geração do arquivo PDF e download automático
+  // ========== DIMENSÕES E ESPECIFICAÇÕES ==========
+  // - Páginas: formato A4 (210mm x 297mm)
+  // - Resolução: scale 2x para melhor qualidade (794px x 1123px)
+  // - Formato de imagem: JPEG com qualidade 95%
+  // - Background: branco (#ffffff)
+  // ========== PROCESSAMENTO DE PÁGINAS ==========
+  // Cada página do documento é capturada individualmente como canvas
+  // e adicionada ao PDF como imagem JPEG, garantindo fidelidade visual
   const handleDownloadPdf = async () => {
-    // Validação
+    // ========== VALIDAÇÃO: CAMPOS OBRIGATÓRIOS ==========
+    // Verifica se o campo município foi preenchido
+    // Se não estiver preenchido, exibe modal de erro e interrompe o processo
     if (!options.municipio || !options.municipio.trim()) {
       setModal({
         open: true,
@@ -1384,6 +1404,10 @@ export default function ProposalGenerator({ onBackToHome, onLogout, propostaToLo
       return;
     }
 
+    // ========== INICIALIZAÇÃO: ESTADO E CONTAINER ==========
+    // Ativa o estado de loading para mostrar feedback visual ao usuário
+    // Busca o elemento HTML que contém a prévia do documento (id="preview")
+    // Se o container não for encontrado, exibe erro e interrompe o processo
     setLoadingPdf(true); // Ativa estado de loading
     const container = document.getElementById("preview"); // Busca o container da prévia
     if (!container) {
@@ -1399,7 +1423,17 @@ export default function ProposalGenerator({ onBackToHome, onLogout, propostaToLo
 
     try {
       // ========== FUNÇÃO AUXILIAR: AGUARDAR IMAGENS ==========
-      // Aguarda todas as imagens de uma página carregarem antes de converter para PDF
+      // ========== DESCRIÇÃO ==========
+      // Aguarda todas as imagens de uma página carregarem completamente antes de converter para PDF
+      // Isso é crítico para garantir que todas as imagens apareçam corretamente no PDF final
+      // ========== PROCESSAMENTO ==========
+      // 1. Busca todas as tags <img> dentro do elemento fornecido
+      // 2. Para cada imagem, verifica se já está carregada (complete && naturalHeight > 0)
+      // 3. Se não estiver, força recarregamento e aguarda eventos onload/onerror
+      // 4. Conta imagens carregadas e com erro separadamente
+      // 5. Resolve quando todas as imagens foram processadas ou após timeout de 5 segundos
+      // ========== RETORNO ==========
+      // Retorna uma Promise que resolve quando todas as imagens foram processadas
       const waitForImages = (element: HTMLElement): Promise<void> => {
         return new Promise((resolve) => {
           const images = element.querySelectorAll('img');
@@ -1456,9 +1490,19 @@ export default function ProposalGenerator({ onBackToHome, onLogout, propostaToLo
         });
       };
 
+      // ========== INICIALIZAÇÃO: DOCUMENTO PDF ==========
+      // Cria um novo documento PDF usando jsPDF
+      // Parâmetros: 'p' = portrait (retrato), 'mm' = milímetros, 'a4' = formato A4
       const pdf = new jsPDF('p', 'mm', 'a4');
+
+      // ========== BUSCA: PÁGINAS DO DOCUMENTO ==========
+      // Busca todos os elementos com classe 'pdf-page-render' que representam páginas individuais
+      // Cada página será capturada e adicionada ao PDF separadamente
       const pages = container.querySelectorAll('.pdf-page-render');
 
+      // ========== VALIDAÇÃO: PÁGINAS ENCONTRADAS ==========
+      // Verifica se pelo menos uma página foi encontrada
+      // Se não houver páginas, exibe erro e interrompe o processo
       if (pages.length === 0) {
         setModal({
           open: true,
@@ -1470,55 +1514,107 @@ export default function ProposalGenerator({ onBackToHome, onLogout, propostaToLo
         return;
       }
 
-      // Aguarda todas as imagens carregarem antes de processar
+      // ========== AGUARDO: CARREGAMENTO DE IMAGENS ==========
+      // Aguarda todas as imagens de todas as páginas carregarem completamente
+      // Isso garante que todas as imagens estejam prontas antes de iniciar a captura
       console.log('Aguardando carregamento de imagens...');
       for (let i = 0; i < pages.length; i++) {
         await waitForImages(pages[i] as HTMLElement);
       }
 
-      // Aguardar um pouco mais para garantir renderização completa
+      // ========== AGUARDO: RENDERIZAÇÃO COMPLETA ==========
+      // Aguarda 1 segundo adicional para garantir que toda a renderização esteja completa
+      // Isso inclui estilos CSS aplicados, posicionamento de elementos, etc.
       await new Promise(resolve => setTimeout(resolve, 1000));
 
+      // ========== LOOP: PROCESSAMENTO DE CADA PÁGINA ==========
+      // Itera sobre cada página do documento
+      // Para cada página:
+      // 1. Adiciona nova página ao PDF (exceto a primeira)
+      // 2. Captura a página como canvas usando html2canvas
+      // 3. Converte o canvas em imagem JPEG
+      // 4. Adiciona a imagem ao PDF com dimensões A4
       for (let i = 0; i < pages.length; i++) {
+        // ========== ADIÇÃO: NOVA PÁGINA NO PDF ==========
+        // Adiciona uma nova página ao PDF para cada página do documento (exceto a primeira)
+        // A primeira página já existe quando o PDF é criado
         if (i > 0) {
           pdf.addPage();
         }
 
+        // ========== OBTENÇÃO: ELEMENTO DA PÁGINA ==========
+        // Obtém o elemento HTML que representa a página atual
         const pageElement = pages[i] as HTMLElement;
 
         try {
-          // Ajusta overflow da página para captura correta
+          // ========== AJUSTE: OVERFLOW PARA CAPTURA ==========
+          // Ajusta o overflow da página para 'hidden' durante a captura
+          // Isso evita que elementos que ultrapassam os limites da página apareçam na captura
+          // Salva o valor original para restaurar depois
           const originalOverflow = pageElement.style.overflow;
           pageElement.style.overflow = 'hidden';
 
+          // ========== CAPTURA: PÁGINA COMO CANVAS ==========
+          // Usa html2canvas para capturar a página como um elemento canvas
+          // Parâmetros:
+          // - scale: 2 (dobra a resolução para melhor qualidade)
+          // - useCORS: true (permite carregar imagens de outros domínios)
+          // - allowTaint: true (permite "contaminar" o canvas com imagens externas)
+          // - logging: false (desativa logs de debug)
+          // - backgroundColor: '#ffffff' (fundo branco)
+          // - width/height: 794x1123px (equivalente a 210mm x 297mm em A4)
+          // - windowWidth/windowHeight: define o viewport para captura
           const canvas = await html2canvas(pageElement, {
-            scale: 2,
-            useCORS: true,
-            allowTaint: true,
-            logging: false,
-            backgroundColor: '#ffffff',
+            scale: 2, // Resolução 2x para melhor qualidade
+            useCORS: true, // Permite imagens de outros domínios
+            allowTaint: true, // Permite "contaminar" canvas com imagens externas
+            logging: false, // Desativa logs
+            backgroundColor: '#ffffff', // Fundo branco
             width: 794, // 210mm em pixels (210mm * 3.779527559 = ~794px)
             height: 1123, // 297mm em pixels (297mm * 3.779527559 = ~1123px)
-            windowWidth: 794,
-            windowHeight: 1123,
+            windowWidth: 794, // Largura do viewport
+            windowHeight: 1123, // Altura do viewport
           });
 
-          // Restaurar overflow original
+          // ========== RESTAURAÇÃO: OVERFLOW ORIGINAL ==========
+          // Restaura o valor original do overflow após a captura
           pageElement.style.overflow = originalOverflow;
 
+          // ========== CONVERSÃO: CANVAS PARA JPEG ==========
+          // Converte o canvas em uma string base64 de imagem JPEG
+          // Qualidade: 95% (balanço entre qualidade e tamanho do arquivo)
           const imgData = canvas.toDataURL('image/jpeg', 0.95);
+
+          // ========== DIMENSÕES: IMAGEM NO PDF ==========
+          // Define as dimensões da imagem no PDF em milímetros
+          // A4: 210mm de largura x 297mm de altura
           const imgWidth = 210; // A4 width in mm
           const imgHeight = 297; // A4 height in mm (fixo)
 
+          // ========== ADIÇÃO: IMAGEM AO PDF ==========
+          // Adiciona a imagem JPEG ao PDF na posição (0, 0) com dimensões A4
+          // Isso preenche toda a página com a captura
           pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
         } catch (pageError) {
+          // ========== TRATAMENTO: ERRO EM PÁGINA INDIVIDUAL ==========
+          // Se uma página falhar, registra o erro mas continua processando as outras
+          // Isso garante que o máximo de páginas possível seja incluído no PDF
           console.error(`Erro ao processar página ${i + 1}:`, pageError);
           // Continua para próxima página mesmo se uma falhar
         }
       }
 
-      // ========== FORMATAÇÃO: NOME DO ARQUIVO ==========
-      // Formata o nome do arquivo PDF: DD.MM.YYYY - Proposta de Serviços Advocatícios - Município de NOME - UF (êxito).pdf
+      // ========== FUNÇÃO AUXILIAR: FORMATAR DATA PARA NOME DE ARQUIVO ==========
+      // ========== DESCRIÇÃO ==========
+      // Formata a data da proposta para ser usada no nome do arquivo PDF
+      // Formato final: DD.MM.YYYY - Proposta de Serviços Advocatícios - Município de NOME - UF (êxito).pdf
+      // ========== PROCESSAMENTO ==========
+      // 1. Se não houver data, usa a data atual
+      // 2. Tenta extrair data no formato brasileiro: "DD de mês de YYYY"
+      // 3. Se não encontrar, tenta formato DD/MM/YYYY ou DD.MM.YYYY
+      // 4. Converte para formato DD.MM.YYYY
+      // ========== RETORNO ==========
+      // Retorna string formatada como DD.MM.YYYY
       const formatDateForFilename = (dateStr: string) => {
         if (!dateStr) {
           const today = new Date();
@@ -1551,20 +1647,31 @@ export default function ProposalGenerator({ onBackToHome, onLogout, propostaToLo
         return dateStr.replace(/\//g, '.').replace(/\s+/g, '_');
       };
 
+      // ========== FORMATAÇÃO: NOME DO ARQUIVO PDF ==========
+      // Formata a data usando a função auxiliar
+      // Obtém o nome do município (usa 'CR' como padrão se não definido)
       const filenameDate = formatDateForFilename(options.data || '');
       const municipio = options.municipio || 'CR';
 
-      // Extrai UF do município se estiver no formato "Nome - UF"
+      // ========== EXTRAÇÃO: NOME E UF DO MUNICÍPIO ==========
+      // Extrai o nome do município e a UF se estiver no formato "Nome - UF"
+      // Exemplo: "Brasília - DF" -> nomeMunicipio: "Brasília", uf: "DF"
       const municipioParts = municipio.split(' - ');
       const nomeMunicipio = municipioParts[0];
       const uf = municipioParts[1] || '';
 
+      // ========== CONSTRUÇÃO: NOME COMPLETO DO ARQUIVO ==========
+      // Constrói o nome do arquivo no formato:
+      // "DD.MM.YYYY - Proposta de Serviços Advocatícios - Município de NOME - UF (êxito).pdf"
+      // Se houver UF, adiciona ao nome; caso contrário, omite
       let filename = `${filenameDate} - Proposta de Serviços Advocatícios - Município de ${nomeMunicipio}`;
       if (uf) {
         filename += ` - ${uf}`;
       }
       filename += ' (êxito).pdf';
 
+      // ========== DOWNLOAD: ARQUIVO PDF ==========
+      // Salva o PDF com o nome formatado, iniciando o download automático
       pdf.save(filename);
 
       setModal({
@@ -1587,9 +1694,27 @@ export default function ProposalGenerator({ onBackToHome, onLogout, propostaToLo
   };
 
   // ========== HANDLER: BAIXAR DOCX ==========
-  // Converte a prévia HTML em DOCX usando html-docx-js
+  // ========== DESCRIÇÃO GERAL ==========
+  // Esta função gera um arquivo DOCX (Word) profissional usando a biblioteca docx
+  // O documento é construído programaticamente, garantindo fidelidade total ao formato Word
+  // ========== VANTAGENS ==========
+  // - Sem conversão HTML quebrada: renderização nativa do Word
+  // - Rodapés e cabeçalhos reais que se repetem em todas as páginas
+  // - Imagens com tamanhos precisos e qualidade preservada
+  // - Formatação tipográfica profissional (Garamond, espaçamentos corretos)
+  // - Performance: processamento direto sem canvas invisível ou strings gigantes
+  // ========== DIMENSÕES E ESPECIFICAÇÕES ==========
+  // - Imagens de logo: 170px de largura
+  // - Imagens de municípios: 400px de largura
+  // - Imagens de assinatura: 150px de largura
+  // - Páginas: formato A4 (210mm x 297mm)
+  // - Margens: 20mm superior/inferior, 25mm esquerda
+  // - Fonte: Garamond, 13pt (26 meios-pontos)
+  // - Line-height: 17pt
   const handleDownloadDocx = async () => {
-    // Validações: verifica se todos os campos obrigatórios foram preenchidos
+    // ========== VALIDAÇÃO: CAMPOS OBRIGATÓRIOS ==========
+    // Verifica se o campo município foi preenchido
+    // Se não estiver preenchido, exibe modal de erro e interrompe o processo
     if (!options.municipio || !options.municipio.trim()) {
       setModal({
         open: true,
@@ -1621,321 +1746,667 @@ export default function ProposalGenerator({ onBackToHome, onLogout, propostaToLo
       return;
     }
 
-    setLoadingDocx(true); // Ativa estado de loading
-    const container = document.getElementById("preview"); // Busca o container da prévia
-    if (!container) {
-      setModal({
-        open: true,
-        title: "Erro",
-        message: "Container de preview não encontrado.",
-        type: "error"
-      });
-      setLoadingDocx(false);
-      return;
-    }
+    // ========== INICIALIZAÇÃO: ESTADO ==========
+    // Ativa o estado de loading para mostrar feedback visual ao usuário
+    setLoadingDocx(true);
 
     try {
-      // Aguarda um pouco para garantir que todas as imagens estejam carregadas
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // ========== FUNÇÃO AUXILIAR: CONVERTER IMAGEM PARA BASE64 ==========
-      // Converte uma imagem (URL ou caminho) para base64 com tamanho controlado
-      const imageToBase64 = (img: HTMLImageElement): Promise<string> => {
-        return new Promise((resolve, reject) => {
-          if (!img.src || img.src.startsWith('data:')) {
-            // Se já for base64, retorna como está
-            resolve(img.src);
-            return;
-          }
-
-          // Determina o tamanho alvo baseado no tipo de imagem
-          let targetWidth = 150; // Padrão
-          if (img.src.includes('logo-cavalcante-reis') || img.alt?.toLowerCase().includes('logo')) {
-            targetWidth = 170; // Logo 170px
-          } else if (img.src.includes('munincipios') || img.src.includes('Municipios')) {
-            targetWidth = 400; // Imagens de municípios (mantém proporção)
-          } else if (img.src.includes('Assinatura') || img.alt?.toLowerCase().includes('assinatura')) {
-            targetWidth = 150; // Assinatura 150px
-          }
-
-          // Cria um canvas para converter a imagem com tamanho controlado
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
-
-          if (!ctx) {
-            reject(new Error('Não foi possível criar contexto do canvas'));
-            return;
-          }
-
-          // Calcula dimensões mantendo proporção
-          const originalWidth = img.naturalWidth || img.width || targetWidth;
-          const originalHeight = img.naturalHeight || img.height || (originalWidth * 0.75);
-          const aspectRatio = originalHeight / originalWidth;
-
-          // Define dimensões do canvas (máximo targetWidth, mantém proporção)
-          const finalWidth = Math.min(originalWidth, targetWidth);
-          const finalHeight = finalWidth * aspectRatio;
-
-          canvas.width = finalWidth;
-          canvas.height = finalHeight;
-
-          // Desenha a imagem redimensionada no canvas
-          ctx.drawImage(img, 0, 0, finalWidth, finalHeight);
-
-          try {
-            // Converte para base64
-            const dataUrl = canvas.toDataURL('image/png', 0.95);
-            resolve(dataUrl);
-          } catch (error) {
-            // Se falhar, tenta carregar via fetch sem redimensionar
-            fetch(img.src)
-              .then(response => response.blob())
-              .then(blob => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result as string);
-                reader.onerror = () => reject(new Error('Erro ao ler imagem'));
-                reader.readAsDataURL(blob);
-              })
-              .catch(() => reject(new Error('Erro ao carregar imagem')));
-          }
-        });
+      // ========== FUNÇÕES AUXILIARES: FORMATAÇÃO DE DATA ==========
+      // Funções para formatar datas (mesmas do componente ProposalDocument)
+      const formatDateNumeric = (dateStr: string): string => {
+        if (!dateStr) {
+          const today = new Date();
+          const day = String(today.getDate()).padStart(2, '0');
+          const month = String(today.getMonth() + 1).padStart(2, '0');
+          const year = today.getFullYear();
+          return `${day}/${month}/${year}`;
+        }
+        const dateMatch = dateStr.match(/(\d{1,2})[./](\d{1,2})[./](\d{4})/);
+        if (dateMatch) {
+          const day = dateMatch[1].padStart(2, '0');
+          const month = dateMatch[2].padStart(2, '0');
+          const year = dateMatch[3];
+          return `${day}/${month}/${year}`;
+        }
+        const dateMatch2 = dateStr.match(/(\d{1,2})\s+de\s+(\w+)\s+de\s+(\d{4})/);
+        if (dateMatch2) {
+          const day = dateMatch2[1].padStart(2, '0');
+          const months: Record<string, string> = {
+            'janeiro': '01', 'fevereiro': '02', 'março': '03', 'abril': '04',
+            'maio': '05', 'junho': '06', 'julho': '07', 'agosto': '08',
+            'setembro': '09', 'outubro': '10', 'novembro': '11', 'dezembro': '12'
+          };
+          const month = months[dateMatch2[2].toLowerCase()] || '01';
+          const year = dateMatch2[3];
+          return `${day}/${month}/${year}`;
+        }
+        return dateStr;
       };
 
-      // Aguarda todas as imagens carregarem e converte para base64
-      const images = container.querySelectorAll('img');
-      const imagePromises: Promise<void>[] = [];
-
-      images.forEach((img, index) => {
-        const promise = new Promise<void>((resolve) => {
-          if (img.complete && img.naturalHeight > 0) {
-            // Imagem já carregada
-            imageToBase64(img)
-              .then((base64) => {
-                img.src = base64;
-                resolve();
-              })
-              .catch((error) => {
-                console.warn(`Erro ao converter imagem ${index + 1} para base64:`, error);
-                resolve(); // Continua mesmo se falhar
-              });
-          } else {
-            // Aguarda carregar
-            img.onload = () => {
-              imageToBase64(img)
-                .then((base64) => {
-                  img.src = base64;
-                  resolve();
-                })
-                .catch((error) => {
-                  console.warn(`Erro ao converter imagem ${index + 1} para base64:`, error);
-                  resolve(); // Continua mesmo se falhar
-                });
-            };
-            img.onerror = () => {
-              console.warn(`Erro ao carregar imagem ${index + 1}:`, img.src);
-              resolve(); // Continua mesmo se falhar
-            };
-
-            // Timeout de segurança
-            setTimeout(() => resolve(), 3000);
+      const formatDateWithMonthName = (dateStr: string): string => {
+        if (!dateStr) {
+          const today = new Date();
+          const months = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+          return `${today.getDate()} de ${months[today.getMonth()]} de ${today.getFullYear()}`;
+        }
+        if (dateStr.match(/\d{1,2}\s+de\s+\w+\s+de\s+\d{4}/)) {
+          return dateStr;
+        }
+        const dateMatch = dateStr.match(/(\d{1,2})[./](\d{1,2})[./](\d{4})/);
+        if (dateMatch) {
+          const day = parseInt(dateMatch[1]);
+          const month = parseInt(dateMatch[2]);
+          const year = dateMatch[3];
+          const months = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+          if (month >= 1 && month <= 12) {
+            return `${day} de ${months[month - 1]} de ${year}`;
           }
-        });
-        imagePromises.push(promise);
+        }
+        return dateStr;
+      };
+
+      // ========== CARREGAMENTO: IMAGENS COMO BUFFERS ==========
+      // Carrega todas as imagens necessárias como ArrayBuffer
+      // Isso é muito mais eficiente que converter para base64 via canvas
+      const loadImageAsBuffer = async (url: string): Promise<ArrayBuffer | null> => {
+        try {
+          const response = await fetch(url);
+          if (!response.ok) {
+            console.warn(`Erro ao carregar imagem: ${url}`);
+            return null;
+          }
+          return await response.arrayBuffer();
+        } catch (error) {
+          console.warn(`Erro ao carregar imagem ${url}:`, error);
+          return null;
+        }
+      };
+
+      // Carrega todas as imagens em paralelo
+      // IMPORTANTE: Verifique se os nomes dos arquivos estão corretos na pasta /public
+      const [logoBuffer, assinaturaBuffer, municipios01Buffer, municipios02Buffer] = await Promise.all([
+        loadImageAsBuffer('/logo-cavalcante-reis.png'),
+        loadImageAsBuffer('/Assinatura.png'),
+        loadImageAsBuffer('/munincipios01.png'),
+        loadImageAsBuffer('/Munincipios02.png'),
+      ]);
+
+      // Log para debug (remover em produção se necessário)
+      console.log('Imagens carregadas:', {
+        logo: !!logoBuffer,
+        assinatura: !!assinaturaBuffer,
+        municipios01: !!municipios01Buffer,
+        municipios02: !!municipios02Buffer,
       });
 
-      // Aguarda todas as imagens serem convertidas
-      await Promise.all(imagePromises);
+      // ========== CONSTRUÇÃO: RODAPÉ DO DOCUMENTO ==========
+      // Cria o rodapé que aparecerá em todas as páginas
+      const enabledOffices = [];
+      if (footerOffices.rj.enabled) enabledOffices.push(footerOffices.rj);
+      if (footerOffices.df.enabled) enabledOffices.push(footerOffices.df);
+      if (footerOffices.sp.enabled) enabledOffices.push(footerOffices.sp);
+      if (footerOffices.am.enabled) enabledOffices.push(footerOffices.am);
 
-      // Aguarda mais um pouco para garantir que as alterações foram aplicadas
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // Se não houver escritórios habilitados, usa DF como padrão
+      const officesToShow = enabledOffices.length > 0 ? enabledOffices : [
+        { cidade: "Brasília - DF", linha1: "SHIS QL 10, Conj. 06, Casa 19", linha2: "Lago Sul,", linha3: "CEP: 71630-065" }
+      ];
 
-      // ========== PROCESSAMENTO: AJUSTAR HTML PARA DOCX ==========
-      // ========== PROCESSAMENTO: AJUSTAR HTML PARA DOCX ==========
-      // Processa o HTML antes de converter, ajustando tamanhos de imagem e estilos
-      const processHTMLForDocx = (htmlString: string): string => {
-        // Usa DOMParser para processar o HTML sem afetar o DOM
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(htmlString, 'text/html');
+      // ========== CONSTRUÇÃO: RODAPÉ DO DOCUMENTO ==========
+      // Cria uma tabela para os escritórios ficarem lado a lado no rodapé
+      // A tabela tem uma linha com uma célula para cada escritório
+      const footerTableRows = [new TableRow({
+        children: officesToShow.map(office =>
+          new TableCell({
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({ text: office.cidade, bold: true, size: 18, font: "Garamond", color: "000000" }), // 9pt
+                  new TextRun({ text: `\n${office.linha1}`, size: 20, font: "Garamond", color: "000000" }), // 10pt
+                  new TextRun({ text: `\n${office.linha2}`, size: 20, font: "Garamond", color: "000000" }), // 10pt
+                  new TextRun({ text: `\n${office.linha3}`, size: 20, font: "Garamond", color: "000000" }), // 10pt
+                ],
+                alignment: AlignmentType.CENTER,
+                spacing: { after: 200 },
+              }),
+            ],
+            width: { size: 100 / officesToShow.length, type: WidthType.PERCENTAGE },
+            margins: { top: 100, bottom: 100, left: 100, right: 100 }, // Margens internas
+          })
+        ),
+      })];
 
-        // Ajusta todas as imagens para tamanhos fixos em pixels
-        const allImages = doc.querySelectorAll('img');
-        allImages.forEach((img) => {
-          let targetWidth = 150; // Padrão
+      const footerTable = new Table({
+        rows: footerTableRows,
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        borders: {
+          // Remove bordas da tabela para ficar limpo
+          top: { size: 0, style: "none" },
+          bottom: { size: 0, style: "none" },
+          left: { size: 0, style: "none" },
+          right: { size: 0, style: "none" },
+          insideHorizontal: { size: 0, style: "none" },
+          insideVertical: { size: 0, style: "none" },
+        },
+      });
 
-          // Detecta tipo de imagem pelo src ou alt
-          const src = img.getAttribute('src') || '';
-          if (src.includes('logo-cavalcante-reis') || img.getAttribute('alt')?.toLowerCase().includes('logo')) {
-            targetWidth = 170; // Logo 170px
-          } else if (src.includes('munincipios') || src.includes('Municipios')) {
-            targetWidth = 400; // Imagens de municípios
-          } else if (src.includes('Assinatura') || img.getAttribute('alt')?.toLowerCase().includes('assinatura')) {
-            targetWidth = 150; // Assinatura 150px
-          }
+      // Cria o footer completo com tabela de escritórios e linha com site
+      const documentFooter = new Footer({
+        children: [
+          footerTable,
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "WWW.CAVALCANTE-REIS.ADV.BR",
+                size: 20, // 10pt
+                font: "Garamond",
+                color: "000000", // Força cor preta
+              }),
+            ],
+            alignment: AlignmentType.CENTER,
+            spacing: { before: 200 },
+            border: {
+              top: {
+                color: "D0D0D0",
+                size: 6, // Linha superior fina
+                style: "single",
+              },
+            },
+          }),
+        ],
+      });
 
-          // Define largura fixa em pixels (Word lê melhor assim)
-          img.setAttribute('width', targetWidth.toString());
-          img.setAttribute('style', `width: ${targetWidth}px; height: auto; max-width: ${targetWidth}px;`);
-          img.removeAttribute('height');
-        });
+      // ========== CONSTRUÇÃO: CABEÇALHOS (DIFERENTES PARA CAPA E CONTEÚDO) ==========
+      // Cabeçalho da CAPA: Logo maior (~220px) para destacar na primeira página
+      const headerCapa = new Header({
+        children: logoBuffer ? [
+          new Paragraph({
+            children: [
+              new ImageRun({
+                data: logoBuffer,
+                transformation: {
+                  width: 220 * 9525, // 220px em EMUs (logo grande na capa)
+                  height: (220 * 9525) * 0.34, // Proporção aproximada (75px de altura)
+                },
+              }),
+            ],
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 800 }, // Mais espaço após o logo grande
+          }),
+        ] : [
+          new Paragraph({ text: "" }) // Parágrafo vazio se não houver logo
+        ],
+      });
 
-        // Garante que parágrafos com text-align tenham o estilo inline
-        const allParagraphs = doc.querySelectorAll('p');
-        allParagraphs.forEach((p) => {
-          const computedAlign = p.style.textAlign || '';
-          if (computedAlign) {
-            p.setAttribute('style', (p.getAttribute('style') || '') + ` text-align: ${computedAlign};`);
-          } else {
-            // Verifica pelo estilo aplicado via classe ou estilo inline existente
-            const existingStyle = p.getAttribute('style') || '';
-            if (existingStyle.includes('text-align')) {
-              // Já tem, mantém
-            } else {
-              // Adiciona justify como padrão para parágrafos de texto
-              p.setAttribute('style', existingStyle + ' text-align: justify;');
-            }
-          }
-        });
+      // Cabeçalho do CONTEÚDO: Logo menor/padrão (~100px) para não ocupar muito espaço
+      const headerConteudo = new Header({
+        children: logoBuffer ? [
+          new Paragraph({
+            children: [
+              new ImageRun({
+                data: logoBuffer,
+                transformation: {
+                  width: 100 * 9525, // 100px em EMUs (logo padrão no conteúdo)
+                  height: (100 * 9525) * 0.35, // Proporção aproximada (35px de altura)
+                },
+              }),
+            ],
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 400 }, // Espaço padrão após o logo menor
+          }),
+        ] : [
+          new Paragraph({ text: "" }) // Parágrafo vazio se não houver logo
+        ],
+      });
 
-        // Garante que divs com centralização tenham o estilo
-        const allDivs = doc.querySelectorAll('div');
-        allDivs.forEach((div) => {
-          const existingStyle = div.getAttribute('style') || '';
-          if (existingStyle.includes('text-align: center') || existingStyle.includes('textAlign: center')) {
-            div.setAttribute('style', existingStyle.replace(/textAlign:\s*center/g, 'text-align: center'));
-          }
-          if (existingStyle.includes('text-align: right') || existingStyle.includes('textAlign: right')) {
-            div.setAttribute('style', existingStyle.replace(/textAlign:\s*right/g, 'text-align: right'));
-          }
-        });
+      // ========== CONSTRUÇÃO: CONTEÚDO DO DOCUMENTO ==========
+      // ========== ESTRATÉGIA: MÚLTIPLAS SEÇÕES ==========
+      // Seção 1: Capa (COM cabeçalho e rodapé, igual às outras páginas)
+      // Seção 2: Todo o conteúdo principal (Sumário + todas as seções)
+      // O Word quebra páginas automaticamente quando o conteúdo chega no rodapé
 
-        return doc.body.innerHTML;
-      };
+      // ========== SEÇÃO 1: CAPA ==========
+      // A capa NÃO deve ter o logo duplicado no conteúdo, pois já está no header
+      const capaChildren: any[] = [];
 
-      // Obtém o HTML e processa antes de converter
-      const rawHtml = container.innerHTML;
-      const htmlContent = processHTMLForDocx(rawHtml);
+      // Informações da capa (Proponente, Destinatário, Data) alinhadas à direita
+      // O logo já aparece no cabeçalho, então não precisamos adicionar aqui
+      capaChildren.push(
+        new Paragraph({ text: "", spacing: { after: 600 } }), // Espaço após cabeçalho
+        createSimpleParagraph("Proponente:", { bold: true, alignment: AlignmentType.RIGHT, size: 26 }),
+        createSimpleParagraph("Cavalcante Reis Advogados", { alignment: AlignmentType.RIGHT, size: 26 }),
+        new Paragraph({ text: "", spacing: { after: 200 } }),
+        createSimpleParagraph("Destinatário:", { bold: true, alignment: AlignmentType.RIGHT, size: 26 }),
+        createSimpleParagraph(options.destinatario || options.municipio || "[Nome do Destinatário]", { alignment: AlignmentType.RIGHT, size: 26 }),
+        new Paragraph({ text: "", spacing: { after: 400 } }),
+        createSimpleParagraph(formatDateNumeric(options.data || "") || new Date().getFullYear().toString(), { bold: true, alignment: AlignmentType.RIGHT, size: 26 })
+      );
 
-      // Adiciona estilos inline para melhor formatação no Word
-      const styledHtml = `
-        <!DOCTYPE html>
-        <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-        <head>
-          <meta charset="UTF-8">
-          <meta name="ProgId" content="Word.Document">
-          <meta name="Generator" content="Microsoft Word">
-          <meta name="Originator" content="Microsoft Word">
-          <style>
-            * {
-              margin: 0;
-              padding: 0;
-              box-sizing: border-box;
-            }
-            @page {
-              size: A4;
-              margin: 20mm 20mm 20mm 25mm;
-            }
-            body { 
-              font-family: 'Garamond', 'Times New Roman', serif; 
-              margin: 0;
-              padding: 0;
-              font-size: 13px;
-              line-height: 17pt;
-              color: #000000;
-              background: #ffffff;
-            }
-            .pdf-page-render {
-              page-break-after: always;
-              page-break-before: auto;
-              margin: 0;
-              padding: 56.7pt 70.9pt 56.7pt 70.9pt; /* 20mm = 56.7pt, 25mm = 70.9pt */
-              width: 595.3pt; /* 210mm = 595.3pt */
-              min-height: 841.9pt; /* 297mm = 841.9pt */
-              box-sizing: border-box;
-              background: white;
-            }
-            .pdf-page-render[data-page="1"] {
-              padding: 56.7pt; /* 20mm = 56.7pt */
-            }
-            .pdf-page-render:last-child {
-              page-break-after: auto;
-            }
-            img {
-              display: block;
-              page-break-inside: avoid;
-              margin: 0 auto;
-            }
-            /* Logos: máximo 170px */
-            img[src*="logo"] {
-              max-width: 170px !important;
-              width: 170px !important;
-              height: auto !important;
-            }
-            /* Imagens de municípios: máximo 400px de largura */
-            img[src*="munincipios"], img[src*="Municipios"] {
-              max-width: 400px !important;
-              width: auto !important;
-              height: auto !important;
-            }
-            /* Assinatura: 150px fixo */
-            img[src*="Assinatura"] {
-              max-width: 150px !important;
-              width: 150px !important;
-              height: auto !important;
-            }
-            table {
-              width: 100%;
-              border-collapse: collapse;
-              page-break-inside: avoid;
-            }
-            th, td {
-              border: 1px solid #000;
-              padding: 8px;
-            }
-            p {
-              text-align: justify;
-              margin: 0;
-              padding: 0;
-              font-size: 13px;
-              line-height: 17pt;
-              font-family: 'Garamond', 'Times New Roman', serif;
-              page-break-inside: avoid;
-              margin-bottom: 12pt;
-            }
-            p[style*="text-align: center"] {
-              text-align: center !important;
-            }
-            p[style*="text-align: right"] {
-              text-align: right !important;
-            }
-            h1, h2, h3 {
-              font-size: 13px;
-              font-family: 'Garamond', serif;
-              page-break-after: avoid;
-            }
-            .page-footer-container {
-              margin-top: auto;
-              padding-top: 20px;
-              page-break-inside: avoid;
-            }
-          </style>
-        </head>
-        <body>
-          ${htmlContent}
-        </body>
-        </html>
-      `;
+      // ========== SEÇÃO 2: CONTEÚDO PRINCIPAL ==========
+      // Array que conterá todo o conteúdo principal (Sumário + todas as seções)
+      // O Word vai quebrar páginas automaticamente quando chegar no rodapé
+      const conteudoPrincipal: any[] = [];
 
-      // Converter HTML para DOCX
-      const blob = htmlDocx.asBlob(styledHtml);
+      // ========== SUMÁRIO ==========
+      conteudoPrincipal.push(
+        new Paragraph({
+          text: "Sumário",
+          heading: HeadingLevel.HEADING_1,
+          spacing: { after: 400 },
+        }),
+        createSimpleParagraph("1. Objeto da Proposta", { bold: true }),
+        createSimpleParagraph("2. Análise da Questão", { bold: true }),
+        createSimpleParagraph("3. Dos Honorários, das Condições de Pagamento e Despesas", { bold: true }),
+        createSimpleParagraph("4. Prazo e Cronograma de Execução dos Serviços", { bold: true }),
+        createSimpleParagraph("5. Experiência em atuação em favor de Municípios e da Equipe Responsável", { bold: true }),
+        createSimpleParagraph("6. Disposições Finais", { bold: true }),
+        new Paragraph({ text: "", spacing: { after: 600 } }) // Espaço após sumário
+      );
+
+      // ========== SEÇÃO 1: OBJETO DA PROPOSTA ==========
+      const activeServices = Object.keys(services).filter(k => services[k]);
+
+      conteudoPrincipal.push(
+        new Paragraph({
+          text: "1. Objeto da Proposta",
+          heading: HeadingLevel.HEADING_2,
+          spacing: { after: 400 },
+        }),
+        createSimpleParagraph(
+          `É objeto do presente contrato o desenvolvimento de serviços advocatícios especializados por parte da Proponente, Cavalcante Reis Advogados, ao Aceitante, Município de ${options.municipio || "[MUNICÍPIO]"}, a fim de prestação de serviços de assessoria técnica e jurídica nas áreas de Direito Público, Tributário, Econômico, Financeiro, Previdenciário, atuando perante o Ministério da Fazenda e os seus órgãos administrativos, em especial para alcançar o incremento de receitas, ficando responsável pelo ajuizamento, acompanhamento e eventuais intervenções de terceiro em ações de interesse do Município.`,
+          { alignment: AlignmentType.JUSTIFIED }
+        ),
+        new Paragraph({ text: "", spacing: { after: 400 } }),
+        createSimpleParagraph("A proposta inclui os seguintes objetos:", { alignment: AlignmentType.JUSTIFIED })
+      );
+
+      // ========== TABELA DE TESES ==========
+      // Cria a tabela com as teses e cabimentos
+      const tableRows = [
+        new TableRow({
+          children: [
+            new TableCell({
+              children: [createSimpleParagraph("TESE", { bold: true, alignment: AlignmentType.CENTER })],
+              shading: { fill: "F9F9F9" },
+            }),
+            new TableCell({
+              children: [createSimpleParagraph("CABIMENTO", { bold: true, alignment: AlignmentType.CENTER })],
+              shading: { fill: "F9F9F9" },
+            }),
+          ],
+        }),
+        ...activeServices.map(serviceKey =>
+          new TableRow({
+            children: [
+              new TableCell({
+                children: [createSimpleParagraph(allServices[serviceKey], { bold: true })],
+              }),
+              new TableCell({
+                children: [createSimpleParagraph(customCabimentos[serviceKey] || "Cabível", { bold: true, alignment: AlignmentType.CENTER })],
+              }),
+            ],
+          })
+        ),
+      ];
+
+      const tesesTable = new Table({
+        rows: tableRows,
+        width: {
+          size: 100,
+          type: WidthType.PERCENTAGE,
+        },
+        borders: {
+          top: { style: "single", size: 1, color: "000000" },
+          bottom: { style: "single", size: 1, color: "000000" },
+          left: { style: "single", size: 1, color: "000000" },
+          right: { style: "single", size: 1, color: "000000" },
+          insideHorizontal: { style: "single", size: 1, color: "000000" },
+          insideVertical: { style: "single", size: 1, color: "000000" },
+        },
+      });
+
+      conteudoPrincipal.push(tesesTable);
+      conteudoPrincipal.push(
+        new Paragraph({ text: "", spacing: { after: 400 } }),
+        createSimpleParagraph("Além disso, a proposta também tem como objeto:", { alignment: AlignmentType.JUSTIFIED }),
+        new Paragraph({ text: "", spacing: { after: 200 } }),
+        createSimpleParagraph(`(i) Análise do caso concreto, com a elaboração dos estudos pertinentes ao Município de ${options.municipio || "[MUNICÍPIO]"};`, { alignment: AlignmentType.JUSTIFIED }),
+        createSimpleParagraph("(ii) Ingresso de medida administrativa perante e/ou judicial, com posterior acompanhamento do processo durante sua tramitação, com realização de defesas, diligências, manifestação em razão de intimações, produção de provas, recursos e demais atos necessários ao deslinde dos feitos;", { alignment: AlignmentType.JUSTIFIED }),
+        createSimpleParagraph("(iii) Atuação perante a Justiça Federal seja na condição de recorrente ou recorrido, bem como interposição de recursos ou apresentação de contrarrazões aos Tribunais Superiores, se necessário for;", { alignment: AlignmentType.JUSTIFIED }),
+        createSimpleParagraph("(iv) Acompanhamento processual completo, até o trânsito em Julgado da Sentença administrativa e/ou judicial;", { alignment: AlignmentType.JUSTIFIED }),
+        new Paragraph({ text: "", spacing: { after: 400 } }) // Espaço após seção 1
+      );
+
+      // ========== SEÇÃO 2: ANÁLISE DA QUESTÃO ==========
+      conteudoPrincipal.push(
+        new Paragraph({
+          text: "2. Análise da Questão",
+          heading: HeadingLevel.HEADING_2,
+          spacing: { before: 400, after: 400 },
+        })
+      );
+
+      // Adiciona cada tese selecionada como uma subseção
+      let sectionNumber = 1;
+      activeServices.forEach((serviceKey) => {
+        conteudoPrincipal.push(
+          new Paragraph({
+            text: `2.${sectionNumber} – ${allServices[serviceKey]}`,
+            heading: HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 200 },
+          })
+        );
+
+        // Converte o HTML da tese para parágrafos do Word
+        const htmlContent = serviceTextDatabase[serviceKey] || "";
+        const paragraphs = parseHtmlToDocx(htmlContent);
+        conteudoPrincipal.push(...paragraphs);
+
+        sectionNumber++;
+      });
+
+      // Espaço após seção 2 (Word quebra página automaticamente se necessário)
+      conteudoPrincipal.push(new Paragraph({ text: "", spacing: { after: 400 } }));
+
+      // ========== SEÇÃO 3: HONORÁRIOS ==========
+      conteudoPrincipal.push(
+        new Paragraph({
+          text: "3. Dos Honorários, das Condições de Pagamento e Despesas",
+          heading: HeadingLevel.HEADING_2,
+          spacing: { before: 400, after: 400 },
+        }),
+        createSimpleParagraph(
+          "Os valores levantados a título de incremento são provisórios, baseados em informações preliminares, podendo, ao final, representar valores a maior ou a menor.",
+          { alignment: AlignmentType.JUSTIFIED }
+        ),
+        new Paragraph({ text: "", spacing: { after: 400 } }),
+        createSimpleParagraph(
+          "Considerando a necessidade de manutenção do equilíbrio econômico-financeiro do contrato administrativo, propõe o escritório CAVALCANTE REIS ADVOGADOS que esta Municipalidade pague ao Proponente da seguinte forma:",
+          { alignment: AlignmentType.JUSTIFIED }
+        ),
+        new Paragraph({ text: "", spacing: { after: 400 } }),
+        createMixedParagraph([
+          { text: "3.1.1 " },
+          { text: "Para todos os demais itens descritos nesta Proposta", bold: true },
+          { text: " será efetuado o pagamento de honorários advocatícios à CAVALCANTE REIS ADVOGADOS pela execução dos serviços de recuperação de créditos, " },
+          { text: "ad êxito", bold: true },
+          { text: ` na ordem de ${paymentValue || "R$ 0,12 (doze centavos)"} para cada R$ 1,00 (um real) do montante referente ao incremento financeiro, ou seja, com base nos valores que entrarem nos cofres do CONTRATANTE;` },
+        ], { alignment: AlignmentType.JUSTIFIED }),
+        createMixedParagraph([
+          { text: "3.1.2 Em caso de valores retroativos recuperados em favor da municipalidade, que consiste " },
+          { text: "nos valores não repassados em favor do Contratante nos últimos 5 (cinco)", bold: true },
+          { text: " anos (prescrição quinquenal) ou não abarcados pela prescrição, também serão cobrados honorários advocatícios na ordem " },
+          { text: `de ${paymentValue || "R$ 0,12 (doze centavos)"} para cada R$ 1,00 (um real) do montante recuperado aos Cofres Municipais.`, bold: true },
+        ], { alignment: AlignmentType.JUSTIFIED }),
+        createMixedParagraph([
+          { text: "3.1.3 Sendo um contrato " },
+          { text: "AD EXITUM,", bold: true },
+          { text: " acaso o incremento financeiro em favor deste Município supere o valor mencionado na cláusula que trata do valor do contrato, os desembolsos não poderão ser previstos por dotação orçamentária, posto que terão origem na REDUÇÃO DE DESPESAS/INCREMENTO DE RECEITAS, como consequência da prestação dos serviços." },
+        ], { alignment: AlignmentType.JUSTIFIED }),
+        new Paragraph({ text: "", spacing: { after: 400 } }) // Espaço após seção 3
+      );
+
+      // ========== SEÇÃO 4: PRAZO ==========
+      conteudoPrincipal.push(
+        new Paragraph({
+          text: "4. Prazo e Cronograma de Execução dos Serviços",
+          heading: HeadingLevel.HEADING_2,
+          spacing: { before: 400, after: 400 },
+        }),
+        createMixedParagraph([
+          { text: "O prazo de execução será de " },
+          { text: `${prazo} (vinte e quatro) meses`, bold: true },
+          { text: ", podendo ser prorrogado por interesse das partes, com base no art. 107 da Lei n.º 14.133/21." },
+        ], { alignment: AlignmentType.JUSTIFIED }),
+        new Paragraph({ text: "", spacing: { after: 400 } }) // Espaço após seção 4
+      );
+
+      // ========== SEÇÃO 5: EXPERIÊNCIA E EQUIPE ==========
+      conteudoPrincipal.push(
+        new Paragraph({
+          text: "5. Experiência em atuação em favor de Municípios e da Equipe Responsável",
+          heading: HeadingLevel.HEADING_2,
+          spacing: { before: 400, after: 400 },
+        }),
+        createSimpleParagraph(
+          "No portfólio de serviços executados e/ou em execução, constam os seguintes Municípios contratantes:",
+          { alignment: AlignmentType.JUSTIFIED }
+        ),
+        new Paragraph({ text: "", spacing: { after: 400 } })
+      );
+
+      // Adiciona imagens dos municípios (Tópico 5)
+      if (municipios01Buffer) {
+        conteudoPrincipal.push(
+          new Paragraph({
+            children: [
+              new ImageRun({
+                data: municipios01Buffer,
+                transformation: {
+                  width: 400 * 9525, // 400px em EMUs
+                  height: (400 * 9525) * 0.75, // Proporção aproximada
+                },
+              }),
+            ],
+            alignment: AlignmentType.CENTER,
+            spacing: { before: 200, after: 200 },
+          })
+        );
+      } else {
+        console.warn('Imagem municípios01 não foi carregada! Verifique se o arquivo /munincipios01.png existe na pasta /public');
+      }
+
+      if (municipios02Buffer) {
+        conteudoPrincipal.push(
+          new Paragraph({
+            children: [
+              new ImageRun({
+                data: municipios02Buffer,
+                transformation: {
+                  width: 400 * 9525, // 400px em EMUs
+                  height: (400 * 9525) * 0.75, // Proporção aproximada
+                },
+              }),
+            ],
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 400 },
+          })
+        );
+      } else {
+        console.warn('Imagem municípios02 não foi carregada! Verifique se o arquivo /Munincipios02.png existe na pasta /public');
+      }
+
+      conteudoPrincipal.push(
+        createSimpleParagraph(
+          "Para coordenar os trabalhos de consultoria propostos neste documento, a CAVALCANTE REIS ADVOGADOS alocará os seguintes profissionais:",
+          { alignment: AlignmentType.JUSTIFIED }
+        ),
+        new Paragraph({ text: "", spacing: { after: 400 } }),
+        createMixedParagraph([
+          { text: "IURI DO LAGO NOGUEIRA CAVALCANTE REIS", bold: true },
+          { text: " - Doutorando em Direito e Mestre em Direito Econômico e Desenvolvimento pelo Instituto Brasileiro de Ensino, Desenvolvimento e Pesquisa (IDP/Brasília). LLM (Master of Laws) em Direito Empresarial pela Fundação Getúlio Vargas (FGV/RJ). Integrante da Comissão de Juristas do Senado Federal criada para consolidar a proposta do novo Código Comercial Brasileiro. Autor e Coautor de livros, pareceres e artigos jurídicos na área do direito público. Sócio-diretor do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: iuri@cavalcantereis.adv.br)." },
+        ], { alignment: AlignmentType.JUSTIFIED }),
+        new Paragraph({ text: "", spacing: { after: 400 } }),
+        createMixedParagraph([
+          { text: "PEDRO AFONSO FIGUEIREDO DE SOUZA", bold: true },
+          { text: " - Graduado em Direito pela Pontifícia Universidade Católica de Minas Gerais. Especialista em Direito Penal e Processo Penal pela Academia Brasileira de Direito Constitucional. Mestre em Direito nas Relações Econômicas e Sociais pela Faculdade de Direito Milton Campos. Diretor de Comunicação e Conselheiro Consultivo, Científico e Fiscal do Instituto de Ciências Penais. Autor de artigos e capítulos de livros jurídicos. Advogado associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: pedro@cavalcantereis.adv.br)." },
+        ], { alignment: AlignmentType.JUSTIFIED }),
+        createMixedParagraph([
+          { text: "SÉRGIO RICARDO ALVES DE JESUS FILHO", bold: true },
+          { text: " - Graduado em Direito pelo Centro Universitário de Brasília (UniCEUB). Graduando em Ciências Contábeis pelo Centro Universitário de Brasília (UniCEUB). Pós-graduando em Direito Tributário pelo Instituto Brasileiro de Ensino, Desenvolvimento e Pesquisa (IDP). Membro da Comissão de Assuntos Tributários da OAB/DF. Advogado Associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: sergio@cavalcantereis.adv.br)." },
+        ], { alignment: AlignmentType.JUSTIFIED }),
+        createMixedParagraph([
+          { text: "GABRIEL GAUDÊNCIO ZANCHETTA CALIMAN", bold: true },
+          { text: " - Graduado em Direito pelo Centro Universitário de Brasília (UniCeub). Especialista em Gestão Pública e Tributária pelo Gran Centro Universitário. Membro da Comissão de Assuntos Tributários da OAB/DF. Advogado associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: gabrielcaliman@cavalcantereis.adv.br)." },
+        ], { alignment: AlignmentType.JUSTIFIED }),
+        createMixedParagraph([
+          { text: "FELIPE NOBREGA ROCHA", bold: true },
+          { text: " - CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: felipe@cavalcantereis.adv.br)." },
+        ], { alignment: AlignmentType.JUSTIFIED }),
+        createMixedParagraph([
+          { text: "RYSLHAINY DOS SANTOS CORDEIRO", bold: true },
+          { text: " - Advogada associada do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: ryslhainy@cavalcantereis.adv.br)." },
+        ], { alignment: AlignmentType.JUSTIFIED }),
+        new Paragraph({ text: "", spacing: { after: 400 } }),
+        createSimpleParagraph(
+          "Além desses profissionais, a CAVALCANTE REIS ADVOGADOS alocará uma equipe de profissionais pertencentes ao seu quadro técnico, utilizando, também, caso necessário, o apoio técnico especializado de terceiros, pessoas físicas ou jurídicas, que deverão atuar sob sua orientação, cabendo à CAVALCANTE REIS ADVOGADOS a responsabilidade técnica pela execução das tarefas.",
+          { alignment: AlignmentType.JUSTIFIED }
+        ),
+        new Paragraph({ text: "", spacing: { after: 400 } }),
+        createSimpleParagraph(
+          "Nossa contratação, portanto, devido à altíssima qualificação e experiência, aliada à singularidade do objeto da demanda, bem como os diferenciais já apresentados acima, está inserida dentre as hipóteses do art. 6°, XVIII \"e\" e art. 74, III, \"e\", da Lei n.º 14.133/2021.",
+          { alignment: AlignmentType.JUSTIFIED }
+        ),
+        new Paragraph({ text: "", spacing: { after: 400 } }) // Espaço após seção 5
+      );
+
+      // ========== SEÇÃO 6: DISPOSIÇÕES FINAIS ==========
+      conteudoPrincipal.push(
+        new Paragraph({
+          text: "6. Disposições Finais",
+          heading: HeadingLevel.HEADING_2,
+          spacing: { before: 400, after: 400 },
+        }),
+        createSimpleParagraph(
+          "Nesse sentido, ficamos no aguardo da manifestação deste Município para promover os ajustes contratuais que entenderem necessários, sendo mantida a mesma forma de remuneração aqui proposta, com fundamento no art. 6º, XVIII, \"e\" e art. 74, III, \"e\", da Lei n.º 14.133/2021.",
+          { alignment: AlignmentType.JUSTIFIED }
+        ),
+        new Paragraph({ text: "", spacing: { after: 400 } }),
+        createSimpleParagraph(
+          "A presente proposta tem validade de 60 (sessenta) dias.",
+          { alignment: AlignmentType.JUSTIFIED }
+        ),
+        new Paragraph({ text: "", spacing: { after: 400 } }),
+        createSimpleParagraph(
+          "Sendo o que se apresenta para o momento, aguardamos posicionamento da parte de V. Exa., colocando-nos, desde já, à inteira disposição para dirimir quaisquer dúvidas eventualmente existentes.",
+          { alignment: AlignmentType.JUSTIFIED }
+        ),
+        new Paragraph({ text: "", spacing: { after: 800 } }),
+        createSimpleParagraph(`Brasília-DF, ${formatDateWithMonthName(options.data || '')}.`, { alignment: AlignmentType.LEFT }),
+        new Paragraph({ text: "", spacing: { after: 800 } }),
+        createSimpleParagraph("Atenciosamente,", { alignment: AlignmentType.LEFT }),
+        new Paragraph({ text: "", spacing: { after: 400 } })
+      );
+
+      // Adiciona assinatura (final do documento)
+      if (assinaturaBuffer) {
+        conteudoPrincipal.push(
+          new Paragraph({
+            children: [
+              new ImageRun({
+                data: assinaturaBuffer,
+                transformation: {
+                  width: 150 * 9525, // 150px em EMUs
+                  height: (150 * 9525) * 0.3, // Proporção aproximada da assinatura
+                },
+              }),
+            ],
+            alignment: AlignmentType.CENTER,
+            spacing: { before: 200, after: 200 },
+          })
+        );
+      } else {
+        console.warn('Assinatura não foi carregada! Verifique se o arquivo /Assinatura.png existe na pasta /public');
+      }
+
+      conteudoPrincipal.push(
+        createSimpleParagraph("CAVALCANTE REIS ADVOGADOS", { bold: true, alignment: AlignmentType.CENTER, size: 30 })
+      );
+
+      // ========== CRIAÇÃO: DOCUMENTO WORD COM MÚLTIPLAS SEÇÕES ==========
+      // Cria o documento final com seções separadas para capa e conteúdo principal
+      const doc = new Document({
+        sections: [
+          // ========== SEÇÃO 1: CAPA (COM cabeçalho GRANDE e rodapé) ==========
+          {
+            properties: {
+              type: SectionType.NEXT_PAGE, // Garante que a próxima seção comece em nova página
+              page: {
+                size: {
+                  orientation: "portrait",
+                  width: 11906, // A4 width em twips (210mm)
+                  height: 16838, // A4 height em twips (297mm)
+                },
+                margin: {
+                  top: 1440, // 25mm em twips (reservando espaço para cabeçalho GRANDE)
+                  right: 1417, // 25mm em twips
+                  bottom: 1440, // 25mm em twips (reservando espaço para rodapé)
+                  left: 1417, // 25mm em twips
+                },
+              },
+            },
+            // Cabeçalho com logo GRANDE (~220px) na capa
+            headers: {
+              default: headerCapa,
+            },
+            // Rodapé com endereços e site (igual às outras páginas)
+            footers: {
+              default: documentFooter,
+            },
+            // Conteúdo da capa
+            children: capaChildren,
+          },
+          // ========== SEÇÃO 2: CONTEÚDO PRINCIPAL (com cabeçalho PEQUENO e rodapé) ==========
+          // O Word vai quebrar páginas automaticamente quando o conteúdo chegar no rodapé
+          {
+            properties: {
+              type: SectionType.CONTINUOUS, // Continua da página anterior (já garantido pelo NEXT_PAGE na seção anterior)
+              page: {
+                size: {
+                  orientation: "portrait",
+                  width: 11906, // A4 width em twips (210mm)
+                  height: 16838, // A4 height em twips (297mm)
+                },
+                margin: {
+                  top: 1134, // 20mm em twips (reservando espaço para cabeçalho PEQUENO)
+                  right: 1417, // 25mm em twips
+                  bottom: 1134, // 20mm em twips (reservando espaço para rodapé)
+                  left: 1417, // 25mm em twips
+                },
+              },
+            },
+            // Cabeçalho com logo PEQUENO/PADRÃO (~100px) no conteúdo
+            headers: {
+              default: headerConteudo,
+            },
+            // Rodapé que se repete em todas as páginas desta seção (mesmo da capa)
+            footers: {
+              default: documentFooter,
+            },
+            // Todo o conteúdo principal: o Word quebra páginas automaticamente
+            children: conteudoPrincipal,
+          },
+        ],
+        styles: {
+          default: {
+            document: {
+              run: {
+                font: "Garamond",
+                size: 26, // 13pt (docx usa meios-pontos: 13 * 2 = 26)
+                color: "000000", // Força cor preta em todo o documento
+              },
+            },
+          },
+        },
+      });
+
+      // ========== GERAÇÃO E DOWNLOAD: DOCX ==========
+      // Gera o blob do documento e faz o download
+      const blob = await Packer.toBlob(doc);
       saveAs(blob, `Proposta_${options.municipio || "CR"}.docx`);
 
+      // ========== FEEDBACK: SUCESSO ==========
       setModal({
         open: true,
         title: "Sucesso",
         message: "DOCX gerado e baixado com sucesso!",
         type: "success"
       });
+
     } catch (e: any) {
+      // ========== TRATAMENTO: ERRO ==========
+      // Em caso de erro durante o processo, registra no console e exibe modal de erro
+      // Mostra mensagem de erro amigável ao usuário
       console.error('Erro ao gerar DOCX:', e);
       setModal({
         open: true,
@@ -1944,6 +2415,9 @@ export default function ProposalGenerator({ onBackToHome, onLogout, propostaToLo
         type: "error"
       });
     } finally {
+      // ========== FINALIZAÇÃO: DESATIVA LOADING ==========
+      // Sempre desativa o estado de loading, independente de sucesso ou erro
+      // Isso garante que o botão volte ao estado normal após o processo
       setLoadingDocx(false);
     }
   };
@@ -1994,7 +2468,7 @@ export default function ProposalGenerator({ onBackToHome, onLogout, propostaToLo
             loadingProposals={loadingProposals}
           />
           <div className="content">
-            <h2 className="preview-title">Prévia da Proposta</h2>
+            <h2 className="preview-title">Documento da Proposta</h2>
             <ProposalDocument
               options={options} prazo={prazo} services={services}
               customCabimentos={customCabimentos} customEstimates={customEstimates}
