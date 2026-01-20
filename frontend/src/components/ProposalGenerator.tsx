@@ -1854,17 +1854,42 @@ export default function ProposalGenerator({ onBackToHome, onLogout, propostaToLo
 
       // ========== CONSTRUÇÃO: RODAPÉ DO DOCUMENTO ==========
       // Cria uma tabela para os escritórios ficarem lado a lado no rodapé
-      // A tabela tem uma linha com uma célula para cada escritório
+      // Segue o padrão do HTML: fonte 9-10px, centralizado, layout flexível
       const footerTableRows = [new TableRow({
         children: officesToShow.map(office =>
           new TableCell({
             children: [
               new Paragraph({
                 children: [
-                  new TextRun({ text: office.cidade, bold: true, size: 18, font: "Garamond", color: "000000" }), // 9pt
-                  new TextRun({ text: `\n${office.linha1}`, size: 20, font: "Garamond", color: "000000" }), // 10pt
-                  new TextRun({ text: `\n${office.linha2}`, size: 20, font: "Garamond", color: "000000" }), // 10pt
-                  new TextRun({ text: `\n${office.linha3}`, size: 20, font: "Garamond", color: "000000" }), // 10pt
+                  // Cidade em negrito, maiúsculas, 9pt (18 half-points)
+                  new TextRun({
+                    text: office.cidade.toUpperCase(),
+                    bold: true,
+                    size: 18, // 9pt (docx usa meios-pontos: 9 * 2 = 18)
+                    font: "Garamond",
+                    color: "000000"
+                  }),
+                  // Linha 1: 9.9pt (19.8 ≈ 20 half-points)
+                  new TextRun({
+                    text: `\n${office.linha1}`,
+                    size: 20, // 10pt (9.9pt arredondado)
+                    font: "Garamond",
+                    color: "000000"
+                  }),
+                  // Linha 2: 10pt (20 half-points)
+                  new TextRun({
+                    text: `\n${office.linha2}`,
+                    size: 20, // 10pt
+                    font: "Garamond",
+                    color: "000000"
+                  }),
+                  // Linha 3: 10pt (20 half-points)
+                  new TextRun({
+                    text: `\n${office.linha3}`,
+                    size: 20, // 10pt
+                    font: "Garamond",
+                    color: "000000"
+                  }),
                 ],
                 alignment: AlignmentType.CENTER,
                 spacing: { after: 200 },
@@ -1880,7 +1905,7 @@ export default function ProposalGenerator({ onBackToHome, onLogout, propostaToLo
         rows: footerTableRows,
         width: { size: 100, type: WidthType.PERCENTAGE },
         borders: {
-          // Remove bordas da tabela para ficar limpo
+          // Remove bordas da tabela para ficar limpo (igual ao HTML sem bordas)
           top: { size: 0, style: "none" },
           bottom: { size: 0, style: "none" },
           left: { size: 0, style: "none" },
