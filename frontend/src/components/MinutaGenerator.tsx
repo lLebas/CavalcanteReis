@@ -1142,15 +1142,15 @@ const MinutaDocument = ({
         margin: '0 auto',
         marginBottom: '20px',
         background: 'white',
-        padding: '20mm 25mm 20mm 25mm',
+        padding: '20mm 25mm 25mm 25mm', // Margens uniformes (sem rodapé)
         width: '210mm',
-        minHeight: '297mm',
+        minHeight: '297mm', // minHeight permite crescimento
         position: 'relative',
         boxSizing: 'border-box',
         display: 'flex',
         flexDirection: 'column',
         pageBreakAfter: 'always',
-        overflow: 'hidden'
+        overflow: 'visible' // Permite overflow para fluxo contínuo
       }}>
         {/* Cabeçalho com Logo da Prefeitura - 180pt para paridade com DOCX */}
         <div style={{ textAlign: 'center', marginBottom: '25pt', flexShrink: 0 }}>
@@ -1161,7 +1161,7 @@ const MinutaDocument = ({
             crossOrigin="anonymous"
           />
         </div>
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
           {children}
         </div>
       </div>

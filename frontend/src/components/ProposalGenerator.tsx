@@ -561,8 +561,8 @@ const ProposalDocument = ({ options, prazo, services, customCabimentos, customEs
   // ========== COMPONENTE INTERNO: PÁGINA ==========
   // Componente wrapper que cria uma página A4 com margens, logo (se não for capa) e rodapé
   const Page = ({ children, pageNumber, isCover = false, FooterComponent }: any) => {
-    // Padding diferente para capa vs páginas internas
-    const padding = isCover ? '20mm 20mm 20mm 20mm' : '20mm 20mm 20mm 25mm';
+    // Padding ajustado para proteger o rodapé (30mm bottom para conteúdo não cobrir rodapé)
+    const padding = isCover ? '20mm 20mm 30mm 20mm' : '20mm 25mm 30mm 25mm';
 
     return (
       <div className="pdf-page-render" data-page={pageNumber} style={{
@@ -572,23 +572,22 @@ const ProposalDocument = ({ options, prazo, services, customCabimentos, customEs
         background: 'white',
         padding: padding,
         width: '210mm',
-        height: '297mm',
+        minHeight: '297mm', // minHeight permite crescimento se necessário
         position: 'relative',
         boxSizing: 'border-box',
         display: 'flex',
         flexDirection: 'column',
         pageBreakAfter: 'always',
-        overflow: 'hidden'
+        overflow: 'visible' // Permite overflow para fluxo contínuo
       }}>
         {!isCover && (
           <div style={{ textAlign: 'center', marginBottom: '25pt', flexShrink: 0 }}>
             <img src="/logo-cavalcante-reis.png" alt="Logo" style={{ width: '145pt', height: 'auto', display: 'block', margin: '0 auto' }} crossOrigin="anonymous" onError={(e) => { console.error('Erro ao carregar logo'); }} />
           </div>
         )}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>{children}</div>
-        <div style={{ marginTop: 'auto', paddingTop: '20px', flexShrink: 0 }}>
-          <FooterComponent />
-        </div>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>{children}</div>
+        {/* Rodapé fixo no bottom da página */}
+        <FooterComponent />
       </div>
     );
   };
