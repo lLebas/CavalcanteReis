@@ -581,8 +581,8 @@ const ProposalDocument = ({ options, prazo, services, customCabimentos, customEs
         overflow: 'hidden'
       }}>
         {!isCover && (
-          <div style={{ textAlign: 'center', marginBottom: '25px', flexShrink: 0 }}>
-            <img src="/logo-cavalcante-reis.png" alt="Logo" style={{ width: '145px', height: 'auto', display: 'block', margin: '0 auto' }} crossOrigin="anonymous" onError={(e) => { console.error('Erro ao carregar logo'); }} />
+          <div style={{ textAlign: 'center', marginBottom: '25pt', flexShrink: 0 }}>
+            <img src="/logo-cavalcante-reis.png" alt="Logo" style={{ width: '145pt', height: 'auto', display: 'block', margin: '0 auto' }} crossOrigin="anonymous" onError={(e) => { console.error('Erro ao carregar logo'); }} />
           </div>
         )}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>{children}</div>
@@ -684,35 +684,35 @@ const ProposalDocument = ({ options, prazo, services, customCabimentos, customEs
       {/* ========== PÁGINA 1: CAPA ========== */}
       <Page isCover={true} FooterComponent={FooterComp} data-page={1}>
         {/* Logo centralizado no topo da página */}
-        <div style={{ textAlign: "center", marginTop: '20px', marginBottom: '0' }}>
-          <img src="/logo-cavalcante-reis.png" alt="Logo" style={{ width: "170px", height: 'auto', display: 'block', margin: '0 auto' }} crossOrigin="anonymous" onError={(e) => { console.error('Erro ao carregar logo na capa'); }} />
+        <div style={{ textAlign: "center", marginTop: '20pt', marginBottom: '0' }}>
+          <img src="/logo-cavalcante-reis.png" alt="Logo" style={{ width: "170pt", height: 'auto', display: 'block', margin: '0 auto' }} crossOrigin="anonymous" onError={(e) => { console.error('Erro ao carregar logo na capa'); }} />
         </div>
 
         {/* Container principal - alinha todo o conteúdo à direita da página */}
-        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-end', flex: 1, paddingTop: '80px', paddingBottom: '80px', paddingRight: '25mm', width: '100%' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-end', flex: 1, paddingTop: '80pt', paddingBottom: '80pt', paddingRight: '25mm', width: '100%' }}>
           {/* Container interno - contém as informações da capa (Proponente, Destinatário, etc.) */}
           <div style={{ textAlign: "right", width: 'auto', maxWidth: '35%', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
 
             {/* Linha horizontal superior (separador) - BORDA PRETA SUPERIOR GRANDE */}
-            <div style={{ width: '180%', borderTop: '2px solid #000', marginBottom: '10px' }}></div>
+            <div style={{ width: '180%', borderTop: '2pt solid #000', marginBottom: '10pt' }}></div>
 
             {/* Seção Proponente - Container com bordas */}
-            <div style={{ width: '100%', paddingBottom: '2px', borderBottom: '1px solid #ddd' }}>
-              <p style={{ fontSize: '13px', fontWeight: 'bold', color: '#000', marginBottom: '5px', fontFamily: "'Garamond', serif", textAlign: 'right', whiteSpace: 'nowrap' }}>Proponente:</p>
-              <p style={{ fontSize: '13px', color: '#000', marginBottom: '0', fontFamily: "'Garamond', serif", textAlign: 'right', whiteSpace: 'nowrap' }}>Cavalcante Reis Advogados</p>
+            <div style={{ width: '100%', paddingBottom: '2pt', borderBottom: '1pt solid #ddd' }}>
+              <p style={{ fontSize: '13pt', fontWeight: 'bold', color: '#000', marginBottom: '5pt', fontFamily: "'Garamond', serif", textAlign: 'right', whiteSpace: 'nowrap' }}>Proponente:</p>
+              <p style={{ fontSize: '13pt', color: '#000', marginBottom: '0', fontFamily: "'Garamond', serif", textAlign: 'right', whiteSpace: 'nowrap' }}>Cavalcante Reis Advogados</p>
             </div>
 
             {/* Seção Destinatário - Container com bordas */}
-            <div style={{ width: '100%', paddingTop: '10px', paddingBottom: '10px', borderBottom: '1px solid #ddd' }}>
-              <p style={{ fontSize: '13px', fontWeight: 'bold', color: '#000', marginTop: '0', marginBottom: '5px', fontFamily: "'Garamond', serif", textAlign: 'right', whiteSpace: 'nowrap' }}>Destinatário:</p>
-              <p style={{ fontSize: '13px', color: '#000', marginBottom: '0', fontFamily: "'Garamond', serif", textAlign: 'right', whiteSpace: 'nowrap' }}>{options.destinatario || options.municipio || "[Nome do Destinatário]"}</p>
+            <div style={{ width: '100%', paddingTop: '10pt', paddingBottom: '10pt', borderBottom: '1pt solid #ddd' }}>
+              <p style={{ fontSize: '13pt', fontWeight: 'bold', color: '#000', marginTop: '0', marginBottom: '5pt', fontFamily: "'Garamond', serif", textAlign: 'right', whiteSpace: 'nowrap' }}>Destinatário:</p>
+              <p style={{ fontSize: '13pt', color: '#000', marginBottom: '0', fontFamily: "'Garamond', serif", textAlign: 'right', whiteSpace: 'nowrap' }}>{options.destinatario || options.municipio || "[Nome do Destinatário]"}</p>
             </div>
 
             {/* Linha horizontal inferior (separador) - BORDA PRETA INFERIOR GRANDE */}
-            <div style={{ width: '180%', borderBottom: '2px solid #000', marginTop: '10px', marginBottom: '10px' }}></div>
+            <div style={{ width: '180%', borderBottom: '2pt solid #000', marginTop: '10pt', marginBottom: '10pt' }}></div>
 
             {/* Data da proposta (apenas números na capa) */}
-            <p style={{ fontSize: '13px', fontWeight: 'bold', color: '#000', fontFamily: "'Garamond', serif", textAlign: 'right', marginTop: '10px', whiteSpace: 'nowrap' }}>
+            <p style={{ fontSize: '13pt', fontWeight: 'bold', color: '#000', fontFamily: "'Garamond', serif", textAlign: 'right', marginTop: '10pt', whiteSpace: 'nowrap' }}>
               {formatDateNumeric(options.data || "") || new Date().getFullYear().toString()}
             </p>
           </div>
@@ -858,17 +858,17 @@ const ProposalDocument = ({ options, prazo, services, customCabimentos, customEs
           <Page key={`group-${groupIndex}`} pageNumber={pageNumber} FooterComponent={FooterComp}>
             {/* Container centralizado com margens maiores nas laterais */}
             <div style={{ maxWidth: '135mm', margin: '0 auto', width: '100%' }}>
-              {isFirstGroup && <h2 style={{ fontSize: '13px', fontWeight: 'bold', color: '#000', borderBottom: '1px solid #000', paddingBottom: '8px', marginBottom: '25px', marginTop: '0', fontFamily: "'Garamond', serif" }}>2. Análise da Questão</h2>}
+              {isFirstGroup && <h2 style={{ fontSize: '13pt', fontWeight: 'bold', color: '#000', borderBottom: '1pt solid #000', paddingBottom: '8pt', marginBottom: '25pt', marginTop: '0', fontFamily: "'Garamond', serif" }}>2. Análise da Questão</h2>}
               {group.map((serviceKey, itemIndex) => {
                 const currentSectionNumber = sectionStartNumber + itemIndex;
                 const isFirstInGroup = itemIndex === 0 && !isFirstGroup;
 
                 return (
-                  <div key={serviceKey} style={{ marginBottom: itemIndex < group.length - 1 ? '35px' : '0' }}>
-                    <h3 style={{ fontSize: '13px', fontWeight: 'bold', color: '#000', marginBottom: '10px', marginTop: '0', fontFamily: "'Garamond', serif" }}>
+                  <div key={serviceKey} style={{ marginBottom: itemIndex < group.length - 1 ? '35pt' : '0' }}>
+                    <h3 style={{ fontSize: '13pt', fontWeight: 'bold', color: '#000', marginBottom: '10pt', marginTop: '0', fontFamily: "'Garamond', serif" }}>
                       2.{currentSectionNumber} – {allServices[serviceKey]}
                     </h3>
-                    <div style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '17pt', color: '#000', fontFamily: "'Garamond', serif" }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(serviceTextDatabase[serviceKey] || "") }} />
+                    <div style={{ textAlign: 'justify', fontSize: '13pt', lineHeight: '1.5', color: '#000', fontFamily: "'Garamond', serif" }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(serviceTextDatabase[serviceKey] || "") }} />
                   </div>
                 );
               })}
@@ -942,16 +942,16 @@ const ProposalDocument = ({ options, prazo, services, customCabimentos, customEs
             <Page key="section5-page1" pageNumber={basePageNumber} FooterComponent={FooterComp}>
               {/* Container centralizado com margens maiores nas laterais */}
               <div style={{ maxWidth: '140mm', margin: '0 auto', width: '100%' }}>
-                <h2 style={{ fontSize: '13px', fontWeight: 'bold', color: '#000', borderBottom: '1px solid #000', paddingBottom: '8px', marginBottom: '15px', marginTop: '0', fontFamily: "'Garamond', serif" }}>5. Experiência em atuação em favor de Municípios e da Equipe Responsável</h2>
-                <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '17pt', marginBottom: '15px', marginTop: '0', color: '#000', fontFamily: "'Garamond', serif" }}>
+                <h2 style={{ fontSize: '13pt', fontWeight: 'bold', color: '#000', borderBottom: '1pt solid #000', paddingBottom: '8pt', marginBottom: '15pt', marginTop: '0', fontFamily: "'Garamond', serif" }}>5. Experiência em atuação em favor de Municípios e da Equipe Responsável</h2>
+                <p style={{ textAlign: 'justify', fontSize: '13pt', lineHeight: '1.5', marginBottom: '15pt', marginTop: '0', color: '#000', fontFamily: "'Garamond', serif" }}>
                   No portfólio de serviços executados e/ou em execução, constam os seguintes Municípios contratantes:
                 </p>
-                <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '20px' }}>
-                  <img src="/munincipios01.png" style={{ maxWidth: '65%', height: 'auto', margin: '0 auto', display: 'block' }} alt="Municípios 1" crossOrigin="anonymous" onError={(e) => { console.error('Erro ao carregar municípios 1'); }} />
-                  <img src="/Munincipios02.png" style={{ maxWidth: '65%', height: 'auto', margin: '0 auto', display: 'block' }} alt="Municípios 2" crossOrigin="anonymous" onError={(e) => { console.error('Erro ao carregar municípios 2'); }} />
+                <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '15pt', marginBottom: '20pt' }}>
+                  <img src="/munincipios01.png" style={{ width: '300pt', height: 'auto', margin: '0 auto', display: 'block' }} alt="Municípios 1" crossOrigin="anonymous" onError={(e) => { console.error('Erro ao carregar municípios 1'); }} />
+                  <img src="/Munincipios02.png" style={{ width: '300pt', height: 'auto', margin: '0 auto', display: 'block' }} alt="Municípios 2" crossOrigin="anonymous" onError={(e) => { console.error('Erro ao carregar municípios 2'); }} />
                 </div>
 
-                <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '17pt', marginBottom: '15px', marginTop: '0', color: '#000', fontFamily: "'Garamond', serif" }}>
+                <p style={{ textAlign: 'justify', fontSize: '13pt', lineHeight: '1.5', marginBottom: '15pt', marginTop: '0', color: '#000', fontFamily: "'Garamond', serif" }}>
                   Para coordenar os trabalhos de consultoria propostos neste documento, a CAVALCANTE REIS ADVOGADOS alocará os seguintes profissionais:
                 </p>
                 <br />
@@ -1034,29 +1034,29 @@ const ProposalDocument = ({ options, prazo, services, customCabimentos, customEs
                 Nossa contratação, portanto, devido à altíssima qualificação e experiência, aliada à singularidade do objeto da demanda, bem como os diferenciais já apresentados acima, está inserida dentre as hipóteses do art. 6°, XVIII &quot;e&quot; e art. 74, III, &quot;e&quot;, da Lei n.º 14.133/2021.
               </p>
               <br />
-              <h2 style={{ fontSize: '13px', fontWeight: 'bold', color: '#000', borderBottom: '1px solid #000', paddingBottom: '8px', marginBottom: '20px', marginTop: '0', fontFamily: "'Garamond', serif" }}>6. Disposições Finais</h2>
-              <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '17pt', marginBottom: '12px', marginTop: '0', color: '#000', fontFamily: "'Garamond', serif" }}>
+              <h2 style={{ fontSize: '13pt', fontWeight: 'bold', color: '#000', borderBottom: '1pt solid #000', paddingBottom: '8pt', marginBottom: '20pt', marginTop: '0', fontFamily: "'Garamond', serif" }}>6. Disposições Finais</h2>
+              <p style={{ textAlign: 'justify', fontSize: '13pt', lineHeight: '1.5', marginBottom: '12pt', marginTop: '0', color: '#000', fontFamily: "'Garamond', serif" }}>
                 Nesse sentido, ficamos no aguardo da manifestação deste Município para promover os ajustes contratuais que entenderem necessários, sendo mantida a mesma forma de remuneração aqui proposta, com fundamento no art. 6º, XVIII, &quot;e&quot; e art. 74, III, &quot;e&quot;, da Lei n.º 14.133/2021.
               </p>
               <br />
-              <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '17pt', marginBottom: '12px', marginTop: '0', color: '#000', fontFamily: "'Garamond', serif" }}>
+              <p style={{ textAlign: 'justify', fontSize: '13pt', lineHeight: '1.5', marginBottom: '12pt', marginTop: '0', color: '#000', fontFamily: "'Garamond', serif" }}>
                 A presente proposta tem validade de 60 (sessenta) dias.
               </p>
               <br />
-              <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '17pt', marginBottom: '20px', marginTop: '0', color: '#000', fontFamily: "'Garamond', serif" }}>
+              <p style={{ textAlign: 'justify', fontSize: '13pt', lineHeight: '1.5', marginBottom: '20pt', marginTop: '0', color: '#000', fontFamily: "'Garamond', serif" }}>
                 Sendo o que se apresenta para o momento, aguardamos posicionamento da parte de V. Exa., colocando-nos, desde já, à inteira disposição para dirimir quaisquer dúvidas eventualmente existentes.
               </p>
             </div>
             {/* Seção de fechamento: Data, Atenciosamente, Assinatura e Nome da Empresa - Centralizados e juntos */}
-            <div style={{ textAlign: 'center', marginTop: '2px', marginBottom: '0' }}>
-              <p style={{ fontSize: '14px', lineHeight: '17pt', marginBottom: '0', marginTop: '-20px', color: '#000', paddingLeft: '200px', textIndent: '210px', fontFamily: "'Garamond', serif" }}>
+            <div style={{ textAlign: 'center', marginTop: '2pt', marginBottom: '0' }}>
+              <p style={{ fontSize: '14pt', lineHeight: '1.5', marginBottom: '0', marginTop: '-20pt', color: '#000', paddingLeft: '200pt', textIndent: '210pt', fontFamily: "'Garamond', serif" }}>
                 Brasília-DF, {formatDateWithMonthName(options.data || '')}.
               </p>
-              <p style={{ fontSize: '14px', lineHeight: '17pt', marginBottom: '0', marginTop: '-80px', color: '#000', paddingLeft: '200px', textIndent: '255px', fontFamily: "'Garamond', serif" }}>
+              <p style={{ fontSize: '14pt', lineHeight: '1.5', marginBottom: '0', marginTop: '-80pt', color: '#000', paddingLeft: '200pt', textIndent: '255pt', fontFamily: "'Garamond', serif" }}>
                 Atenciosamente,
               </p>
-              <img src="/Assinatura.png" style={{ width: '150px', height: 'auto', marginTop: '-40px', margin: '0 auto 0px auto', display: 'block' }} alt="Assinatura" crossOrigin="anonymous" onError={(e) => { console.error('Erro ao carregar assinatura'); }} />
-              <h1 style={{ fontWeight: 'bold', color: '#000', fontSize: '15px', lineHeight: '17pt', marginTop: '-25px', marginBottom: '0', fontFamily: "'Garamond', serif" }}>CAVALCANTE REIS ADVOGADOS</h1>
+              <img src="/Assinatura.png" style={{ width: '150pt', height: 'auto', marginTop: '-40pt', margin: '0 auto 0pt auto', display: 'block' }} alt="Assinatura" crossOrigin="anonymous" onError={(e) => { console.error('Erro ao carregar assinatura'); }} />
+              <h1 style={{ fontWeight: 'bold', color: '#000', fontSize: '15pt', lineHeight: '1.5', marginTop: '-25pt', marginBottom: '0', fontFamily: "'Garamond', serif" }}>CAVALCANTE REIS ADVOGADOS</h1>
             </div>
           </Page>
         );
@@ -1703,10 +1703,10 @@ export default function ProposalGenerator({ onBackToHome, onLogout, propostaToLo
   // - Imagens com tamanhos precisos e qualidade preservada
   // - Formatação tipográfica profissional (Garamond, espaçamentos corretos)
   // - Performance: processamento direto sem canvas invisível ou strings gigantes
-  // ========== DIMENSÕES E ESPECIFICAÇÕES ==========
-  // - Imagens de logo: 170px de largura
-  // - Imagens de municípios: 400px de largura
-  // - Imagens de assinatura: 150px de largura
+  // ========== DIMENSÕES E ESPECIFICAÇÕES (em pt para paridade com prévia) ==========
+  // - Imagens de logo: 170pt de largura (capa) / 145pt (páginas internas)
+  // - Imagens de municípios: 300pt de largura
+  // - Imagens de assinatura: 150pt de largura
   // - Páginas: formato A4 (210mm x 297mm)
   // - Margens: 20mm superior/inferior, 25mm esquerda
   // - Fonte: Garamond, 13pt (26 meios-pontos)
@@ -1942,7 +1942,7 @@ export default function ProposalGenerator({ onBackToHome, onLogout, propostaToLo
       });
 
       // ========== CONSTRUÇÃO: CABEÇALHOS (DIFERENTES PARA CAPA E CONTEÚDO) ==========
-      // Cabeçalho da CAPA: Logo maior (~220px) para destacar na primeira página
+      // Cabeçalho da CAPA: Logo 170pt para paridade com prévia
       const headerCapa = new Header({
         children: logoBuffer ? [
           new Paragraph({
@@ -1950,8 +1950,8 @@ export default function ProposalGenerator({ onBackToHome, onLogout, propostaToLo
               new ImageRun({
                 data: logoBuffer,
                 transformation: {
-                  width: 220 * 9525, // 220px em EMUs (logo grande na capa)
-                  height: (220 * 9525) * 0.34, // Proporção aproximada (75px de altura)
+                  width: 170 * 9525, // 170pt em EMUs (paridade com prévia)
+                  height: (170 * 9525) * 0.34, // Proporção aproximada
                 },
               }),
             ],
@@ -1963,7 +1963,7 @@ export default function ProposalGenerator({ onBackToHome, onLogout, propostaToLo
         ],
       });
 
-      // Cabeçalho do CONTEÚDO: Logo menor/padrão (~100px) para não ocupar muito espaço
+      // Cabeçalho do CONTEÚDO: Logo 145pt para paridade com prévia
       const headerConteudo = new Header({
         children: logoBuffer ? [
           new Paragraph({
@@ -1971,8 +1971,8 @@ export default function ProposalGenerator({ onBackToHome, onLogout, propostaToLo
               new ImageRun({
                 data: logoBuffer,
                 transformation: {
-                  width: 100 * 9525, // 100px em EMUs (logo padrão no conteúdo)
-                  height: (100 * 9525) * 0.35, // Proporção aproximada (35px de altura)
+                  width: 145 * 9525, // 145pt em EMUs (paridade com prévia)
+                  height: (145 * 9525) * 0.35, // Proporção aproximada
                 },
               }),
             ],
@@ -2200,7 +2200,7 @@ export default function ProposalGenerator({ onBackToHome, onLogout, propostaToLo
         new Paragraph({ text: "", spacing: { after: 400 } })
       );
 
-      // Adiciona imagens dos municípios (Tópico 5)
+      // Adiciona imagens dos municípios (Tópico 5) - 300pt para paridade com a prévia
       if (municipios01Buffer) {
         conteudoPrincipal.push(
           new Paragraph({
@@ -2208,8 +2208,8 @@ export default function ProposalGenerator({ onBackToHome, onLogout, propostaToLo
               new ImageRun({
                 data: municipios01Buffer,
                 transformation: {
-                  width: 400 * 9525, // 400px em EMUs
-                  height: (400 * 9525) * 0.75, // Proporção aproximada
+                  width: 300 * 9525, // 300pt em EMUs (paridade com prévia)
+                  height: (300 * 9525) * 0.75, // Proporção aproximada
                 },
               }),
             ],
@@ -2228,8 +2228,8 @@ export default function ProposalGenerator({ onBackToHome, onLogout, propostaToLo
               new ImageRun({
                 data: municipios02Buffer,
                 transformation: {
-                  width: 400 * 9525, // 400px em EMUs
-                  height: (400 * 9525) * 0.75, // Proporção aproximada
+                  width: 300 * 9525, // 300pt em EMUs (paridade com prévia)
+                  height: (300 * 9525) * 0.75, // Proporção aproximada
                 },
               }),
             ],
@@ -2313,7 +2313,7 @@ export default function ProposalGenerator({ onBackToHome, onLogout, propostaToLo
         new Paragraph({ text: "", spacing: { after: 400 } })
       );
 
-      // Adiciona assinatura (final do documento)
+      // Adiciona assinatura (final do documento) - 150pt para paridade com prévia
       if (assinaturaBuffer) {
         conteudoPrincipal.push(
           new Paragraph({
@@ -2321,7 +2321,7 @@ export default function ProposalGenerator({ onBackToHome, onLogout, propostaToLo
               new ImageRun({
                 data: assinaturaBuffer,
                 transformation: {
-                  width: 150 * 9525, // 150px em EMUs
+                  width: 150 * 9525, // 150pt em EMUs (paridade com prévia)
                   height: (150 * 9525) * 0.3, // Proporção aproximada da assinatura
                 },
               }),
@@ -2352,11 +2352,12 @@ export default function ProposalGenerator({ onBackToHome, onLogout, propostaToLo
                   width: 11906, // A4 width em twips (210mm)
                   height: 16838, // A4 height em twips (297mm)
                 },
+                // Margens da capa: top/bottom 2.5cm, left 3cm, right 2.5cm (1cm ≈ 567 twips)
                 margin: {
-                  top: 1440, // 25mm em twips (reservando espaço para cabeçalho GRANDE)
-                  right: 1417, // 25mm em twips
-                  bottom: 1440, // 25mm em twips (reservando espaço para rodapé)
-                  left: 1417, // 25mm em twips
+                  top: 1417,   // 2.5cm (espaço para cabeçalho GRANDE)
+                  right: 1417, // 2.5cm
+                  bottom: 1417, // 2.5cm (reservando espaço para rodapé)
+                  left: 1701,  // 3cm
                 },
               },
             },
@@ -2371,22 +2372,24 @@ export default function ProposalGenerator({ onBackToHome, onLogout, propostaToLo
             // Conteúdo da capa
             children: capaChildren,
           },
-          // ========== SEÇÃO 2: CONTEÚDO PRINCIPAL (com cabeçalho PEQUENO e rodapé) ==========
-          // O Word vai quebrar páginas automaticamente quando o conteúdo chegar no rodapé
+          // ========== SEÇÃO 2: CONTEÚDO PRINCIPAL (fluxo contínuo) ==========
+          // Conteúdo em sequência; o Word quebra página ao atingir a margem inferior.
+          // Margem bottom maior (3cm) evita texto sobre o rodapé.
           {
             properties: {
-              type: SectionType.CONTINUOUS, // Continua da página anterior (já garantido pelo NEXT_PAGE na seção anterior)
+              type: SectionType.CONTINUOUS, // Fluxo contínuo após a capa
               page: {
                 size: {
                   orientation: "portrait",
-                  width: 11906, // A4 width em twips (210mm)
-                  height: 16838, // A4 height em twips (297mm)
+                  width: 11906, // A4 (210mm)
+                  height: 16838, // A4 (297mm)
                 },
+                // Margens: top 2.5cm (cabeçalho), bottom 3cm (protege rodapé), left 2.5cm, right 2cm
                 margin: {
-                  top: 1134, // 20mm em twips (reservando espaço para cabeçalho PEQUENO)
-                  right: 1417, // 25mm em twips
-                  bottom: 1134, // 20mm em twips (reservando espaço para rodapé)
-                  left: 1417, // 25mm em twips
+                  top: 1417,   // 2.5cm (cabeçalho não sobrepõe texto)
+                  right: 1134, // 2cm
+                  bottom: 1701, // 3cm (texto para antes de atingir o rodapé)
+                  left: 1417,  // 2.5cm
                 },
               },
             },

@@ -1,112 +1,99 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreatePropostaDto } from './dto/create-proposta.dto';
 import { UpdatePropostaDto } from './dto/update-proposta.dto';
-import * as fs from 'fs/promises';
-import * as path from 'path';
 
 @Injectable()
 export class PropostasService {
-  private readonly dataFile = path.join(process.cwd(), 'data', 'proposals.json');
+  constructor(private readonly prisma: PrismaService) {}
 
-  private async readData(): Promise<any[]> {
-    try {
-      const data = await fs.readFile(this.dataFile, 'utf-8');
-      return JSON.parse(data);
-    } catch (error) {
-      return [];
-    }
-  }
-
-  private async writeData(data: any[]): Promise<void> {
-    const dir = path.dirname(this.dataFile);
-    await fs.mkdir(dir, { recursive: true });
-    await fs.writeFile(this.dataFile, JSON.stringify(data, null, 2), 'utf-8');
-  }
-
-  // Verifica se a proposta expirou (padrão: 1 ano = 365 dias)
-  private isExpired(proposta: any): boolean {
-    const now = new Date();
-    const expiresAt = proposta.expiresAt ? new Date(proposta.expiresAt) : null;
-    
-    if (expiresAt) {
-      return now > expiresAt;
-    }
-    
-    // Se não tiver expiresAt, usa regra padrão de 365 dias
-    const createdAt = new Date(proposta.createdAt);
-    const diff = now.getTime() - createdAt.getTime();
-    const oneYearInMs = 365 * 24 * 60 * 60 * 1000;
-    return diff > oneYearInMs;
-  }
-
+  // Cria uma nova proposta no banco de dados
   async create(createPropostaDto: CreatePropostaDto) {
-    const items = await this.readData();
     const now = new Date();
-    
+
     // Define expiresAt: usa o fornecido ou cria um padrão de 1 ano
-    let expiresAt = createPropostaDto.expiresAt;
-    if (!expiresAt) {
-      const oneYearLater = new Date(now);
-      oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
-      expiresAt = oneYearLater.toISOString();
+    let expiresAt: Date;
+    if (createPropostaDto.expiresAt) {
+      expiresAt = new Date(createPropostaDto.expiresAt);
+    } else {
+      expiresAt = new Date(now);
+      expiresAt.setFullYear(expiresAt.getFullYear() + 1);
     }
-    
-    const newProposta = {
-      id: Date.now().toString(),
-      ...createPropostaDto,
-      expiresAt,
-      createdAt: now.toISOString(),
-      updatedAt: now.toISOString(),
-    };
-    items.push(newProposta);
-    await this.writeData(items);
-    return newProposta;
+
+    return this.prisma.proposta.create({
+      data: {
+        municipio: createPropostaDto.municipio,
+        destinatario: createPropostaDto.destinatario,
+        data: createPropostaDto.data,
+        prazo: createPropostaDto.prazo,
+        services: createPropostaDto.services || {},
+        customCabimentos: createPropostaDto.customCabimentos || {},
+        customEstimates: createPropostaDto.customEstimates || {},
+        footerOffices: createPropostaDto.footerOffices || {},
+        paymentValue: createPropostaDto.paymentValue,
+        expiresAt,
+      },
+    });
   }
 
+  // Lista todas as propostas não expiradas
   async findAll() {
-    const items = await this.readData();
-    // Cleanup: remove propostas expiradas
-    const filtered = items.filter((i) => !this.isExpired(i));
-    if (filtered.length !== items.length) {
-      await this.writeData(filtered);
-    }
-    return filtered.sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
+    const now = new Date();
+
+    // Remove propostas expiradas automaticamente
+    await this.prisma.proposta.deleteMany({
+      where: {
+        expiresAt: {
+          lt: now,
+        },
+      },
+    });
+
+    // Retorna propostas válidas ordenadas por data de criação (mais recentes primeiro)
+    return this.prisma.proposta.findMany({
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
   }
 
+  // Busca uma proposta específica por ID
   async findOne(id: string) {
-    const items = await this.readData();
-    const proposta = items.find((i) => i.id === id);
+    const proposta = await this.prisma.proposta.findUnique({
+      where: { id },
+    });
+
     if (!proposta) {
-      throw new NotFoundException(`Proposta with ID ${id} not found`);
+      throw new NotFoundException(`Proposta com ID ${id} não encontrada`);
     }
+
     return proposta;
   }
 
+  // Atualiza uma proposta existente
   async update(id: string, updatePropostaDto: UpdatePropostaDto) {
-    const items = await this.readData();
-    const index = items.findIndex((i) => i.id === id);
-    if (index === -1) {
-      throw new NotFoundException(`Proposta with ID ${id} not found`);
-    }
-    items[index] = {
-      ...items[index],
-      ...updatePropostaDto,
-      updatedAt: new Date().toISOString(),
-    };
-    await this.writeData(items);
-    return items[index];
+    // Verifica se a proposta existe
+    await this.findOne(id);
+
+    return this.prisma.proposta.update({
+      where: { id },
+      data: {
+        ...updatePropostaDto,
+        // Se expiresAt foi passado como string, converte para Date
+        expiresAt: updatePropostaDto.expiresAt
+          ? new Date(updatePropostaDto.expiresAt)
+          : undefined,
+      },
+    });
   }
 
+  // Remove uma proposta
   async remove(id: string) {
-    const items = await this.readData();
-    const index = items.findIndex((i) => i.id === id);
-    if (index === -1) {
-      throw new NotFoundException(`Proposta with ID ${id} not found`);
-    }
-    items.splice(index, 1);
-    await this.writeData(items);
+    // Verifica se a proposta existe
+    await this.findOne(id);
+
+    await this.prisma.proposta.delete({
+      where: { id },
+    });
   }
 }
-

@@ -327,7 +327,7 @@ const ModalTabela45 = ({ open, onClose, tabelaItems, onUpdate }: any) => {
         </div>
 
         <div style={{ marginBottom: '20px', padding: '12px', background: '#f0f8f5', borderRadius: '6px' }}>
-          <p style={{ fontSize: '13px', lineHeight: '1.6', color: '#333', margin: 0 }}>
+          <p style={{ fontSize: '13pt', lineHeight: '1.6', color: '#333', margin: 0 }}>
             <strong>4.6-</strong> As memórias de cálculo e valores exatos somente poderão ser fixados no momento da conclusão dos serviços, quando já estiverem definidos os valores por decisão ou acordo judicial, bem como por decisão ou acordo na via administrativa, desde que não esteja mais sujeito a nenhum tipo de recurso ou questionamento, ou seja, que esteja fixado de forma definitiva.
           </p>
         </div>
@@ -358,10 +358,10 @@ const ModalTabela45 = ({ open, onClose, tabelaItems, onUpdate }: any) => {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: '#f5f5f5' }}>
-                <th style={{ border: '1px solid #ddd', padding: '10px', textAlign: 'center', fontSize: '13px', fontWeight: '600' }}>ITEM</th>
-                <th style={{ border: '1px solid #ddd', padding: '10px', textAlign: 'center', fontSize: '13px', fontWeight: '600' }}>DESCRIÇÃO</th>
-                <th style={{ border: '1px solid #ddd', padding: '10px', textAlign: 'center', fontSize: '13px', fontWeight: '600' }}>CABIMENTO</th>
-                <th style={{ border: '1px solid #ddd', padding: '10px', textAlign: 'center', fontSize: '13px', fontWeight: '600', width: '60px' }}>AÇÕES</th>
+                <th style={{ border: '1px solid #ddd', padding: '10px', textAlign: 'center', fontSize: '13pt', fontWeight: '600' }}>ITEM</th>
+                <th style={{ border: '1px solid #ddd', padding: '10px', textAlign: 'center', fontSize: '13pt', fontWeight: '600' }}>DESCRIÇÃO</th>
+                <th style={{ border: '1px solid #ddd', padding: '10px', textAlign: 'center', fontSize: '13pt', fontWeight: '600' }}>CABIMENTO</th>
+                <th style={{ border: '1px solid #ddd', padding: '10px', textAlign: 'center', fontSize: '13pt', fontWeight: '600', width: '60px' }}>AÇÕES</th>
               </tr>
             </thead>
             <tbody>
@@ -595,10 +595,10 @@ const ModalTabela171 = ({ open, onClose, dotacaoItems, onUpdate }: any) => {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: '#f5f5f5' }}>
-                <th colSpan={2} style={{ border: '1px solid #ddd', padding: '10px', textAlign: 'center', fontSize: '13px', fontWeight: '600' }}>
+                <th colSpan={2} style={{ border: '1px solid #ddd', padding: '10px', textAlign: 'center', fontSize: '13pt', fontWeight: '600' }}>
                   DOTAÇÃO ORÇAMENTÁRIA
                 </th>
-                <th style={{ border: '1px solid #ddd', padding: '10px', textAlign: 'center', fontSize: '13px', fontWeight: '600', width: '60px' }}>AÇÕES</th>
+                <th style={{ border: '1px solid #ddd', padding: '10px', textAlign: 'center', fontSize: '13pt', fontWeight: '600', width: '60px' }}>AÇÕES</th>
               </tr>
               <tr style={{ background: '#f9f9f9' }}>
                 <th style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'center', fontSize: '12px', fontWeight: '600' }}>CAMPO</th>
@@ -862,7 +862,7 @@ const EditSidebar = ({ clause, onClose, onUpdateClause, clauseData }: any) => {
                 style={{ marginTop: '4px', accentColor: '#227056' }}
               />
               <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: '600', fontSize: '13px', marginBottom: '4px' }}>
+                <div style={{ fontWeight: '600', fontSize: '13pt', marginBottom: '4px' }}>
                   {key}
                 </div>
                 <div style={{ fontSize: '12px', color: '#666', lineHeight: '1.5' }}>
@@ -943,7 +943,7 @@ const EditSidebar = ({ clause, onClose, onUpdateClause, clauseData }: any) => {
                 style={{ marginTop: '4px', accentColor: '#227056' }}
               />
               <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: '600', fontSize: '13px', marginBottom: '4px' }}>
+                <div style={{ fontWeight: '600', fontSize: '13pt', marginBottom: '4px' }}>
                   {key}
                 </div>
                 <div style={{ fontSize: '12px', color: '#666', lineHeight: '1.5' }}>
@@ -968,7 +968,7 @@ const EditSidebar = ({ clause, onClose, onUpdateClause, clauseData }: any) => {
                   border: 'none',
                   borderRadius: '6px',
                   cursor: 'pointer',
-                  fontSize: '13px',
+                  fontSize: '13pt',
                   fontWeight: '500',
                   display: 'flex',
                   alignItems: 'center',
@@ -997,7 +997,7 @@ const EditSidebar = ({ clause, onClose, onUpdateClause, clauseData }: any) => {
                   border: 'none',
                   borderRadius: '6px',
                   cursor: 'pointer',
-                  fontSize: '13px',
+                  fontSize: '13pt',
                   fontWeight: '500',
                   display: 'flex',
                   alignItems: 'center',
@@ -1019,7 +1019,7 @@ const EditSidebar = ({ clause, onClose, onUpdateClause, clauseData }: any) => {
                   background: '#f0f8f5',
                   border: '1px solid #227056',
                   borderRadius: '6px',
-                  fontSize: '13px',
+                  fontSize: '13pt',
                   color: '#227056',
                   textAlign: 'center'
                 }}
@@ -1152,12 +1152,12 @@ const MinutaDocument = ({
         pageBreakAfter: 'always',
         overflow: 'hidden'
       }}>
-        {/* Cabeçalho com Logo da Prefeitura - 180px */}
-        <div style={{ textAlign: 'center', marginBottom: '25px', flexShrink: 0 }}>
+        {/* Cabeçalho com Logo da Prefeitura - 180pt para paridade com DOCX */}
+        <div style={{ textAlign: 'center', marginBottom: '25pt', flexShrink: 0 }}>
           <img
             src="/barrocas.png"
             alt="Logo Prefeitura"
-            style={{ width: '180px', height: 'auto', display: 'block', margin: '0 auto' }}
+            style={{ width: '180pt', height: 'auto', display: 'block', margin: '0 auto' }}
             crossOrigin="anonymous"
           />
         </div>
@@ -1182,13 +1182,13 @@ const MinutaDocument = ({
       {/* PÁGINA 1: CAPA */}
       <Page pageNumber={1}>
         <div style={{ marginBottom: '30px' }}>
-          <p style={{ fontSize: '13px', color: '#000', marginBottom: '8px', fontFamily: "'Garamond', serif" }}>
+          <p style={{ fontSize: '13pt', color: '#000', marginBottom: '8px', fontFamily: "'Garamond', serif" }}>
             CONTRATO N° {options.numeroContrato || "____________"}
           </p>
-          <p style={{ fontSize: '13px', color: '#000', marginBottom: '8px', fontFamily: "'Garamond', serif" }}>
+          <p style={{ fontSize: '13pt', color: '#000', marginBottom: '8px', fontFamily: "'Garamond', serif" }}>
             INEXIGIBILIDADE DE LICITAÇÃO N° {options.numeroInexigibilidade || "_____________"}
           </p>
-          <p style={{ fontSize: '13px', color: '#000', marginBottom: '0', fontFamily: "'Garamond', serif" }}>
+          <p style={{ fontSize: '13pt', color: '#000', marginBottom: '0', fontFamily: "'Garamond', serif" }}>
             PROCESSO ADMINISTRATIVO N° {options.numeroProcesso || "_____________________"}
           </p>
         </div>
@@ -1204,8 +1204,8 @@ const MinutaDocument = ({
           marginLeft: 'auto'
         }}>
           <p style={{
-            fontSize: '13px',
-            lineHeight: '17pt',
+            fontSize: '13pt',
+            lineHeight: '1.5',
             color: '#000',
             fontFamily: "'Garamond', serif",
             textAlign: 'justify'
@@ -1228,8 +1228,8 @@ const MinutaDocument = ({
             marginLeft: 'auto'
           }}>
             <p style={{
-              fontSize: '13px',
-              lineHeight: '17pt',
+              fontSize: '13pt',
+              lineHeight: '1.5',
               color: '#000',
               fontFamily: "'Garamond', serif",
               textAlign: 'justify',
@@ -1246,10 +1246,10 @@ const MinutaDocument = ({
         <Page pageNumber={2}>
           <div style={{ maxWidth: '135mm', margin: '0 auto', width: '100%' }}>
             <h2 style={{
-              fontSize: '13px',
+              fontSize: '13pt',
               fontWeight: 'bold',
               color: '#000',
-              borderBottom: '1px solid #000',
+              borderBottom: '1pt solid #000',
               paddingBottom: '8px',
               marginBottom: '20px',
               marginTop: '0',
@@ -1260,8 +1260,8 @@ const MinutaDocument = ({
 
             <p style={{
               textAlign: 'justify',
-              fontSize: '13px',
-              lineHeight: '17pt',
+              fontSize: '13pt',
+              lineHeight: '1.5',
               marginBottom: '15px',
               marginTop: '0',
               color: '#000',
@@ -1274,8 +1274,8 @@ const MinutaDocument = ({
               <div key={key} style={{ marginBottom: '15px' }}>
                 <p style={{
                   textAlign: 'justify',
-                  fontSize: '13px',
-                  lineHeight: '17pt',
+                  fontSize: '13pt',
+                  lineHeight: '1.5',
                   marginBottom: '10px',
                   color: '#000',
                   fontFamily: "'Garamond', serif"
@@ -1307,10 +1307,10 @@ const MinutaDocument = ({
               <Page pageNumber={3}>
                 <div style={{ maxWidth: '135mm', margin: '0 auto', width: '100%' }}>
                   <h2 style={{
-                    fontSize: '13px',
+                    fontSize: '13pt',
                     fontWeight: 'bold',
                     color: '#000',
-                    borderBottom: '1px solid #000',
+                    borderBottom: '1pt solid #000',
                     paddingBottom: '8px',
                     marginBottom: '20px',
                     marginTop: '0',
@@ -1326,8 +1326,8 @@ const MinutaDocument = ({
                           key={lineIdx}
                           style={{
                             textAlign: 'justify',
-                            fontSize: '13px',
-                            lineHeight: '17pt',
+                            fontSize: '13pt',
+                            lineHeight: '1.5',
                             marginBottom: lineIdx === texto.split('\n').length - 1 ? '10px' : '2px',
                             color: '#000',
                             fontFamily: "'Garamond', serif"
@@ -1354,8 +1354,8 @@ const MinutaDocument = ({
                           key={lineIdx}
                           style={{
                             textAlign: 'justify',
-                            fontSize: '13px',
-                            lineHeight: '17pt',
+                            fontSize: '13pt',
+                            lineHeight: '1.5',
                             marginBottom: lineIdx === texto.split('\n').length - 1 ? '10px' : '2px',
                             color: '#000',
                             fontFamily: "'Garamond', serif"
@@ -1454,8 +1454,8 @@ const MinutaDocument = ({
                           key={lineIdx}
                           style={{
                             textAlign: 'justify',
-                            fontSize: '13px',
-                            lineHeight: '17pt',
+                            fontSize: '13pt',
+                            lineHeight: '1.5',
                             marginBottom: lineIdx === texto.split('\n').length - 1 ? '10px' : '2px',
                             color: '#000',
                             fontFamily: "'Garamond', serif"
@@ -1470,10 +1470,10 @@ const MinutaDocument = ({
                   {group.map((item, idx) => (
                     <div key={item.num} style={{ marginBottom: item === group[group.length - 1] ? '0' : '30px' }}>
                       <h2 style={{
-                        fontSize: '13px',
+                        fontSize: '13pt',
                         fontWeight: 'bold',
                         color: '#000',
-                        borderBottom: '1px solid #000',
+                        borderBottom: '1pt solid #000',
                         paddingBottom: '8px',
                         marginBottom: '20px',
                         marginTop: idx === 0 && clause7Late.length > 0 ? '20px' : '0',
@@ -1490,8 +1490,8 @@ const MinutaDocument = ({
                                 key={lineIdx}
                                 style={{
                                   textAlign: 'justify',
-                                  fontSize: '13px',
-                                  lineHeight: '17pt',
+                                  fontSize: '13pt',
+                                  lineHeight: '1.5',
                                   marginBottom: lineIdx === texto.split('\n').length - 1 ? '10px' : '2px',
                                   color: '#000',
                                   fontFamily: "'Garamond', serif"
@@ -1526,10 +1526,10 @@ const MinutaDocument = ({
                   {group.map((item) => (
                     <div key={item.num} style={{ marginBottom: item === group[group.length - 1] ? '0' : '30px' }}>
                       <h2 style={{
-                        fontSize: '13px',
+                        fontSize: '13pt',
                         fontWeight: 'bold',
                         color: '#000',
-                        borderBottom: '1px solid #000',
+                        borderBottom: '1pt solid #000',
                         paddingBottom: '8px',
                         marginBottom: '20px',
                         marginTop: '0',
@@ -1546,8 +1546,8 @@ const MinutaDocument = ({
                                 key={lineIdx}
                                 style={{
                                   textAlign: 'justify',
-                                  fontSize: '13px',
-                                  lineHeight: '17pt',
+                                  fontSize: '13pt',
+                                  lineHeight: '1.5',
                                   marginBottom: lineIdx === texto.split('\n').length - 1 ? '10px' : '2px',
                                   color: '#000',
                                   fontFamily: "'Garamond', serif"
@@ -1583,10 +1583,10 @@ const MinutaDocument = ({
                     {group.map((item) => (
                       <div key={item.num} style={{ marginBottom: item === group[group.length - 1] ? '0' : '30px' }}>
                         <h2 style={{
-                          fontSize: '13px',
+                          fontSize: '13pt',
                           fontWeight: 'bold',
                           color: '#000',
-                          borderBottom: '1px solid #000',
+                          borderBottom: '1pt solid #000',
                           paddingBottom: '8px',
                           marginBottom: '20px',
                           marginTop: '0',
@@ -1608,8 +1608,8 @@ const MinutaDocument = ({
                                         key={lineIdx}
                                         style={{
                                           textAlign: 'justify',
-                                          fontSize: '13px',
-                                          lineHeight: '17pt',
+                                          fontSize: '13pt',
+                                          lineHeight: '1.5',
                                           marginBottom: lineIdx === texto.split('\n').length - 1 ? '10px' : '2px',
                                           color: '#000',
                                           fontFamily: "'Garamond', serif"
@@ -1633,7 +1633,7 @@ const MinutaDocument = ({
                                         }}>
                                           <thead>
                                             <tr>
-                                              <th colSpan={2} style={{ border: '1px solid #000', padding: '10px', fontSize: '13px', color: '#000', textAlign: 'center', fontWeight: 'bold' }}>
+                                              <th colSpan={2} style={{ border: '1px solid #000', padding: '10px', fontSize: '13pt', color: '#000', textAlign: 'center', fontWeight: 'bold' }}>
                                                 DOTAÇÃO ORÇAMENTÁRIA
                                               </th>
                                             </tr>
@@ -1641,32 +1641,32 @@ const MinutaDocument = ({
                                           <tbody>
                                             {dotacao.dotacaoOrcamentaria && (
                                               <tr>
-                                                <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13px', color: '#000', fontWeight: 'bold' }}>DOTAÇÃO ORÇAMENTÁRIA</td>
-                                                <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13px', color: '#000' }}>{dotacao.dotacaoOrcamentaria}</td>
+                                                <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13pt', color: '#000', fontWeight: 'bold' }}>DOTAÇÃO ORÇAMENTÁRIA</td>
+                                                <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13pt', color: '#000' }}>{dotacao.dotacaoOrcamentaria}</td>
                                               </tr>
                                             )}
                                             {dotacao.unidOrcamentaria && (
                                               <tr>
-                                                <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13px', color: '#000', fontWeight: 'bold' }}>UNID. ORÇAMENTÁRIA</td>
-                                                <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13px', color: '#000' }}>{dotacao.unidOrcamentaria}</td>
+                                                <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13pt', color: '#000', fontWeight: 'bold' }}>UNID. ORÇAMENTÁRIA</td>
+                                                <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13pt', color: '#000' }}>{dotacao.unidOrcamentaria}</td>
                                               </tr>
                                             )}
                                             {dotacao.projetoAtividade && (
                                               <tr>
-                                                <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13px', color: '#000', fontWeight: 'bold' }}>PROJETO ATIVIDADE</td>
-                                                <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13px', color: '#000' }}>{dotacao.projetoAtividade}</td>
+                                                <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13pt', color: '#000', fontWeight: 'bold' }}>PROJETO ATIVIDADE</td>
+                                                <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13pt', color: '#000' }}>{dotacao.projetoAtividade}</td>
                                               </tr>
                                             )}
                                             {dotacao.categoria && (
                                               <tr>
-                                                <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13px', color: '#000', fontWeight: 'bold' }}>CATEGORIA</td>
-                                                <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13px', color: '#000' }}>{dotacao.categoria}</td>
+                                                <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13pt', color: '#000', fontWeight: 'bold' }}>CATEGORIA</td>
+                                                <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13pt', color: '#000' }}>{dotacao.categoria}</td>
                                               </tr>
                                             )}
                                             {dotacao.fonteRecurso && (
                                               <tr>
-                                                <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13px', color: '#000', fontWeight: 'bold' }}>FONTE DE RECURSO</td>
-                                                <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13px', color: '#000' }}>{dotacao.fonteRecurso}</td>
+                                                <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13pt', color: '#000', fontWeight: 'bold' }}>FONTE DE RECURSO</td>
+                                                <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13pt', color: '#000' }}>{dotacao.fonteRecurso}</td>
                                               </tr>
                                             )}
                                           </tbody>
@@ -1685,8 +1685,8 @@ const MinutaDocument = ({
                                     key={lineIdx}
                                     style={{
                                       textAlign: 'justify',
-                                      fontSize: '13px',
-                                      lineHeight: '17pt',
+                                      fontSize: '13pt',
+                                      lineHeight: '1.5',
                                       marginBottom: lineIdx === texto.split('\n').length - 1 ? '10px' : '2px',
                                       color: '#000',
                                       fontFamily: "'Garamond', serif"
@@ -1706,17 +1706,17 @@ const MinutaDocument = ({
 
                   {/* Assinaturas na mesma página */}
                   <div style={{ marginTop: 'auto', paddingTop: '40px' }}>
-                    <p style={{ fontSize: '13px', color: '#000', marginBottom: '40px', fontFamily: "'Garamond', serif" }}>
+                    <p style={{ fontSize: '13pt', color: '#000', marginBottom: '40px', fontFamily: "'Garamond', serif" }}>
                       Barrocas/BA_____ de dezembro de 2025.
                     </p>
 
                     <div style={{ marginTop: '60px', display: 'flex', flexDirection: 'column', gap: '40px' }}>
                       <div style={{ textAlign: 'center' }}>
                         <div style={{ borderTop: '1px solid #000', paddingTop: '8px', marginBottom: '8px' }}>
-                          <p style={{ fontSize: '13px', color: '#000', fontFamily: "'Garamond', serif", margin: 0 }}>
+                          <p style={{ fontSize: '13pt', color: '#000', fontFamily: "'Garamond', serif", margin: 0 }}>
                             MUNICÍPIO DE BARROCAS/BA, representado por seu Prefeito,
                           </p>
-                          <p style={{ fontSize: '13px', color: '#000', fontFamily: "'Garamond', serif", margin: 0 }}>
+                          <p style={{ fontSize: '13pt', color: '#000', fontFamily: "'Garamond', serif", margin: 0 }}>
                             Sr. JOSÉ ALMIR ARAÚJO QUEIROZ
                           </p>
                         </div>
@@ -1724,10 +1724,10 @@ const MinutaDocument = ({
 
                       <div style={{ textAlign: 'center' }}>
                         <div style={{ borderTop: '1px solid #000', paddingTop: '8px', marginBottom: '8px' }}>
-                          <p style={{ fontSize: '13px', color: '#000', fontFamily: "'Garamond', serif", margin: 0 }}>
+                          <p style={{ fontSize: '13pt', color: '#000', fontFamily: "'Garamond', serif", margin: 0 }}>
                             CAVALCANTE REIS ADVOGADOS, representado pelo sócio-diretor, Sr.
                           </p>
-                          <p style={{ fontSize: '13px', color: '#000', fontFamily: "'Garamond', serif", margin: 0 }}>
+                          <p style={{ fontSize: '13pt', color: '#000', fontFamily: "'Garamond', serif", margin: 0 }}>
                             IURI DO LAGO NOGUEIRA CAVALCANTE REIS,
                           </p>
                         </div>
@@ -1735,26 +1735,26 @@ const MinutaDocument = ({
                     </div>
 
                     <div style={{ marginTop: '60px' }}>
-                      <p style={{ fontSize: '13px', color: '#000', fontFamily: "'Garamond', serif", marginBottom: '20px' }}>
+                      <p style={{ fontSize: '13pt', color: '#000', fontFamily: "'Garamond', serif", marginBottom: '20px' }}>
                         Testemunhas:
                       </p>
                       <div style={{ display: 'flex', justifyContent: 'space-around', marginTop: '40px' }}>
                         <div style={{ textAlign: 'center', flex: 1 }}>
                           <div style={{ borderTop: '1px solid #000', paddingTop: '8px', marginBottom: '8px' }}>
-                            <p style={{ fontSize: '13px', color: '#000', fontFamily: "'Garamond', serif", margin: 0 }}>
+                            <p style={{ fontSize: '13pt', color: '#000', fontFamily: "'Garamond', serif", margin: 0 }}>
                               1ª___________________________
                             </p>
-                            <p style={{ fontSize: '13px', color: '#000', fontFamily: "'Garamond', serif", margin: '4px 0 0 0' }}>
+                            <p style={{ fontSize: '13pt', color: '#000', fontFamily: "'Garamond', serif", margin: '4px 0 0 0' }}>
                               CPF nº:
                             </p>
                           </div>
                         </div>
                         <div style={{ textAlign: 'center', flex: 1 }}>
                           <div style={{ borderTop: '1px solid #000', paddingTop: '8px', marginBottom: '8px' }}>
-                            <p style={{ fontSize: '13px', color: '#000', fontFamily: "'Garamond', serif", margin: 0 }}>
+                            <p style={{ fontSize: '13pt', color: '#000', fontFamily: "'Garamond', serif", margin: 0 }}>
                               2ª___________________________
                             </p>
-                            <p style={{ fontSize: '13px', color: '#000', fontFamily: "'Garamond', serif", margin: '4px 0 0 0' }}>
+                            <p style={{ fontSize: '13pt', color: '#000', fontFamily: "'Garamond', serif", margin: '4px 0 0 0' }}>
                               CPF nº:
                             </p>
                           </div>
@@ -1780,10 +1780,10 @@ const MinutaDocument = ({
                 <Page key="3-early" pageNumber={currentPageNum++}>
                   <div style={{ maxWidth: '135mm', margin: '0 auto', width: '100%' }}>
                     <h2 style={{
-                      fontSize: '13px',
+                      fontSize: '13pt',
                       fontWeight: 'bold',
                       color: '#000',
-                      borderBottom: '1px solid #000',
+                      borderBottom: '1pt solid #000',
                       paddingBottom: '8px',
                       marginBottom: '20px',
                       marginTop: '0',
@@ -1798,8 +1798,8 @@ const MinutaDocument = ({
                             key={lineIdx}
                             style={{
                               textAlign: 'justify',
-                              fontSize: '13px',
-                              lineHeight: '17pt',
+                              fontSize: '13pt',
+                              lineHeight: '1.5',
                               marginBottom: lineIdx === texto.split('\n').length - 1 ? '10px' : '2px',
                               color: '#000',
                               fontFamily: "'Garamond', serif"
@@ -1833,8 +1833,8 @@ const MinutaDocument = ({
                               key={lineIdx}
                               style={{
                                 textAlign: 'justify',
-                                fontSize: '13px',
-                                lineHeight: '17pt',
+                                fontSize: '13pt',
+                                lineHeight: '1.5',
                                 marginBottom: lineIdx === texto.split('\n').length - 1 ? '10px' : '2px',
                                 color: '#000',
                                 fontFamily: "'Garamond', serif"
@@ -1875,8 +1875,8 @@ const MinutaDocument = ({
                             key={lineIdx}
                             style={{
                               textAlign: 'justify',
-                              fontSize: '13px',
-                              lineHeight: '17pt',
+                              fontSize: '13pt',
+                              lineHeight: '1.5',
                               marginBottom: lineIdx === texto.split('\n').length - 1 ? '10px' : '2px',
                               color: '#000',
                               fontFamily: "'Garamond', serif"
@@ -1890,10 +1890,10 @@ const MinutaDocument = ({
                     ))}
                     {/* Título da cláusula 4 */}
                     <h2 style={{
-                      fontSize: '13px',
+                      fontSize: '13pt',
                       fontWeight: 'bold',
                       color: '#000',
-                      borderBottom: '1px solid #000',
+                      borderBottom: '1pt solid #000',
                       paddingBottom: '8px',
                       marginBottom: '20px',
                       marginTop: clause3Late.length > 0 ? '20px' : '0',
@@ -1909,8 +1909,8 @@ const MinutaDocument = ({
                             key={lineIdx}
                             style={{
                               textAlign: 'justify',
-                              fontSize: '13px',
-                              lineHeight: '17pt',
+                              fontSize: '13pt',
+                              lineHeight: '1.5',
                               marginBottom: lineIdx === texto.split('\n').length - 1 ? '10px' : '2px',
                               color: '#000',
                               fontFamily: "'Garamond', serif"
@@ -1940,8 +1940,8 @@ const MinutaDocument = ({
                           key={lineIdx}
                           style={{
                             textAlign: 'justify',
-                            fontSize: '13px',
-                            lineHeight: '17pt',
+                            fontSize: '13pt',
+                            lineHeight: '1.5',
                             marginBottom: lineIdx === texto.split('\n').length - 1 ? '10px' : '2px',
                             color: '#000',
                             fontFamily: "'Garamond', serif"
@@ -1964,9 +1964,9 @@ const MinutaDocument = ({
                         }}>
                           <thead>
                             <tr style={{ background: '#f9f9f9' }}>
-                              <th style={{ border: '1px solid #000', padding: '10px', fontSize: '13px', color: '#000', textAlign: 'center', fontWeight: 'bold' }}>ITEM</th>
-                              <th style={{ border: '1px solid #000', padding: '10px', fontSize: '13px', color: '#000', textAlign: 'center', fontWeight: 'bold' }}>DESCRIÇÃO</th>
-                              <th style={{ border: '1px solid #000', padding: '10px', fontSize: '13px', color: '#000', textAlign: 'center', fontWeight: 'bold' }}>CABIMENTO</th>
+                              <th style={{ border: '1px solid #000', padding: '10px', fontSize: '13pt', color: '#000', textAlign: 'center', fontWeight: 'bold' }}>ITEM</th>
+                              <th style={{ border: '1px solid #000', padding: '10px', fontSize: '13pt', color: '#000', textAlign: 'center', fontWeight: 'bold' }}>DESCRIÇÃO</th>
+                              <th style={{ border: '1px solid #000', padding: '10px', fontSize: '13pt', color: '#000', textAlign: 'center', fontWeight: 'bold' }}>CABIMENTO</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -1974,13 +1974,13 @@ const MinutaDocument = ({
                               .sort(([a], [b]) => parseInt(a) - parseInt(b))
                               .map(([itemNum, item]: [string, any]) => (
                                 <tr key={itemNum}>
-                                  <td style={{ border: '1px solid #000', padding: '8px', fontSize: '13px', color: '#000', textAlign: 'center', fontWeight: 'bold' }}>
+                                  <td style={{ border: '1px solid #000', padding: '8px', fontSize: '13pt', color: '#000', textAlign: 'center', fontWeight: 'bold' }}>
                                     {itemNum}
                                   </td>
-                                  <td style={{ border: '1px solid #000', padding: '8px', fontSize: '13px', color: '#000' }}>
+                                  <td style={{ border: '1px solid #000', padding: '8px', fontSize: '13pt', color: '#000' }}>
                                     {item.descricao}
                                   </td>
-                                  <td style={{ border: '1px solid #000', padding: '8px', fontSize: '13px', color: '#000' }}>
+                                  <td style={{ border: '1px solid #000', padding: '8px', fontSize: '13pt', color: '#000' }}>
                                     {item.cabimento}
                                   </td>
                                 </tr>
@@ -1990,16 +1990,16 @@ const MinutaDocument = ({
 
                         {/* Textos a, b, c, d após tabela */}
                         <div style={{ marginTop: '20px' }}>
-                          <p style={{ fontSize: '13px', lineHeight: '17pt', color: '#000', fontFamily: "'Garamond', serif", textAlign: 'justify', marginBottom: '10px' }}>
+                          <p style={{ fontSize: '13pt', lineHeight: '1.5', color: '#000', fontFamily: "'Garamond', serif", textAlign: 'justify', marginBottom: '10px' }}>
                             a) Os demais objetos contidos nas cláusulas do presente contrato terão os valores levantados após a disponibilização da documentação necessária para a efetivação do serviço, haja vista a natureza concomitante do trabalho desenvolvido.
                           </p>
-                          <p style={{ fontSize: '13px', lineHeight: '17pt', color: '#000', fontFamily: "'Garamond', serif", textAlign: 'justify', marginBottom: '10px' }}>
+                          <p style={{ fontSize: '13pt', lineHeight: '1.5', color: '#000', fontFamily: "'Garamond', serif", textAlign: 'justify', marginBottom: '10px' }}>
                             b) Os valores levantados a título de incremento são provisórios, baseados em informações preliminares, podendo, ao final, representar valores a maior ou a menor.
                           </p>
-                          <p style={{ fontSize: '13px', lineHeight: '17pt', color: '#000', fontFamily: "'Garamond', serif", textAlign: 'justify', marginBottom: '10px' }}>
+                          <p style={{ fontSize: '13pt', lineHeight: '1.5', color: '#000', fontFamily: "'Garamond', serif", textAlign: 'justify', marginBottom: '10px' }}>
                             c) Para efetivação da atualização do valor contratual previsto no parágrafo antecedente, ocorrerá mediante a celebração de aditamento, na forma prevista na Lei n.° 14.133/21.
                           </p>
-                          <p style={{ fontSize: '13px', lineHeight: '17pt', color: '#000', fontFamily: "'Garamond', serif", textAlign: 'justify', marginBottom: '10px' }}>
+                          <p style={{ fontSize: '13pt', lineHeight: '1.5', color: '#000', fontFamily: "'Garamond', serif", textAlign: 'justify', marginBottom: '10px' }}>
                             d) Em nenhuma hipótese, o MUNICÍPIO DE BARROCAS/BA pagará à CONTRATADA antes que os valores sejam registrados nos cofres públicos.
                           </p>
                         </div>
@@ -2025,10 +2025,10 @@ const MinutaDocument = ({
                 <Page key="5-early" pageNumber={currentPageNum++}>
                   <div style={{ maxWidth: '135mm', margin: '0 auto', width: '100%' }}>
                     <h2 style={{
-                      fontSize: '13px',
+                      fontSize: '13pt',
                       fontWeight: 'bold',
                       color: '#000',
-                      borderBottom: '1px solid #000',
+                      borderBottom: '1pt solid #000',
                       paddingBottom: '8px',
                       marginBottom: '20px',
                       marginTop: '0',
@@ -2043,8 +2043,8 @@ const MinutaDocument = ({
                             key={lineIdx}
                             style={{
                               textAlign: 'justify',
-                              fontSize: '13px',
-                              lineHeight: '17pt',
+                              fontSize: '13pt',
+                              lineHeight: '1.5',
                               marginBottom: lineIdx === texto.split('\n').length - 1 ? '10px' : '2px',
                               color: '#000',
                               fontFamily: "'Garamond', serif"
@@ -2078,8 +2078,8 @@ const MinutaDocument = ({
                             key={lineIdx}
                             style={{
                               textAlign: 'justify',
-                              fontSize: '13px',
-                              lineHeight: '17pt',
+                              fontSize: '13pt',
+                              lineHeight: '1.5',
                               marginBottom: lineIdx === texto.split('\n').length - 1 ? '10px' : '2px',
                               color: '#000',
                               fontFamily: "'Garamond', serif"
@@ -2118,8 +2118,8 @@ const MinutaDocument = ({
                           key={lineIdx}
                           style={{
                             textAlign: 'justify',
-                            fontSize: '13px',
-                            lineHeight: '17pt',
+                            fontSize: '13pt',
+                            lineHeight: '1.5',
                             marginBottom: lineIdx === texto.split('\n').length - 1 ? '10px' : '2px',
                             color: '#000',
                             fontFamily: "'Garamond', serif"
@@ -2134,10 +2134,10 @@ const MinutaDocument = ({
                   {/* Título da cláusula 6 */}
                   {clause5Late.length > 0 && (
                     <h2 style={{
-                      fontSize: '13px',
+                      fontSize: '13pt',
                       fontWeight: 'bold',
                       color: '#000',
-                      borderBottom: '1px solid #000',
+                      borderBottom: '1pt solid #000',
                       paddingBottom: '8px',
                       marginBottom: '20px',
                       marginTop: '20px',
@@ -2148,10 +2148,10 @@ const MinutaDocument = ({
                   )}
                   {clause5Late.length === 0 && (
                     <h2 style={{
-                      fontSize: '13px',
+                      fontSize: '13pt',
                       fontWeight: 'bold',
                       color: '#000',
-                      borderBottom: '1px solid #000',
+                      borderBottom: '1pt solid #000',
                       paddingBottom: '8px',
                       marginBottom: '20px',
                       marginTop: '0',
@@ -2168,8 +2168,8 @@ const MinutaDocument = ({
                           key={lineIdx}
                           style={{
                             textAlign: 'justify',
-                            fontSize: '13px',
-                            lineHeight: '17pt',
+                            fontSize: '13pt',
+                            lineHeight: '1.5',
                             marginBottom: lineIdx === texto.split('\n').length - 1 ? '10px' : '2px',
                             color: '#000',
                             fontFamily: "'Garamond', serif"
@@ -2202,8 +2202,8 @@ const MinutaDocument = ({
                               key={lineIdx}
                               style={{
                                 textAlign: 'justify',
-                                fontSize: '13px',
-                                lineHeight: '17pt',
+                                fontSize: '13pt',
+                                lineHeight: '1.5',
                                 marginBottom: lineIdx === texto.split('\n').length - 1 ? '10px' : '2px',
                                 color: '#000',
                                 fontFamily: "'Garamond', serif"
@@ -2249,8 +2249,8 @@ const MinutaDocument = ({
                           key={lineIdx}
                           style={{
                             textAlign: 'justify',
-                            fontSize: '13px',
-                            lineHeight: '17pt',
+                            fontSize: '13pt',
+                            lineHeight: '1.5',
                             marginBottom: lineIdx === texto.split('\n').length - 1 ? '10px' : '2px',
                             color: '#000',
                             fontFamily: "'Garamond', serif"
@@ -2264,10 +2264,10 @@ const MinutaDocument = ({
                   ))}
                   {/* Título da cláusula 7 */}
                   <h2 style={{
-                    fontSize: '13px',
+                    fontSize: '13pt',
                     fontWeight: 'bold',
                     color: '#000',
-                    borderBottom: '1px solid #000',
+                    borderBottom: '1pt solid #000',
                     paddingBottom: '8px',
                     marginBottom: '20px',
                     marginTop: clause6Late.length > 0 ? '20px' : '0',
@@ -2283,8 +2283,8 @@ const MinutaDocument = ({
                           key={lineIdx}
                           style={{
                             textAlign: 'justify',
-                            fontSize: '13px',
-                            lineHeight: '17pt',
+                            fontSize: '13pt',
+                            lineHeight: '1.5',
                             marginBottom: lineIdx === texto.split('\n').length - 1 ? '10px' : '2px',
                             color: '#000',
                             fontFamily: "'Garamond', serif"
@@ -2317,8 +2317,8 @@ const MinutaDocument = ({
                               key={lineIdx}
                               style={{
                                 textAlign: 'justify',
-                                fontSize: '13px',
-                                lineHeight: '17pt',
+                                fontSize: '13pt',
+                                lineHeight: '1.5',
                                 marginBottom: lineIdx === texto.split('\n').length - 1 ? '10px' : '2px',
                                 color: '#000',
                                 fontFamily: "'Garamond', serif"
@@ -2364,8 +2364,8 @@ const MinutaDocument = ({
                           key={lineIdx}
                           style={{
                             textAlign: 'justify',
-                            fontSize: '13px',
-                            lineHeight: '17pt',
+                            fontSize: '13pt',
+                            lineHeight: '1.5',
                             marginBottom: lineIdx === texto.split('\n').length - 1 ? '10px' : '2px',
                             color: '#000',
                             fontFamily: "'Garamond', serif"
@@ -2379,10 +2379,10 @@ const MinutaDocument = ({
                   ))}
                   {/* Título da cláusula 8 */}
                   <h2 style={{
-                    fontSize: '13px',
+                    fontSize: '13pt',
                     fontWeight: 'bold',
                     color: '#000',
-                    borderBottom: '1px solid #000',
+                    borderBottom: '1pt solid #000',
                     paddingBottom: '8px',
                     marginBottom: '20px',
                     marginTop: clause7Late.length > 0 ? '20px' : '0',
@@ -2398,8 +2398,8 @@ const MinutaDocument = ({
                           key={lineIdx}
                           style={{
                             textAlign: 'justify',
-                            fontSize: '13px',
-                            lineHeight: '17pt',
+                            fontSize: '13pt',
+                            lineHeight: '1.5',
                             marginBottom: lineIdx === texto.split('\n').length - 1 ? '10px' : '2px',
                             color: '#000',
                             fontFamily: "'Garamond', serif"
@@ -2423,10 +2423,10 @@ const MinutaDocument = ({
             <Page key={current.num} pageNumber={currentPageNum++}>
               <div style={{ maxWidth: '135mm', margin: '0 auto', width: '100%' }}>
                 <h2 style={{
-                  fontSize: '13px',
+                  fontSize: '13pt',
                   fontWeight: 'bold',
                   color: '#000',
-                  borderBottom: '1px solid #000',
+                  borderBottom: '1pt solid #000',
                   paddingBottom: '8px',
                   marginBottom: '20px',
                   marginTop: '0',
@@ -2447,8 +2447,8 @@ const MinutaDocument = ({
                                 key={lineIdx}
                                 style={{
                                   textAlign: 'justify',
-                                  fontSize: '13px',
-                                  lineHeight: '17pt',
+                                  fontSize: '13pt',
+                                  lineHeight: '1.5',
                                   marginBottom: lineIdx === texto.split('\n').length - 1 ? '10px' : '2px',
                                   color: '#000',
                                   fontFamily: "'Garamond', serif"
@@ -2471,9 +2471,9 @@ const MinutaDocument = ({
                               }}>
                                 <thead>
                                   <tr style={{ background: '#f9f9f9' }}>
-                                    <th style={{ border: '1px solid #000', padding: '10px', fontSize: '13px', color: '#000', textAlign: 'center', fontWeight: 'bold' }}>ITEM</th>
-                                    <th style={{ border: '1px solid #000', padding: '10px', fontSize: '13px', color: '#000', textAlign: 'center', fontWeight: 'bold' }}>DESCRIÇÃO</th>
-                                    <th style={{ border: '1px solid #000', padding: '10px', fontSize: '13px', color: '#000', textAlign: 'center', fontWeight: 'bold' }}>CABIMENTO</th>
+                                    <th style={{ border: '1px solid #000', padding: '10px', fontSize: '13pt', color: '#000', textAlign: 'center', fontWeight: 'bold' }}>ITEM</th>
+                                    <th style={{ border: '1px solid #000', padding: '10px', fontSize: '13pt', color: '#000', textAlign: 'center', fontWeight: 'bold' }}>DESCRIÇÃO</th>
+                                    <th style={{ border: '1px solid #000', padding: '10px', fontSize: '13pt', color: '#000', textAlign: 'center', fontWeight: 'bold' }}>CABIMENTO</th>
                                   </tr>
                                 </thead>
                                 <tbody>
@@ -2481,13 +2481,13 @@ const MinutaDocument = ({
                                     .sort(([a], [b]) => parseInt(a) - parseInt(b))
                                     .map(([itemNum, item]: [string, any]) => (
                                       <tr key={itemNum}>
-                                        <td style={{ border: '1px solid #000', padding: '8px', fontSize: '13px', color: '#000', textAlign: 'center', fontWeight: 'bold' }}>
+                                        <td style={{ border: '1px solid #000', padding: '8px', fontSize: '13pt', color: '#000', textAlign: 'center', fontWeight: 'bold' }}>
                                           {itemNum}
                                         </td>
-                                        <td style={{ border: '1px solid #000', padding: '8px', fontSize: '13px', color: '#000' }}>
+                                        <td style={{ border: '1px solid #000', padding: '8px', fontSize: '13pt', color: '#000' }}>
                                           {item.descricao}
                                         </td>
-                                        <td style={{ border: '1px solid #000', padding: '8px', fontSize: '13px', color: '#000' }}>
+                                        <td style={{ border: '1px solid #000', padding: '8px', fontSize: '13pt', color: '#000' }}>
                                           {item.cabimento}
                                         </td>
                                       </tr>
@@ -2497,16 +2497,16 @@ const MinutaDocument = ({
 
                               {/* Textos a, b, c, d após tabela */}
                               <div style={{ marginTop: '20px' }}>
-                                <p style={{ fontSize: '13px', lineHeight: '17pt', color: '#000', fontFamily: "'Garamond', serif", textAlign: 'justify', marginBottom: '10px' }}>
+                                <p style={{ fontSize: '13pt', lineHeight: '1.5', color: '#000', fontFamily: "'Garamond', serif", textAlign: 'justify', marginBottom: '10px' }}>
                                   a) Os demais objetos contidos nas cláusulas do presente contrato terão os valores levantados após a disponibilização da documentação necessária para a efetivação do serviço, haja vista a natureza concomitante do trabalho desenvolvido.
                                 </p>
-                                <p style={{ fontSize: '13px', lineHeight: '17pt', color: '#000', fontFamily: "'Garamond', serif", textAlign: 'justify', marginBottom: '10px' }}>
+                                <p style={{ fontSize: '13pt', lineHeight: '1.5', color: '#000', fontFamily: "'Garamond', serif", textAlign: 'justify', marginBottom: '10px' }}>
                                   b) Os valores levantados a título de incremento são provisórios, baseados em informações preliminares, podendo, ao final, representar valores a maior ou a menor.
                                 </p>
-                                <p style={{ fontSize: '13px', lineHeight: '17pt', color: '#000', fontFamily: "'Garamond', serif", textAlign: 'justify', marginBottom: '10px' }}>
+                                <p style={{ fontSize: '13pt', lineHeight: '1.5', color: '#000', fontFamily: "'Garamond', serif", textAlign: 'justify', marginBottom: '10px' }}>
                                   c) Para efetivação da atualização do valor contratual previsto no parágrafo antecedente, ocorrerá mediante a celebração de aditamento, na forma prevista na Lei n.° 14.133/21.
                                 </p>
-                                <p style={{ fontSize: '13px', lineHeight: '17pt', color: '#000', fontFamily: "'Garamond', serif", textAlign: 'justify', marginBottom: '10px' }}>
+                                <p style={{ fontSize: '13pt', lineHeight: '1.5', color: '#000', fontFamily: "'Garamond', serif", textAlign: 'justify', marginBottom: '10px' }}>
                                   d) Em nenhuma hipótese, o MUNICÍPIO DE BARROCAS/BA pagará à CONTRATADA antes que os valores sejam registrados nos cofres públicos.
                                 </p>
                               </div>
@@ -2525,8 +2525,8 @@ const MinutaDocument = ({
                                 key={lineIdx}
                                 style={{
                                   textAlign: 'justify',
-                                  fontSize: '13px',
-                                  lineHeight: '17pt',
+                                  fontSize: '13pt',
+                                  lineHeight: '1.5',
                                   marginBottom: lineIdx === texto.split('\n').length - 1 ? '10px' : '2px',
                                   color: '#000',
                                   fontFamily: "'Garamond', serif"
@@ -2550,7 +2550,7 @@ const MinutaDocument = ({
                                 }}>
                                   <thead>
                                     <tr>
-                                      <th colSpan={2} style={{ border: '1px solid #000', padding: '10px', fontSize: '13px', color: '#000', textAlign: 'center', fontWeight: 'bold' }}>
+                                      <th colSpan={2} style={{ border: '1px solid #000', padding: '10px', fontSize: '13pt', color: '#000', textAlign: 'center', fontWeight: 'bold' }}>
                                         DOTAÇÃO ORÇAMENTÁRIA
                                       </th>
                                     </tr>
@@ -2558,32 +2558,32 @@ const MinutaDocument = ({
                                   <tbody>
                                     {dotacao.dotacaoOrcamentaria && (
                                       <tr>
-                                        <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13px', color: '#000', fontWeight: 'bold' }}>DOTAÇÃO ORÇAMENTÁRIA</td>
-                                        <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13px', color: '#000' }}>{dotacao.dotacaoOrcamentaria}</td>
+                                        <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13pt', color: '#000', fontWeight: 'bold' }}>DOTAÇÃO ORÇAMENTÁRIA</td>
+                                        <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13pt', color: '#000' }}>{dotacao.dotacaoOrcamentaria}</td>
                                       </tr>
                                     )}
                                     {dotacao.unidOrcamentaria && (
                                       <tr>
-                                        <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13px', color: '#000', fontWeight: 'bold' }}>UNID. ORÇAMENTÁRIA</td>
-                                        <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13px', color: '#000' }}>{dotacao.unidOrcamentaria}</td>
+                                        <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13pt', color: '#000', fontWeight: 'bold' }}>UNID. ORÇAMENTÁRIA</td>
+                                        <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13pt', color: '#000' }}>{dotacao.unidOrcamentaria}</td>
                                       </tr>
                                     )}
                                     {dotacao.projetoAtividade && (
                                       <tr>
-                                        <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13px', color: '#000', fontWeight: 'bold' }}>PROJETO ATIVIDADE</td>
-                                        <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13px', color: '#000' }}>{dotacao.projetoAtividade}</td>
+                                        <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13pt', color: '#000', fontWeight: 'bold' }}>PROJETO ATIVIDADE</td>
+                                        <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13pt', color: '#000' }}>{dotacao.projetoAtividade}</td>
                                       </tr>
                                     )}
                                     {dotacao.categoria && (
                                       <tr>
-                                        <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13px', color: '#000', fontWeight: 'bold' }}>CATEGORIA</td>
-                                        <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13px', color: '#000' }}>{dotacao.categoria}</td>
+                                        <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13pt', color: '#000', fontWeight: 'bold' }}>CATEGORIA</td>
+                                        <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13pt', color: '#000' }}>{dotacao.categoria}</td>
                                       </tr>
                                     )}
                                     {dotacao.fonteRecurso && (
                                       <tr>
-                                        <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13px', color: '#000', fontWeight: 'bold' }}>FONTE DE RECURSO</td>
-                                        <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13px', color: '#000' }}>{dotacao.fonteRecurso}</td>
+                                        <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13pt', color: '#000', fontWeight: 'bold' }}>FONTE DE RECURSO</td>
+                                        <td style={{ border: '1px solid #000', padding: '10px', fontSize: '13pt', color: '#000' }}>{dotacao.fonteRecurso}</td>
                                       </tr>
                                     )}
                                   </tbody>
@@ -2602,8 +2602,8 @@ const MinutaDocument = ({
                             key={lineIdx}
                             style={{
                               textAlign: 'justify',
-                              fontSize: '13px',
-                              lineHeight: '17pt',
+                              fontSize: '13pt',
+                              lineHeight: '1.5',
                               marginBottom: lineIdx === texto.split('\n').length - 1 ? '10px' : '2px',
                               color: '#000',
                               fontFamily: "'Garamond', serif"
@@ -2651,17 +2651,17 @@ const MinutaDocument = ({
               minHeight: '100%'
             }}>
               <div style={{ marginTop: 'auto', paddingTop: '40px' }}>
-                <p style={{ fontSize: '13px', color: '#000', marginBottom: '40px', fontFamily: "'Garamond', serif" }}>
+                <p style={{ fontSize: '13pt', color: '#000', marginBottom: '40px', fontFamily: "'Garamond', serif" }}>
                   Barrocas/BA_____ de dezembro de 2025.
                 </p>
 
                 <div style={{ marginTop: '60px', display: 'flex', flexDirection: 'column', gap: '40px' }}>
                   <div style={{ textAlign: 'center' }}>
                     <div style={{ borderTop: '1px solid #000', paddingTop: '8px', marginBottom: '8px' }}>
-                      <p style={{ fontSize: '13px', color: '#000', fontFamily: "'Garamond', serif", margin: 0 }}>
+                      <p style={{ fontSize: '13pt', color: '#000', fontFamily: "'Garamond', serif", margin: 0 }}>
                         MUNICÍPIO DE BARROCAS/BA, representado por seu Prefeito,
                       </p>
-                      <p style={{ fontSize: '13px', color: '#000', fontFamily: "'Garamond', serif", margin: 0 }}>
+                      <p style={{ fontSize: '13pt', color: '#000', fontFamily: "'Garamond', serif", margin: 0 }}>
                         Sr. JOSÉ ALMIR ARAÚJO QUEIROZ
                       </p>
                     </div>
@@ -2669,10 +2669,10 @@ const MinutaDocument = ({
 
                   <div style={{ textAlign: 'center' }}>
                     <div style={{ borderTop: '1px solid #000', paddingTop: '8px', marginBottom: '8px' }}>
-                      <p style={{ fontSize: '13px', color: '#000', fontFamily: "'Garamond', serif", margin: 0 }}>
+                      <p style={{ fontSize: '13pt', color: '#000', fontFamily: "'Garamond', serif", margin: 0 }}>
                         CAVALCANTE REIS ADVOGADOS, representado pelo sócio-diretor, Sr.
                       </p>
-                      <p style={{ fontSize: '13px', color: '#000', fontFamily: "'Garamond', serif", margin: 0 }}>
+                      <p style={{ fontSize: '13pt', color: '#000', fontFamily: "'Garamond', serif", margin: 0 }}>
                         IURI DO LAGO NOGUEIRA CAVALCANTE REIS,
                       </p>
                     </div>
@@ -2680,26 +2680,26 @@ const MinutaDocument = ({
                 </div>
 
                 <div style={{ marginTop: '60px' }}>
-                  <p style={{ fontSize: '13px', color: '#000', fontFamily: "'Garamond', serif", marginBottom: '20px' }}>
+                  <p style={{ fontSize: '13pt', color: '#000', fontFamily: "'Garamond', serif", marginBottom: '20px' }}>
                     Testemunhas:
                   </p>
                   <div style={{ display: 'flex', justifyContent: 'space-around', marginTop: '40px' }}>
                     <div style={{ textAlign: 'center', flex: 1 }}>
                       <div style={{ borderTop: '1px solid #000', paddingTop: '8px', marginBottom: '8px' }}>
-                        <p style={{ fontSize: '13px', color: '#000', fontFamily: "'Garamond', serif", margin: 0 }}>
+                        <p style={{ fontSize: '13pt', color: '#000', fontFamily: "'Garamond', serif", margin: 0 }}>
                           1ª___________________________
                         </p>
-                        <p style={{ fontSize: '13px', color: '#000', fontFamily: "'Garamond', serif", margin: '4px 0 0 0' }}>
+                        <p style={{ fontSize: '13pt', color: '#000', fontFamily: "'Garamond', serif", margin: '4px 0 0 0' }}>
                           CPF nº:
                         </p>
                       </div>
                     </div>
                     <div style={{ textAlign: 'center', flex: 1 }}>
                       <div style={{ borderTop: '1px solid #000', paddingTop: '8px', marginBottom: '8px' }}>
-                        <p style={{ fontSize: '13px', color: '#000', fontFamily: "'Garamond', serif", margin: 0 }}>
+                        <p style={{ fontSize: '13pt', color: '#000', fontFamily: "'Garamond', serif", margin: 0 }}>
                           2ª___________________________
                         </p>
-                        <p style={{ fontSize: '13px', color: '#000', fontFamily: "'Garamond', serif", margin: '4px 0 0 0' }}>
+                        <p style={{ fontSize: '13pt', color: '#000', fontFamily: "'Garamond', serif", margin: '4px 0 0 0' }}>
                           CPF nº:
                         </p>
                       </div>
@@ -2842,8 +2842,8 @@ export default function MinutaGenerator({ onBackToHome, onLogout }: MinutaGenera
       // Minuta usa APENAS a imagem barrocas.png (não usa logo Cavalcante Reis)
       const barrocasBuffer = await loadImageAsBuffer('/barrocas.png');
 
-      // ========== CONSTRUÇÃO: CABEÇALHOS (DIFERENTES PARA CAPA E CONTEÚDO) ==========
-      // Cabeçalho da CAPA: Imagem Barrocas maior (~220px) para destacar na primeira página
+      // ========== CONSTRUÇÃO: CABEÇALHOS (PARIDADE COM PRÉVIA: 180pt) ==========
+      // Cabeçalho da CAPA: Imagem Barrocas 180pt para paridade com prévia
       const headerCapa = new Header({
         children: barrocasBuffer ? [
           new Paragraph({
@@ -2851,8 +2851,8 @@ export default function MinutaGenerator({ onBackToHome, onLogout }: MinutaGenera
               new ImageRun({
                 data: barrocasBuffer,
                 transformation: {
-                  width: 220 * 9525, // 220px em EMUs (imagem grande na capa)
-                  height: (220 * 9525) * 0.34, // Proporção aproximada (75px de altura)
+                  width: 180 * 9525, // 180pt em EMUs (paridade com prévia)
+                  height: (180 * 9525) * 0.34, // Proporção aproximada
                 },
               }),
             ],
@@ -2864,7 +2864,7 @@ export default function MinutaGenerator({ onBackToHome, onLogout }: MinutaGenera
         ],
       });
 
-      // Cabeçalho do CONTEÚDO: Imagem Barrocas menor/padrão (~100px) para não ocupar muito espaço
+      // Cabeçalho do CONTEÚDO: Imagem Barrocas 180pt para paridade com prévia
       const headerConteudo = new Header({
         children: barrocasBuffer ? [
           new Paragraph({
@@ -2872,13 +2872,13 @@ export default function MinutaGenerator({ onBackToHome, onLogout }: MinutaGenera
               new ImageRun({
                 data: barrocasBuffer,
                 transformation: {
-                  width: 100 * 9525, // 100px em EMUs (imagem padrão no conteúdo)
-                  height: (100 * 9525) * 0.35, // Proporção aproximada (35px de altura)
+                  width: 180 * 9525, // 180pt em EMUs (paridade com prévia)
+                  height: (180 * 9525) * 0.34, // Proporção aproximada
                 },
               }),
             ],
             alignment: AlignmentType.CENTER,
-            spacing: { after: 400 }, // Espaço padrão após a imagem menor
+            spacing: { after: 400 }, // Espaço padrão após a imagem
           }),
         ] : [
           new Paragraph({ text: "" }) // Parágrafo vazio se não houver imagem
@@ -3133,14 +3133,15 @@ export default function MinutaGenerator({ onBackToHome, onLogout }: MinutaGenera
               page: {
                 size: {
                   orientation: "portrait",
-                  width: 11906, // A4 width em twips (210mm)
-                  height: 16838, // A4 height em twips (297mm)
+                  width: 11906, // A4 (210mm)
+                  height: 16838, // A4 (297mm)
                 },
+                // Margens da capa: top/bottom 2.5cm, left 3cm, right 2.5cm (1cm ≈ 567 twips)
                 margin: {
-                  top: 1440, // 25mm em twips (reservando espaço para cabeçalho GRANDE)
-                  right: 1417, // 25mm em twips
-                  bottom: 1134, // 20mm em twips (SEM reserva para rodapé)
-                  left: 1417, // 25mm em twips
+                  top: 1417,   // 2.5cm (cabeçalho GRANDE)
+                  right: 1417, // 2.5cm
+                  bottom: 1417, // 2.5cm (Minuta não tem rodapé)
+                  left: 1701,  // 3cm
                 },
               },
             },
@@ -3152,22 +3153,24 @@ export default function MinutaGenerator({ onBackToHome, onLogout }: MinutaGenera
             // Conteúdo da capa
             children: capaChildren,
           },
-          // ========== SEÇÃO 2: CLÁUSULAS (com cabeçalho PEQUENO mas SEM rodapé) ==========
-          // O Word vai quebrar páginas automaticamente quando o conteúdo chegar no limite A4
+          // ========== SEÇÃO 2: CLÁUSULAS (fluxo contínuo) ==========
+          // Conteúdo em sequência; o Word quebra página ao atingir a margem inferior.
+          // Minuta não tem rodapé; bottom 2.5cm é suficiente.
           {
             properties: {
-              type: SectionType.CONTINUOUS, // Continua da página anterior
+              type: SectionType.CONTINUOUS, // Fluxo contínuo após a capa
               page: {
                 size: {
                   orientation: "portrait",
-                  width: 11906, // A4 width em twips (210mm)
-                  height: 16838, // A4 height em twips (297mm)
+                  width: 11906, // A4 (210mm)
+                  height: 16838, // A4 (297mm)
                 },
+                // Margens: top 2.5cm (cabeçalho), bottom 2.5cm, left 2.5cm, right 2cm
                 margin: {
-                  top: 1134, // 20mm em twips (reservando espaço para cabeçalho PEQUENO)
-                  right: 1417, // 25mm em twips
-                  bottom: 1134, // 20mm em twips (SEM reserva para rodapé)
-                  left: 1417, // 25mm em twips
+                  top: 1417,   // 2.5cm (cabeçalho não sobrepõe texto)
+                  right: 1134, // 2cm
+                  bottom: 1417, // 2.5cm (sem rodapé)
+                  left: 1417,  // 2.5cm
                 },
               },
             },

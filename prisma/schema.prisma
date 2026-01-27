@@ -1,14 +1,51 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// Prisma Schema para CavalcanteReis
+// Documentação: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ========== MODELO: PROPOSTA ==========
+// Armazena as propostas comerciais geradas pelo sistema
+model Proposta {
+  id               String   @id @default(uuid())
+  municipio        String
+  destinatario     String?
+  data             String?
+  prazo            String?
+  services         Json?    // Objeto com serviços selecionados { pasep: true, irrf: false, ... }
+  customCabimentos Json?    // Textos personalizados de cabimento
+  customEstimates  Json?    // Estimativas personalizadas
+  footerOffices    Json?    // Configuração dos escritórios no rodapé
+  paymentValue     String?  // Valor do pagamento (ex: "R$ 0,12")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  expiresAt        DateTime // Data de expiração (padrão: 1 ano)
+
+  @@map("propostas")
+}
+
+// ========== MODELO: MINUTA ==========
+// Armazena as minutas de contrato geradas pelo sistema
+model Minuta {
+  id               String   @id @default(uuid())
+  municipio        String
+  objeto           String?  @db.Text
+  valorContrato    String?
+  prazoVigencia    String?
+  dataAssinatura   String?
+  representante    String?
+  cargo            String?
+  services         Json?    // Serviços selecionados
+  customCabimentos Json?    // Textos personalizados
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  expiresAt        DateTime // Data de expiração (padrão: 1 ano)
+
+  @@map("minutas")
 }
