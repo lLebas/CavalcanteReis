@@ -971,18 +971,16 @@ const ProposalDocument = ({ options, prazo, services, customCabimentos, customEs
                   26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: iuri@cavalcantereis.adv.br).
                 </p>
                 <br />
-                {/* TODOS os profissionais LADO A LADO */}
+                {/* TODOS os profissionais UM ABAIXO DO OUTRO */}
                 <div style={{
                   display: 'flex',
-                  flexDirection: 'row',
+                  flexDirection: 'column',
                   gap: '15px',
-                  flexWrap: 'wrap',
-                  alignItems: 'flex-start',
                   width: '100%'
                 }}>
                   {professionals.map((prof, index) => (
-                    <div key={`prof-${index}`} style={{ flex: '1', minWidth: '45%', maxWidth: '48%' }}>
-                      <p style={{ marginBottom: '0', marginTop: '15px', textAlign: 'justify', fontSize: '13px', lineHeight: '20pt', fontFamily: "'Garamond', serif" }}>
+                    <div key={`prof-${index}`} style={{ width: '100%' }}>
+                      <p style={{ marginBottom: '0', marginTop: '15px', textAlign: 'justify', fontSize: '13pt', lineHeight: '1.5', fontFamily: "'Garamond', serif" }}>
                         <strong>{prof.name}</strong> - {prof.bio}
                       </p>
                     </div>
@@ -1000,25 +998,24 @@ const ProposalDocument = ({ options, prazo, services, customCabimentos, customEs
         return (
           <Page pageNumber={section6PageNumber} FooterComponent={FooterComp}>
             {/* Container centralizado com margens maiores nas laterais */}
-            {/* Advogados lado a lado (Felipe e Ryslhainy) */}
+            {/* Advogados um abaixo do outro (Felipe e Ryslhainy) */}
             <div style={{
               display: 'flex',
-              flexDirection: 'row',
-              gap: '20px',
+              flexDirection: 'column',
+              gap: '15px',
               maxWidth: '160mm',
               margin: '0 auto',
-              width: '100%',
-              alignItems: 'flex-start'
+              width: '100%'
             }}>
-              {/* Felipe - lado esquerdo */}
-              <div style={{ flex: '1', minWidth: '0' }}>
-                <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '17pt', marginBottom: '15px', marginTop: '0', color: '#000', fontFamily: "'Garamond', serif" }}>
+              {/* Felipe */}
+              <div style={{ width: '100%' }}>
+                <p style={{ textAlign: 'justify', fontSize: '13pt', lineHeight: '1.5', marginBottom: '0', marginTop: '0', color: '#000', fontFamily: "'Garamond', serif" }}>
                   <strong>FELIPE NOBREGA ROCHA</strong> - CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: felipe@cavalcantereis.adv.br).
                 </p>
               </div>
-              {/* Ryslhainy - lado direito */}
-              <div style={{ flex: '1', minWidth: '0' }}>
-                <p style={{ textAlign: 'justify', fontSize: '13px', lineHeight: '17pt', marginBottom: '60px', marginTop: '0', color: '#000', fontFamily: "'Garamond', serif" }}>
+              {/* Ryslhainy */}
+              <div style={{ width: '100%' }}>
+                <p style={{ textAlign: 'justify', fontSize: '13pt', lineHeight: '1.5', marginBottom: '0', marginTop: '0', color: '#000', fontFamily: "'Garamond', serif" }}>
                   <strong>RYSLHAINY DOS SANTOS CORDEIRO</strong> - Advogada associada do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: ryslhainy@cavalcantereis.adv.br).
                 </p>
               </div>
@@ -1047,7 +1044,7 @@ const ProposalDocument = ({ options, prazo, services, customCabimentos, customEs
               </p>
             </div>
             {/* Seção de fechamento: Data, Atenciosamente, Assinatura e Nome da Empresa - Centralizados e juntos */}
-            <div style={{ textAlign: 'center', marginTop: '2pt', marginBottom: '0' }}>
+            <div className="signature-section" style={{ textAlign: 'center', marginTop: '2pt', marginBottom: '0' }}>
               <p style={{ fontSize: '14pt', lineHeight: '1.5', marginBottom: '0', marginTop: '-20pt', color: '#000', paddingLeft: '200pt', textIndent: '210pt', fontFamily: "'Garamond', serif" }}>
                 Brasília-DF, {formatDateWithMonthName(options.data || '')}.
               </p>
@@ -1830,8 +1827,20 @@ export default function ProposalGenerator({ onBackToHome, onLogout, propostaToLo
         loadImageAsBuffer('/Munincipios02.png'),
       ]);
 
-      // Log para debug (remover em produção se necessário)
-      console.log('Imagens carregadas:', {
+      // Validação crítica: garantir que logo foi carregada
+      if (!logoBuffer) {
+        console.error('ERRO CRÍTICO: Logo não foi carregada!');
+        setModal({
+          open: true,
+          title: "Erro",
+          message: "Não foi possível carregar a logo. Verifique se o arquivo /logo-cavalcante-reis.png existe na pasta /public.",
+          type: "error"
+        });
+        setLoadingDocx(false);
+        return;
+      }
+
+      console.log('✅ Imagens carregadas com sucesso:', {
         logo: !!logoBuffer,
         assinatura: !!assinaturaBuffer,
         municipios01: !!municipios01Buffer,
@@ -1941,45 +1950,41 @@ export default function ProposalGenerator({ onBackToHome, onLogout, propostaToLo
       });
 
       // ========== CONSTRUÇÃO: CABEÇALHOS (DIFERENTES PARA CAPA E CONTEÚDO) ==========
-      // Cabeçalho da CAPA: Logo 170pt para paridade com prévia
+      // Cabeçalho da CAPA: Logo 170pt (largura) mantém proporção automática
       const headerCapa = new Header({
-        children: logoBuffer ? [
+        children: [
           new Paragraph({
             children: [
               new ImageRun({
                 data: logoBuffer,
                 transformation: {
-                  width: 170 * 9525, // 170pt em EMUs (paridade com prévia)
-                  height: (170 * 9525) * 0.34, // Proporção aproximada
+                  width: 170 * 9525,  // 170pt em EMUs (paridade com prévia)
+                  height: 60 * 9525,  // Altura fixa para não distorcer
                 },
               }),
             ],
             alignment: AlignmentType.CENTER,
-            spacing: { after: 800 }, // Mais espaço após o logo grande
+            spacing: { after: 400 },
           }),
-        ] : [
-          new Paragraph({ text: "" }) // Parágrafo vazio se não houver logo
         ],
       });
 
-      // Cabeçalho do CONTEÚDO: Logo 145pt para paridade com prévia
+      // Cabeçalho do CONTEÚDO: Logo 145pt (largura) mantém proporção
       const headerConteudo = new Header({
-        children: logoBuffer ? [
+        children: [
           new Paragraph({
             children: [
               new ImageRun({
                 data: logoBuffer,
                 transformation: {
-                  width: 145 * 9525, // 145pt em EMUs (paridade com prévia)
-                  height: (145 * 9525) * 0.35, // Proporção aproximada
+                  width: 145 * 9525,  // 145pt em EMUs (paridade com prévia)
+                  height: 50 * 9525,  // Altura fixa proporcional
                 },
               }),
             ],
             alignment: AlignmentType.CENTER,
-            spacing: { after: 400 }, // Espaço padrão após o logo menor
+            spacing: { after: 100 },  // Reduzido de 200 para 100 para menos espaço
           }),
-        ] : [
-          new Paragraph({ text: "" }) // Parágrafo vazio se não houver logo
         ],
       });
 
@@ -1989,21 +1994,75 @@ export default function ProposalGenerator({ onBackToHome, onLogout, propostaToLo
       // Seção 2: Todo o conteúdo principal (Sumário + todas as seções)
       // O Word quebra páginas automaticamente quando o conteúdo chega no rodapé
 
-      // ========== SEÇÃO 1: CAPA ==========
-      // A capa NÃO deve ter o logo duplicado no conteúdo, pois já está no header
+      // ========== SEÇÃO 1: CAPA (FORMATO BARROCAS) ==========
+      // Estrutura: Logo (no header) + Espaço + Bloco à direita com linhas divisórias
       const capaChildren: any[] = [];
 
-      // Informações da capa (Proponente, Destinatário, Data) alinhadas à direita
-      // O logo já aparece no cabeçalho, então não precisamos adicionar aqui
+      // Espaço após o cabeçalho para centralização vertical
+      capaChildren.push(new Paragraph({ text: "", spacing: { after: 2000 } }));
+
+      // LINHA PRETA GROSSA SUPERIOR
       capaChildren.push(
-        new Paragraph({ text: "", spacing: { after: 600 } }), // Espaço após cabeçalho
-        createSimpleParagraph("Proponente:", { bold: true, alignment: AlignmentType.RIGHT, size: 26 }),
-        createSimpleParagraph("Cavalcante Reis Advogados", { alignment: AlignmentType.RIGHT, size: 26 }),
-        new Paragraph({ text: "", spacing: { after: 200 } }),
-        createSimpleParagraph("Destinatário:", { bold: true, alignment: AlignmentType.RIGHT, size: 26 }),
-        createSimpleParagraph(options.destinatario || options.municipio || "[Nome do Destinatário]", { alignment: AlignmentType.RIGHT, size: 26 }),
-        new Paragraph({ text: "", spacing: { after: 400 } }),
-        createSimpleParagraph(formatDateNumeric(options.data || "") || new Date().getFullYear().toString(), { bold: true, alignment: AlignmentType.RIGHT, size: 26 })
+        new Paragraph({
+          text: "",
+          border: { top: { style: "single", size: 12, color: "000000" } },
+          spacing: { after: 200 },
+          alignment: AlignmentType.RIGHT,
+        })
+      );
+
+      // PROPONENTE
+      capaChildren.push(
+        new Paragraph({
+          children: [new TextRun({ text: "Proponente:", bold: true, size: 26, font: "Garamond" })],
+          alignment: AlignmentType.RIGHT,
+        }),
+        new Paragraph({
+          children: [new TextRun({ text: "Cavalcante Reis Advogados", size: 26, font: "Garamond" })],
+          alignment: AlignmentType.RIGHT,
+          spacing: { after: 100 },
+        })
+      );
+
+      // LINHA DIVISÓRIA FINA
+      capaChildren.push(
+        new Paragraph({
+          text: "",
+          border: { top: { style: "single", size: 4, color: "CCCCCC" } },
+          spacing: { before: 100, after: 100 },
+          alignment: AlignmentType.RIGHT,
+        })
+      );
+
+      // DESTINATÁRIO
+      capaChildren.push(
+        new Paragraph({
+          children: [new TextRun({ text: "Destinatário:", bold: true, size: 26, font: "Garamond" })],
+          alignment: AlignmentType.RIGHT,
+        }),
+        new Paragraph({
+          children: [new TextRun({ text: options.destinatario || options.municipio || "[Nome do Destinatário]", size: 26, font: "Garamond" })],
+          alignment: AlignmentType.RIGHT,
+          spacing: { after: 200 },
+        })
+      );
+
+      // LINHA PRETA GROSSA INFERIOR
+      capaChildren.push(
+        new Paragraph({
+          text: "",
+          border: { top: { style: "single", size: 12, color: "000000" } },
+          spacing: { before: 200, after: 400 },
+          alignment: AlignmentType.RIGHT,
+        })
+      );
+
+      // DATA
+      capaChildren.push(
+        new Paragraph({
+          children: [new TextRun({ text: formatDateNumeric(options.data || "") || new Date().getFullYear().toString(), bold: true, size: 26, font: "Garamond" })],
+          alignment: AlignmentType.RIGHT,
+        })
       );
 
       // ========== SEÇÃO 2: CONTEÚDO PRINCIPAL ==========
@@ -2383,9 +2442,9 @@ export default function ProposalGenerator({ onBackToHome, onLogout, propostaToLo
                   width: 11906, // A4 (210mm)
                   height: 16838, // A4 (297mm)
                 },
-                // Margens: top 2.5cm (cabeçalho), bottom 3cm (protege rodapé), left 2.5cm, right 2cm
+                // Margens: top 2cm (cabeçalho), bottom 3cm (protege rodapé), left 2.5cm, right 2cm
                 margin: {
-                  top: 1417,   // 2.5cm (cabeçalho não sobrepõe texto)
+                  top: 1134,   // 2cm (reduzido para menos espaço entre header e texto)
                   right: 1134, // 2cm
                   bottom: 1701, // 3cm (texto para antes de atingir o rodapé)
                   left: 1417,  // 2.5cm

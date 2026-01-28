@@ -360,24 +360,26 @@ html,
 .pdf-page-render {
   background: white;
   width: 210mm;
-  height: 297mm;
-  padding: 20mm 25mm 30mm 25mm; /* top, right, bottom (protege rodapé), left */
+  min-height: 297mm; /* Permite crescimento se necessário */
+  height: auto; /* Altura automática para conteúdo longo */
+  padding: 20mm 25mm 60mm 25mm; /* bottom aumentado (60mm) para proteger rodapé */
   box-sizing: border-box;
   position: relative;
   display: flex;
   flex-direction: column;
   page-break-after: always;
-  margin-bottom: 0;
-  overflow: hidden !important;
+  margin-bottom: 20px;
+  overflow: visible; /* Permite conteúdo fluir */
 }
 
 /* Rodapé fixo na parte inferior de cada página */
 .page-footer-container {
   position: absolute;
-  bottom: 10mm;
+  bottom: 15mm; /* Ajustado para ficar mais acima */
   left: 25mm;
   right: 25mm;
   width: calc(100% - 50mm);
+  z-index: 10; /* Garante que fica acima do conteúdo */
 }
 
 /* Estilos globais para textos dentro da prévia - PARIDADE COM DOCX */
@@ -412,6 +414,30 @@ html,
 .pdf-page-render .proposal-table,
 .pdf-page-render .signature-section {
   page-break-inside: avoid;
+}
+
+/* Evita que os serviços e profissionais sejam cortados no meio */
+.pdf-page-render h3 + div,
+.pdf-page-render > div > div {
+  page-break-inside: avoid;
+}
+
+/* Mantém títulos e conteúdo juntos */
+.pdf-page-render h3 {
+  page-break-after: avoid;
+}
+
+/* Mantém parágrafos de profissionais juntos */
+.pdf-page-render p strong {
+  page-break-after: avoid;
+}
+
+/* Seção de Disposições Finais: mantém tudo junto */
+.pdf-page-render h2:last-of-type,
+.signature-section {
+  page-break-before: auto;
+  page-break-inside: avoid;
+  page-break-after: avoid;
 }
 
 /* Impressão: garante fluxo correto */
