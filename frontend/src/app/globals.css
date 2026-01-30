@@ -360,44 +360,65 @@ html,
 .pdf-page-render {
   background: white;
   width: 210mm;
-  min-height: 297mm; /* Permite crescimento se necessário */
-  height: auto; /* Altura automática para conteúdo longo */
-  padding: 20mm 25mm 60mm 25mm; /* bottom aumentado (60mm) para proteger rodapé */
+  height: 297mm;
+  /* Altura FIXA A4 - conteúdo que ultrapassar será cortado */
+  padding: 20mm 25mm 60mm 25mm !important;
+  /* bottom 60mm (6cm) = ZONA DE SEGURANÇA GIGANTE - texto não encosta no rodapé */
   box-sizing: border-box;
   position: relative;
   display: flex;
   flex-direction: column;
   page-break-after: always;
-  margin-bottom: 20px;
-  overflow: visible; /* Permite conteúdo fluir */
+  margin: 0 auto 20px auto;
+  /* Centraliza horizontalmente */
+  overflow: hidden;
+  /* CORTA o excesso - se texto chegar no limite, ele some (indica próxima página) */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Rodapé fixo na parte inferior de cada página */
+/* Rodapé fixo na parte inferior de cada página - CENTRALIZADO */
 .page-footer-container {
   position: absolute;
-  bottom: 15mm; /* Ajustado para ficar mais acima */
-  left: 25mm;
-  right: 25mm;
-  width: calc(100% - 50mm);
-  z-index: 10; /* Garante que fica acima do conteúdo */
+  bottom: 8mm;
+  /* Fixado a 8mm do fundo da folha */
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: auto;
+  z-index: 10;
+  /* Garante que fica acima do conteúdo */
+  background: white;
+  /* Fundo branco para não misturar com texto */
+}
+
+/* Itens da equipe (Tópico 5) - não quebrar no meio da bio */
+.professional-item {
+  page-break-inside: avoid;
+  margin-bottom: 10pt;
+  padding: 0;
 }
 
 /* Estilos globais para textos dentro da prévia - PARIDADE COM DOCX */
 .pdf-page-render p {
   text-align: justify !important;
-  font-size: 13pt !important; /* Paridade: era 13px, agora 13pt */
-  line-height: 1.5 !important; /* Paridade: era 17pt, agora 1.5 */
+  font-size: 13pt !important;
+  /* Paridade: era 13px, agora 13pt */
+  line-height: 1.5 !important;
+  /* Paridade: era 17pt, agora 1.5 */
   margin: 0 !important;
   padding: 0 !important;
   font-family: 'Garamond', serif !important;
 }
 
-.pdf-page-render h2, .pdf-page-render h3 {
-  font-size: 13pt !important; /* Paridade com DOCX */
+.pdf-page-render h2,
+.pdf-page-render h3 {
+  font-size: 13pt !important;
+  /* Paridade com DOCX */
   font-family: 'Garamond', serif !important;
   margin-top: 0 !important;
   margin-bottom: 0 !important;
-  page-break-after: avoid; /* Evita título órfão */
+  page-break-after: avoid;
+  /* Evita título órfão */
 }
 
 /* Garantir que parágrafos dentro de divs também tenham o espaçamento correto */
@@ -417,8 +438,8 @@ html,
 }
 
 /* Evita que os serviços e profissionais sejam cortados no meio */
-.pdf-page-render h3 + div,
-.pdf-page-render > div > div {
+.pdf-page-render h3+div,
+.pdf-page-render>div>div {
   page-break-inside: avoid;
 }
 
@@ -451,7 +472,8 @@ html,
     bottom: 10mm;
   }
 
-  h2, h3 {
+  h2,
+  h3 {
     page-break-after: avoid;
     page-break-inside: avoid;
   }
