@@ -6,6 +6,9 @@ import Home from '@/components/Home';
 import ProposalGenerator from '@/components/ProposalGenerator';
 import SavedProposals from '@/components/SavedProposals';
 import MinutaGenerator from '@/components/MinutaGenerator';
+import EstudoContratacao from '@/components/EstudoContratacao';
+import TermoReferencia from '@/components/TermoReferencia';
+import ParecerJuridico from '@/components/ParecerJuridico';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState('login');
@@ -87,6 +90,30 @@ export default function App() {
       <MinutaGenerator
         onBackToHome={() => handleNavigate('home')}
         onLogout={handleLogout}
+      />
+    );
+  }
+
+  if (currentPage === 'estudo-contratacao') {
+    return (
+      <EstudoContratacao
+        onBack={() => handleNavigate('home')}
+      />
+    );
+  }
+
+  if (currentPage === 'termo-referencia') {
+    return (
+      <TermoReferencia
+        onBack={() => handleNavigate('home')}
+      />
+    );
+  }
+
+  if (currentPage === 'parecer-juridico') {
+    return (
+      <ParecerJuridico
+        onBack={() => handleNavigate('home')}
       />
     );
   }

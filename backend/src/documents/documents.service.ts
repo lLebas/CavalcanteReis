@@ -210,7 +210,7 @@ export class DocumentsService {
         new Paragraph({
           alignment: AlignmentType.CENTER,
           spacing: { before: 2000, after: 1000 },
-          children: [new ImageRun({ data: logoBuffer, transformation: { width: 170, height: 170 * 0.512 } })], // 170px largura, proporção ~0.512
+          children: [new ImageRun({ data: logoBuffer, transformation: { width: 170, height: 170 * 0.512 } } as any)], // 170px largura, proporção ~0.512
         })
       );
     }
@@ -565,12 +565,12 @@ export class DocumentsService {
       ...(mun01Buffer ? [new Paragraph({
         alignment: AlignmentType.CENTER,
         spacing: { before: 200, after: 200 },
-        children: [new ImageRun({ data: mun01Buffer, transformation: { width: 800, height: 400 } })], // AUMENTADO: 800px largura (quase toda a página A4)
+        children: [new ImageRun({ data: mun01Buffer, transformation: { width: 800, height: 400 } } as any)], // AUMENTADO: 800px largura (quase toda a página A4)
       })] : []),
       ...(mun02Buffer ? [new Paragraph({
         alignment: AlignmentType.CENTER,
         spacing: { before: 200, after: 200 },
-        children: [new ImageRun({ data: mun02Buffer, transformation: { width: 800, height: 288 } })], // AUMENTADO: 800px largura (mantém proporção)
+        children: [new ImageRun({ data: mun02Buffer, transformation: { width: 800, height: 288 } } as any)], // AUMENTADO: 800px largura (mantém proporção)
       })] : []),
       new Paragraph({
         alignment: AlignmentType.JUSTIFIED,
@@ -731,7 +731,7 @@ export class DocumentsService {
       ...(assinaturaBuffer ? [new Paragraph({
         alignment: AlignmentType.CENTER,
         spacing: { before: 400 },
-        children: [new ImageRun({ data: assinaturaBuffer, transformation: { width: 180, height: 60 } })],
+        children: [new ImageRun({ data: assinaturaBuffer, transformation: { width: 180, height: 60 } } as any)],
       })] : []),
       new Paragraph({
         alignment: AlignmentType.CENTER,
@@ -986,7 +986,7 @@ export class DocumentsService {
           new Paragraph({
             alignment: AlignmentType.CENTER,
             spacing: { before: 400, after: 600 },
-            children: [new ImageRun({ data: prefeituraLogoBuffer, transformation: { width: 180, height: 180 * 0.75 } })],
+            children: [new ImageRun({ data: prefeituraLogoBuffer, transformation: { width: 180, height: 180 * 0.75 } } as any)],
           }),
         ],
       });
@@ -1095,7 +1095,7 @@ export class DocumentsService {
         new Paragraph({
           alignment: AlignmentType.CENTER,
           spacing: { before: 400, after: 1200 },
-          children: [new ImageRun({ data: prefeituraLogoBuffer, transformation: { width: 180, height: 180 * 0.75 } })],
+          children: [new ImageRun({ data: prefeituraLogoBuffer, transformation: { width: 180, height: 180 * 0.75 } } as any)],
         })
       );
     }

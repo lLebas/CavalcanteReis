@@ -360,44 +360,69 @@ html,
 .pdf-page-render {
   background: white;
   width: 210mm;
-  min-height: 297mm; /* Permite crescimento se necessário */
-  height: auto; /* Altura automática para conteúdo longo */
-  padding: 20mm 25mm 60mm 25mm; /* bottom aumentado (60mm) para proteger rodapé */
+  min-height: 297mm;
+  /* Permite crescimento se necessário */
+  height: auto;
+  /* Altura automática para conteúdo longo */
+  padding: 20mm 25mm 60mm 25mm;
+  /* bottom aumentado (60mm) para proteger rodapé */
   box-sizing: border-box;
   position: relative;
   display: flex;
   flex-direction: column;
   page-break-after: always;
   margin-bottom: 20px;
-  overflow: visible; /* Permite conteúdo fluir */
+  overflow: visible;
+  /* Permite conteúdo fluir */
 }
 
 /* Rodapé fixo na parte inferior de cada página */
 .page-footer-container {
   position: absolute;
-  bottom: 15mm; /* Ajustado para ficar mais acima */
+  bottom: 15mm;
+  /* Ajustado para ficar mais acima */
   left: 25mm;
   right: 25mm;
   width: calc(100% - 50mm);
-  z-index: 10; /* Garante que fica acima do conteúdo */
+  z-index: 10;
+  /* Garante que fica acima do conteúdo */
+}
+
+/* Linha horizontal com as cidades do rodapé */
+.footer-cities-line {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1cm;
+  font-size: 9pt;
+  font-weight: 500;
+  border-top: 1px solid #ccc;
+  padding-top: 8pt;
+  width: 100%;
+  text-align: center;
 }
 
 /* Estilos globais para textos dentro da prévia - PARIDADE COM DOCX */
 .pdf-page-render p {
   text-align: justify !important;
-  font-size: 13pt !important; /* Paridade: era 13px, agora 13pt */
-  line-height: 1.5 !important; /* Paridade: era 17pt, agora 1.5 */
+  font-size: 13pt !important;
+  /* Paridade: era 13px, agora 13pt */
+  line-height: 1.5 !important;
+  /* Paridade: era 17pt, agora 1.5 */
   margin: 0 !important;
   padding: 0 !important;
   font-family: 'Garamond', serif !important;
 }
 
-.pdf-page-render h2, .pdf-page-render h3 {
-  font-size: 13pt !important; /* Paridade com DOCX */
+.pdf-page-render h2,
+.pdf-page-render h3 {
+  font-size: 13pt !important;
+  /* Paridade com DOCX */
   font-family: 'Garamond', serif !important;
   margin-top: 0 !important;
   margin-bottom: 0 !important;
-  page-break-after: avoid; /* Evita título órfão */
+  page-break-after: avoid;
+  /* Evita título órfão */
 }
 
 /* Garantir que parágrafos dentro de divs também tenham o espaçamento correto */
@@ -417,8 +442,8 @@ html,
 }
 
 /* Evita que os serviços e profissionais sejam cortados no meio */
-.pdf-page-render h3 + div,
-.pdf-page-render > div > div {
+.pdf-page-render h3+div,
+.pdf-page-render>div>div {
   page-break-inside: avoid;
 }
 
@@ -451,7 +476,8 @@ html,
     bottom: 10mm;
   }
 
-  h2, h3 {
+  h2,
+  h3 {
     page-break-after: avoid;
     page-break-inside: avoid;
   }

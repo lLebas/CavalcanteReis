@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { FileText, Box, Save, Users, LogOut, Sparkles, X } from 'lucide-react';
+import { FileText, Box, Save, Users, LogOut, Sparkles, X, FileCheck, Scale } from 'lucide-react';
 
 interface HomeProps {
   onNavigate: (page: string) => void;
@@ -21,32 +21,48 @@ export default function Home({ onNavigate, onLogout }: HomeProps) {
       title: 'Gerador de Propostas',
       description: 'Crie propostas personalizadas para seus clientes',
       icon: FileText,
-      color: '#227056', // Verde principal (mantém identidade)
+      color: '#227056',
       action: () => onNavigate('gerador-propostas'),
     },
     {
       id: 'gerador-minuta',
-      title: 'Gerador de Minuta',
-      description: 'Crie minutas de contrato personalizadas',
+      title: 'Minuta de Contrato',
+      description: 'Documento principal com ementa e qualificação editável',
       icon: FileText,
-      color: '#1e3a5f', // Azul escuro (inspirado no cabeçalho)
+      color: '#1e3a5f',
       action: () => onNavigate('gerador-minuta'),
+    },
+    {
+      id: 'estudo-contratacao',
+      title: 'Estudo de Contratação',
+      description: 'Planejamento e justificativa de viabilidade técnica',
+      icon: FileCheck,
+      color: '#3498db',
+      action: () => onNavigate('estudo-contratacao'),
+    },
+    {
+      id: 'termo-referencia',
+      title: 'Termo de Referência',
+      description: 'Especificação do objeto e fundamentação (Lei 14.133)',
+      icon: Box,
+      color: '#f39c12',
+      action: () => onNavigate('termo-referencia'),
+    },
+    {
+      id: 'parecer-juridico',
+      title: 'Parecer Jurídico',
+      description: 'Análise legal e conclusão pela inexigibilidade',
+      icon: Scale,
+      color: '#9b59b6',
+      action: () => onNavigate('parecer-juridico'),
     },
     {
       id: 'propostas-salvas',
       title: 'Propostas Salvas',
       description: 'Visualize e gerencie suas propostas salvas',
       icon: Save,
-      color: '#2ecc71', // Verde vivo para destacar funcionalidade de salvamento
+      color: '#2ecc71',
       action: () => onNavigate('propostas-salvas'),
-    },
-    {
-      id: 'exemplo-4',
-      title: 'Exemplo 4',
-      description: 'Funcionalidade em desenvolvimento',
-      icon: Users,
-      color: '#f39c12', // Laranja (mantém)
-      action: () => setShowComingSoonModal(true),
     },
   ];
 

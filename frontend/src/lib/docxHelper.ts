@@ -165,3 +165,507 @@ export const createMixedParagraph = (
     },
   });
 };
+
+// ========== FUNÇÃO: GERAR CONTEÚDO DO ESTUDO DE CONTRATAÇÃO ==========
+export const generateEstudoContratacaoContent = (data: {
+  municipio: string;
+  processo: string;
+  data: string;
+  introducao: string;
+  necessidade: string;
+  objetivos: string;
+  viabilidade: string;
+}): Paragraph[] => {
+  const paragraphs: Paragraph[] = [];
+
+  // Título centralizado
+  paragraphs.push(
+    new Paragraph({
+      children: [
+        new TextRun({
+          text: "ESTUDO DE VIABILIDADE DE CONTRATAÇÃO",
+          bold: true,
+          underline: { type: "single" },
+          ...defaultStyle,
+          size: 28, // 14pt
+        }),
+      ],
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 400, line: 360 },
+    })
+  );
+
+  // Espaçamento
+  paragraphs.push(createSimpleParagraph("", { spacingAfter: 200 }));
+
+  // Identificação
+  paragraphs.push(
+    createMixedParagraph(
+      [
+        { text: "Município: ", bold: true },
+        { text: data.municipio, bold: false },
+      ],
+      { size: 22, spacingAfter: 100 }
+    )
+  );
+
+  paragraphs.push(
+    createMixedParagraph(
+      [
+        { text: "Processo Administrativo: ", bold: true },
+        { text: data.processo, bold: false },
+      ],
+      { size: 22, spacingAfter: 100 }
+    )
+  );
+
+  paragraphs.push(
+    createMixedParagraph(
+      [
+        { text: "Data: ", bold: true },
+        { text: data.data, bold: false },
+      ],
+      { size: 22, spacingAfter: 300 }
+    )
+  );
+
+  // 1. Introdução
+  paragraphs.push(
+    createSimpleParagraph("1. INTRODUÇÃO", {
+      bold: true,
+      spacingAfter: 200,
+    })
+  );
+
+  data.introducao.split('\n\n').forEach((paragrafo) => {
+    if (paragrafo.trim()) {
+      paragraphs.push(
+        createSimpleParagraph(paragrafo.trim(), {
+          alignment: AlignmentType.JUSTIFIED,
+          spacingAfter: 200,
+        })
+      );
+    }
+  });
+
+  // 2. Descrição da Necessidade
+  paragraphs.push(
+    createSimpleParagraph("2. DESCRIÇÃO DA NECESSIDADE", {
+      bold: true,
+      spacingAfter: 200,
+    })
+  );
+
+  data.necessidade.split('\n\n').forEach((paragrafo) => {
+    if (paragrafo.trim()) {
+      paragraphs.push(
+        createSimpleParagraph(paragrafo.trim(), {
+          alignment: AlignmentType.JUSTIFIED,
+          spacingAfter: 200,
+        })
+      );
+    }
+  });
+
+  // 3. Objetivos
+  paragraphs.push(
+    createSimpleParagraph("3. OBJETIVOS", {
+      bold: true,
+      spacingAfter: 200,
+    })
+  );
+
+  data.objetivos.split('\n\n').forEach((paragrafo) => {
+    if (paragrafo.trim()) {
+      paragraphs.push(
+        createSimpleParagraph(paragrafo.trim(), {
+          alignment: AlignmentType.JUSTIFIED,
+          spacingAfter: 200,
+        })
+      );
+    }
+  });
+
+  // 4. Declaração de Viabilidade
+  paragraphs.push(
+    createSimpleParagraph("4. DECLARAÇÃO DE VIABILIDADE", {
+      bold: true,
+      spacingAfter: 200,
+    })
+  );
+
+  data.viabilidade.split('\n\n').forEach((paragrafo) => {
+    if (paragrafo.trim()) {
+      paragraphs.push(
+        createSimpleParagraph(paragrafo.trim(), {
+          alignment: AlignmentType.JUSTIFIED,
+          spacingAfter: 200,
+        })
+      );
+    }
+  });
+
+  return paragraphs;
+};
+
+// ========== FUNÇÃO: GERAR CONTEÚDO DO TERMO DE REFERÊNCIA ==========
+export const generateTermoReferenciaContent = (data: {
+  municipio: string;
+  processo: string;
+  data: string;
+  objeto: string;
+  fundamentacao: string;
+  obrigacoes: string;
+  prazo: string;
+  pagamento: string;
+}): Paragraph[] => {
+  const paragraphs: Paragraph[] = [];
+
+  // Título centralizado
+  paragraphs.push(
+    new Paragraph({
+      children: [
+        new TextRun({
+          text: "TERMO DE REFERÊNCIA - INEXIGIBILIDADE DE LICITAÇÃO",
+          bold: true,
+          underline: { type: "single" },
+          ...defaultStyle,
+          size: 28, // 14pt
+        }),
+      ],
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 400, line: 360 },
+    })
+  );
+
+  paragraphs.push(createSimpleParagraph("", { spacingAfter: 200 }));
+
+  // Identificação
+  paragraphs.push(
+    createMixedParagraph(
+      [
+        { text: "Município: ", bold: true },
+        { text: data.municipio, bold: false },
+      ],
+      { size: 22, spacingAfter: 100 }
+    )
+  );
+
+  paragraphs.push(
+    createMixedParagraph(
+      [
+        { text: "Processo Administrativo: ", bold: true },
+        { text: data.processo, bold: false },
+      ],
+      { size: 22, spacingAfter: 100 }
+    )
+  );
+
+  paragraphs.push(
+    createMixedParagraph(
+      [
+        { text: "Data: ", bold: true },
+        { text: data.data, bold: false },
+      ],
+      { size: 22, spacingAfter: 300 }
+    )
+  );
+
+  // 1. Do Objeto
+  paragraphs.push(
+    createSimpleParagraph("1. DO OBJETO", {
+      bold: true,
+      spacingAfter: 200,
+    })
+  );
+
+  data.objeto.split('\n\n').forEach((paragrafo) => {
+    if (paragrafo.trim()) {
+      paragraphs.push(
+        createSimpleParagraph(paragrafo.trim(), {
+          alignment: AlignmentType.JUSTIFIED,
+          spacingAfter: 200,
+        })
+      );
+    }
+  });
+
+  // 2. Fundamentação Legal
+  paragraphs.push(
+    createSimpleParagraph("2. DA FUNDAMENTAÇÃO LEGAL", {
+      bold: true,
+      spacingAfter: 200,
+    })
+  );
+
+  data.fundamentacao.split('\n\n').forEach((paragrafo) => {
+    if (paragrafo.trim()) {
+      paragraphs.push(
+        createSimpleParagraph(paragrafo.trim(), {
+          alignment: AlignmentType.JUSTIFIED,
+          spacingAfter: 200,
+        })
+      );
+    }
+  });
+
+  // 3. Das Obrigações
+  paragraphs.push(
+    createSimpleParagraph("3. DAS OBRIGAÇÕES", {
+      bold: true,
+      spacingAfter: 200,
+    })
+  );
+
+  data.obrigacoes.split('\n\n').forEach((paragrafo) => {
+    if (paragrafo.trim()) {
+      paragraphs.push(
+        createSimpleParagraph(paragrafo.trim(), {
+          alignment: AlignmentType.JUSTIFIED,
+          spacingAfter: 200,
+        })
+      );
+    }
+  });
+
+  // 4. Do Prazo
+  paragraphs.push(
+    createSimpleParagraph("4. DO PRAZO DE VIGÊNCIA", {
+      bold: true,
+      spacingAfter: 200,
+    })
+  );
+
+  data.prazo.split('\n\n').forEach((paragrafo) => {
+    if (paragrafo.trim()) {
+      paragraphs.push(
+        createSimpleParagraph(paragrafo.trim(), {
+          alignment: AlignmentType.JUSTIFIED,
+          spacingAfter: 200,
+        })
+      );
+    }
+  });
+
+  // 5. Do Pagamento
+  paragraphs.push(
+    createSimpleParagraph("5. DO PAGAMENTO", {
+      bold: true,
+      spacingAfter: 200,
+    })
+  );
+
+  data.pagamento.split('\n\n').forEach((paragrafo) => {
+    if (paragrafo.trim()) {
+      paragraphs.push(
+        createSimpleParagraph(paragrafo.trim(), {
+          alignment: AlignmentType.JUSTIFIED,
+          spacingAfter: 200,
+        })
+      );
+    }
+  });
+
+  return paragraphs;
+};
+
+// ========== FUNÇÃO: GERAR CONTEÚDO DO PARECER JURÍDICO ==========
+export const generateParecerJuridicoContent = (data: {
+  municipio: string;
+  processo: string;
+  data: string;
+  ementa: string;
+  relatorio: string;
+  fundamentacao: string;
+  analise: string;
+  conclusao: string;
+}): Paragraph[] => {
+  const paragraphs: Paragraph[] = [];
+
+  // Ementa (alinhada à direita, em itálico e negrito)
+  paragraphs.push(
+    new Paragraph({
+      children: [
+        new TextRun({
+          text: data.ementa,
+          bold: true,
+          italics: true,
+          ...defaultStyle,
+          size: 20, // 10pt
+        }),
+      ],
+      alignment: AlignmentType.RIGHT,
+      spacing: { after: 400, line: 360 },
+      border: {
+        bottom: {
+          color: "000000",
+          space: 1,
+          value: "single",
+          size: 6,
+        },
+      },
+    })
+  );
+
+  // Título centralizado
+  paragraphs.push(
+    new Paragraph({
+      children: [
+        new TextRun({
+          text: "PARECER JURÍDICO",
+          bold: true,
+          ...defaultStyle,
+          size: 28, // 14pt
+        }),
+      ],
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 400, line: 360 },
+    })
+  );
+
+  paragraphs.push(createSimpleParagraph("", { spacingAfter: 200 }));
+
+  // Identificação
+  paragraphs.push(
+    createMixedParagraph(
+      [
+        { text: "Município: ", bold: true },
+        { text: data.municipio, bold: false },
+      ],
+      { size: 22, spacingAfter: 100 }
+    )
+  );
+
+  paragraphs.push(
+    createMixedParagraph(
+      [
+        { text: "Processo Administrativo: ", bold: true },
+        { text: data.processo, bold: false },
+      ],
+      { size: 22, spacingAfter: 100 }
+    )
+  );
+
+  paragraphs.push(
+    createMixedParagraph(
+      [
+        { text: "Data: ", bold: true },
+        { text: data.data, bold: false },
+      ],
+      { size: 22, spacingAfter: 300 }
+    )
+  );
+
+  // I. Relatório
+  paragraphs.push(
+    createSimpleParagraph("I. RELATÓRIO", {
+      bold: true,
+      spacingAfter: 200,
+    })
+  );
+
+  data.relatorio.split('\n\n').forEach((paragrafo) => {
+    if (paragrafo.trim()) {
+      paragraphs.push(
+        createSimpleParagraph(paragrafo.trim(), {
+          alignment: AlignmentType.JUSTIFIED,
+          spacingAfter: 200,
+        })
+      );
+    }
+  });
+
+  // II. Fundamentação Legal
+  paragraphs.push(
+    createSimpleParagraph("II. FUNDAMENTAÇÃO LEGAL", {
+      bold: true,
+      spacingAfter: 200,
+    })
+  );
+
+  data.fundamentacao.split('\n\n').forEach((paragrafo) => {
+    if (paragrafo.trim()) {
+      paragraphs.push(
+        createSimpleParagraph(paragrafo.trim(), {
+          alignment: AlignmentType.JUSTIFIED,
+          spacingAfter: 200,
+        })
+      );
+    }
+  });
+
+  // III. Análise
+  paragraphs.push(
+    createSimpleParagraph("III. ANÁLISE", {
+      bold: true,
+      spacingAfter: 200,
+    })
+  );
+
+  data.analise.split('\n\n').forEach((paragrafo) => {
+    if (paragrafo.trim()) {
+      paragraphs.push(
+        createSimpleParagraph(paragrafo.trim(), {
+          alignment: AlignmentType.JUSTIFIED,
+          spacingAfter: 200,
+        })
+      );
+    }
+  });
+
+  // IV. Conclusão
+  paragraphs.push(
+    createSimpleParagraph("IV. CONCLUSÃO", {
+      bold: true,
+      spacingAfter: 200,
+    })
+  );
+
+  data.conclusao.split('\n\n').forEach((paragrafo) => {
+    if (paragrafo.trim()) {
+      paragraphs.push(
+        createSimpleParagraph(paragrafo.trim(), {
+          alignment: AlignmentType.JUSTIFIED,
+          spacingAfter: 200,
+        })
+      );
+    }
+  });
+
+  // Espaçamento antes da assinatura
+  paragraphs.push(createSimpleParagraph("", { spacingAfter: 400 }));
+  paragraphs.push(createSimpleParagraph("", { spacingAfter: 400 }));
+
+  // Assinatura
+  paragraphs.push(
+    new Paragraph({
+      children: [
+        new TextRun({
+          text: "_____________________________________________",
+          ...defaultStyle,
+        }),
+      ],
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 100, line: 360 },
+    })
+  );
+
+  paragraphs.push(
+    createSimpleParagraph("CAVALCANTE REIS ADVOGADOS", {
+      bold: true,
+      alignment: AlignmentType.CENTER,
+      size: 22,
+      spacingAfter: 50,
+    })
+  );
+
+  paragraphs.push(
+    createSimpleParagraph("OAB/DF 35.075", {
+      alignment: AlignmentType.CENTER,
+      size: 20,
+      spacingAfter: 200,
+    })
+  );
+
+  return paragraphs;
+};
