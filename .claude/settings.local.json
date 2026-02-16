@@ -6,7 +6,8 @@
       "Bash(npx prisma generate:*)",
       "Bash(node_modules.binprisma generate)",
       "Bash(.node_modules.binprisma.cmd generate)",
-      "Bash(test:*)"
+      "Bash(test:*)",
+      "Bash(pnpm prisma db push:*)"
     ]
   }
 }
