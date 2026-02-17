@@ -49,6 +49,38 @@ export const propostasApi = {
   },
 };
 
+export interface Minuta {
+  id?: string;
+  municipio: string;
+  objeto?: string;
+  valorContrato?: string;
+  prazoVigencia?: string;
+  dataAssinatura?: string;
+  representante?: string;
+  cargo?: string;
+  services?: Record<string, boolean>;
+  customCabimentos?: Record<string, string>;
+  expiresAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export const minutasApi = {
+  getAll: async (): Promise<Minuta[]> => {
+    const response = await api.get('/minutas');
+    return response.data;
+  },
+
+  getById: async (id: string): Promise<Minuta> => {
+    const response = await api.get(`/minutas/${id}`);
+    return response.data;
+  },
+
+  delete: async (id: string): Promise<void> => {
+    await api.delete(`/minutas/${id}`);
+  },
+};
+
 export const documentsApi = {
   processDocx: async (file: File, municipio?: string, data?: string): Promise<Blob> => {
     const formData = new FormData();

@@ -207,66 +207,97 @@ export default function ParecerJuridico({ onBack }: ParecerJuridicoProps) {
 
         {/* Preview A4 */}
         <div className="flex-1 p-10 overflow-y-auto bg-neutral-300 flex flex-col items-center">
-          <div className="pdf-page-render bg-white shadow-2xl">
+          <div className="pdf-page-render" style={{
+            boxShadow: '0 0 20px rgba(0,0,0,0.1)',
+            margin: '0 auto',
+            marginBottom: '20px',
+            background: 'white',
+            padding: '20mm 25mm 30mm 25mm',
+            width: '210mm',
+            minHeight: '297mm',
+            position: 'relative',
+            boxSizing: 'border-box',
+            display: 'flex',
+            flexDirection: 'column',
+            pageBreakAfter: 'always',
+            overflow: 'visible'
+          }}>
             {/* Logo */}
-            <div className="text-center mb-10">
+            <div style={{ textAlign: 'center', marginBottom: '25pt', flexShrink: 0 }}>
               <img
                 src="/logo-cavalcante-reis.png"
-                className="w-[160pt] mx-auto"
                 alt="Logo Cavalcante Reis"
+                style={{ width: '145pt', height: 'auto', display: 'block', margin: '0 auto' }}
+                crossOrigin="anonymous"
               />
             </div>
 
             {/* Conteúdo */}
-            <div className="text-[13pt] leading-relaxed font-serif">
+            <div style={{ maxWidth: '135mm', margin: '0 auto', width: '100%', flex: 1 }}>
               {/* Ementa à Direita */}
-              <div className="flex justify-end mb-8">
-                <div className="w-[55%] border-b border-black font-bold italic text-[10pt] uppercase pb-2">
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
+                <div style={{ width: '55%', borderBottom: '1pt solid #000', fontWeight: 'bold', fontStyle: 'italic', fontSize: '10pt', textTransform: 'uppercase', paddingBottom: '8px', fontFamily: "'Garamond', serif", color: '#000' }}>
                   {formData.ementa}
                 </div>
               </div>
 
               {/* Título */}
-              <h1 className="text-center font-bold text-[14pt] mb-8 uppercase">
+              <h1 style={{ fontSize: '14pt', fontWeight: 'bold', color: '#000', textAlign: 'center', marginBottom: '20px', marginTop: '0', fontFamily: "'Garamond', serif", textTransform: 'uppercase' }}>
                 Parecer Jurídico
               </h1>
 
               {/* Identificação */}
-              <div className="mb-6 text-[11pt]">
-                <p className="font-bold">Município: {formData.municipio}</p>
-                <p className="font-bold">Processo Administrativo: {formData.processo}</p>
-                <p className="font-bold">Data: {formData.data}</p>
+              <div style={{ marginBottom: '20px' }}>
+                <p style={{ fontSize: '11pt', fontWeight: 'bold', color: '#000', fontFamily: "'Garamond', serif", margin: '0 0 4px 0' }}>Município: {formData.municipio}</p>
+                <p style={{ fontSize: '11pt', fontWeight: 'bold', color: '#000', fontFamily: "'Garamond', serif", margin: '0 0 4px 0' }}>Processo Administrativo: {formData.processo}</p>
+                <p style={{ fontSize: '11pt', fontWeight: 'bold', color: '#000', fontFamily: "'Garamond', serif", margin: '0' }}>Data: {formData.data}</p>
               </div>
 
               {/* I. Relatório */}
-              <div className="mb-6">
-                <h2 className="font-bold mb-2">I. RELATÓRIO</h2>
-                <p className="text-justify whitespace-pre-line">{formData.relatorio}</p>
+              <div style={{ marginBottom: '20px' }}>
+                <h2 style={{ fontSize: '13pt', fontWeight: 'bold', color: '#000', borderBottom: '1pt solid #000', paddingBottom: '8px', marginBottom: '15px', marginTop: '0', fontFamily: "'Garamond', serif" }}>
+                  I. RELATÓRIO
+                </h2>
+                <p style={{ textAlign: 'justify', fontSize: '13pt', lineHeight: '1.5', marginBottom: '0', marginTop: '0', color: '#000', fontFamily: "'Garamond', serif", whiteSpace: 'pre-line' }}>
+                  {formData.relatorio}
+                </p>
               </div>
 
               {/* II. Fundamentação */}
-              <div className="mb-6">
-                <h2 className="font-bold mb-2">II. FUNDAMENTAÇÃO LEGAL</h2>
-                <p className="text-justify whitespace-pre-line">{formData.fundamentacao}</p>
+              <div style={{ marginBottom: '20px' }}>
+                <h2 style={{ fontSize: '13pt', fontWeight: 'bold', color: '#000', borderBottom: '1pt solid #000', paddingBottom: '8px', marginBottom: '15px', marginTop: '0', fontFamily: "'Garamond', serif" }}>
+                  II. FUNDAMENTAÇÃO LEGAL
+                </h2>
+                <p style={{ textAlign: 'justify', fontSize: '13pt', lineHeight: '1.5', marginBottom: '0', marginTop: '0', color: '#000', fontFamily: "'Garamond', serif", whiteSpace: 'pre-line' }}>
+                  {formData.fundamentacao}
+                </p>
               </div>
 
               {/* III. Análise */}
-              <div className="mb-6">
-                <h2 className="font-bold mb-2">III. ANÁLISE</h2>
-                <p className="text-justify whitespace-pre-line">{formData.analise}</p>
+              <div style={{ marginBottom: '20px' }}>
+                <h2 style={{ fontSize: '13pt', fontWeight: 'bold', color: '#000', borderBottom: '1pt solid #000', paddingBottom: '8px', marginBottom: '15px', marginTop: '0', fontFamily: "'Garamond', serif" }}>
+                  III. ANÁLISE
+                </h2>
+                <p style={{ textAlign: 'justify', fontSize: '13pt', lineHeight: '1.5', marginBottom: '0', marginTop: '0', color: '#000', fontFamily: "'Garamond', serif", whiteSpace: 'pre-line' }}>
+                  {formData.analise}
+                </p>
               </div>
 
               {/* IV. Conclusão */}
-              <div className="mb-6">
-                <h2 className="font-bold mb-2">IV. CONCLUSÃO</h2>
-                <p className="text-justify whitespace-pre-line">{formData.conclusao}</p>
+              <div style={{ marginBottom: '20px' }}>
+                <h2 style={{ fontSize: '13pt', fontWeight: 'bold', color: '#000', borderBottom: '1pt solid #000', paddingBottom: '8px', marginBottom: '15px', marginTop: '0', fontFamily: "'Garamond', serif" }}>
+                  IV. CONCLUSÃO
+                </h2>
+                <p style={{ textAlign: 'justify', fontSize: '13pt', lineHeight: '1.5', marginBottom: '0', marginTop: '0', color: '#000', fontFamily: "'Garamond', serif", whiteSpace: 'pre-line' }}>
+                  {formData.conclusao}
+                </p>
               </div>
 
               {/* Assinatura */}
-              <div className="mt-12 text-center">
-                <div className="border-t border-black w-64 mx-auto pt-2">
-                  <p className="font-bold text-[11pt]">CAVALCANTE REIS ADVOGADOS</p>
-                  <p className="text-[10pt]">OAB/DF 35.075</p>
+              <div style={{ marginTop: '40px', textAlign: 'center' }}>
+                <div style={{ borderTop: '1pt solid #000', width: '160px', margin: '0 auto', paddingTop: '8px' }}>
+                  <p style={{ fontWeight: 'bold', fontSize: '11pt', color: '#000', fontFamily: "'Garamond', serif", margin: '0 0 4px 0' }}>CAVALCANTE REIS ADVOGADOS</p>
+                  <p style={{ fontSize: '10pt', color: '#000', fontFamily: "'Garamond', serif", margin: '0' }}>OAB/DF 35.075</p>
                 </div>
               </div>
             </div>
@@ -278,7 +309,7 @@ export default function ParecerJuridico({ onBack }: ParecerJuridicoProps) {
                 <span>Brasília - DF</span>
                 <span>Manaus - AM</span>
               </div>
-              <p className="text-[8pt] text-neutral-400 mt-1">WWW.CAVALCANTEREIS.ADV.BR</p>
+              <p style={{ fontSize: '8pt', color: '#aaa', marginTop: '4px', textAlign: 'center', fontFamily: 'Arial, sans-serif' }}>WWW.CAVALCANTEREIS.ADV.BR</p>
             </div>
           </div>
         </div>

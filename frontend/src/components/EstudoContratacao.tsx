@@ -181,52 +181,83 @@ export default function EstudoContratacao({ onBack }: EstudoContratacaoProps) {
 
         {/* Preview A4 */}
         <div className="flex-1 p-10 overflow-y-auto bg-neutral-300 flex flex-col items-center">
-          <div className="pdf-page-render bg-white shadow-2xl">
+          <div className="pdf-page-render" style={{
+            boxShadow: '0 0 20px rgba(0,0,0,0.1)',
+            margin: '0 auto',
+            marginBottom: '20px',
+            background: 'white',
+            padding: '20mm 25mm 30mm 25mm',
+            width: '210mm',
+            minHeight: '297mm',
+            position: 'relative',
+            boxSizing: 'border-box',
+            display: 'flex',
+            flexDirection: 'column',
+            pageBreakAfter: 'always',
+            overflow: 'visible'
+          }}>
             {/* Logo */}
-            <div className="text-center mb-10">
+            <div style={{ textAlign: 'center', marginBottom: '25pt', flexShrink: 0 }}>
               <img
                 src="/logo-cavalcante-reis.png"
-                className="w-[160pt] mx-auto"
                 alt="Logo Cavalcante Reis"
+                style={{ width: '145pt', height: 'auto', display: 'block', margin: '0 auto' }}
+                crossOrigin="anonymous"
               />
             </div>
 
             {/* Conteúdo */}
-            <div className="text-[13pt] leading-relaxed font-serif">
+            <div style={{ maxWidth: '135mm', margin: '0 auto', width: '100%', flex: 1 }}>
               {/* Título */}
-              <h1 className="text-center font-bold text-[14pt] mb-8 uppercase underline">
+              <h1 style={{ fontSize: '14pt', fontWeight: 'bold', color: '#000', textAlign: 'center', marginBottom: '20px', marginTop: '0', fontFamily: "'Garamond', serif", textDecoration: 'underline', textTransform: 'uppercase' }}>
                 Estudo de Viabilidade de Contratação
               </h1>
 
               {/* Identificação */}
-              <div className="mb-6 text-[11pt]">
-                <p className="font-bold">Município: {formData.municipio}</p>
-                <p className="font-bold">Processo Administrativo: {formData.processo}</p>
-                <p className="font-bold">Data: {formData.data}</p>
+              <div style={{ marginBottom: '20px' }}>
+                <p style={{ fontSize: '11pt', fontWeight: 'bold', color: '#000', fontFamily: "'Garamond', serif", margin: '0 0 4px 0' }}>Município: {formData.municipio}</p>
+                <p style={{ fontSize: '11pt', fontWeight: 'bold', color: '#000', fontFamily: "'Garamond', serif", margin: '0 0 4px 0' }}>Processo Administrativo: {formData.processo}</p>
+                <p style={{ fontSize: '11pt', fontWeight: 'bold', color: '#000', fontFamily: "'Garamond', serif", margin: '0' }}>Data: {formData.data}</p>
               </div>
 
               {/* 1. Introdução */}
-              <div className="mb-6">
-                <h2 className="font-bold mb-2">1. INTRODUÇÃO</h2>
-                <p className="text-justify whitespace-pre-line">{formData.introducao}</p>
+              <div style={{ marginBottom: '20px' }}>
+                <h2 style={{ fontSize: '13pt', fontWeight: 'bold', color: '#000', borderBottom: '1pt solid #000', paddingBottom: '8px', marginBottom: '15px', marginTop: '0', fontFamily: "'Garamond', serif" }}>
+                  1. INTRODUÇÃO
+                </h2>
+                <p style={{ textAlign: 'justify', fontSize: '13pt', lineHeight: '1.5', marginBottom: '0', marginTop: '0', color: '#000', fontFamily: "'Garamond', serif", whiteSpace: 'pre-line' }}>
+                  {formData.introducao}
+                </p>
               </div>
 
               {/* 2. Descrição da Necessidade */}
-              <div className="mb-6">
-                <h2 className="font-bold mb-2">2. DESCRIÇÃO DA NECESSIDADE</h2>
-                <p className="text-justify whitespace-pre-line">{formData.necessidade}</p>
+              <div style={{ marginBottom: '20px' }}>
+                <h2 style={{ fontSize: '13pt', fontWeight: 'bold', color: '#000', borderBottom: '1pt solid #000', paddingBottom: '8px', marginBottom: '15px', marginTop: '0', fontFamily: "'Garamond', serif" }}>
+                  2. DESCRIÇÃO DA NECESSIDADE
+                </h2>
+                <p style={{ textAlign: 'justify', fontSize: '13pt', lineHeight: '1.5', marginBottom: '0', marginTop: '0', color: '#000', fontFamily: "'Garamond', serif", whiteSpace: 'pre-line' }}>
+                  {formData.necessidade}
+                </p>
               </div>
 
               {/* 3. Objetivos */}
-              <div className="mb-6">
-                <h2 className="font-bold mb-2">3. OBJETIVOS</h2>
-                <p className="text-justify whitespace-pre-line">{formData.objetivos}</p>
+              <div style={{ marginBottom: '20px' }}>
+                <h2 style={{ fontSize: '13pt', fontWeight: 'bold', color: '#000', borderBottom: '1pt solid #000', paddingBottom: '8px', marginBottom: '15px', marginTop: '0', fontFamily: "'Garamond', serif" }}>
+                  3. OBJETIVOS
+                </h2>
+                <p style={{ textAlign: 'justify', fontSize: '13pt', lineHeight: '1.5', marginBottom: '0', marginTop: '0', color: '#000', fontFamily: "'Garamond', serif", whiteSpace: 'pre-line' }}>
+                  {formData.objetivos}
+                </p>
               </div>
 
               {/* 4. Declaração de Viabilidade */}
-              <div className="mb-6">
-                <h2 className="font-bold mb-2">4. DECLARAÇÃO DE VIABILIDADE</h2>
-                <p className="text-justify whitespace-pre-line">{formData.viabilidade}</p>
+              <div style={{ marginBottom: '20px' }}>
+                <h2 style={{ fontSize: '13pt', fontWeight: 'bold', color: '#000', borderBottom: '1pt solid #000', paddingBottom: '8px', marginBottom: '15px', marginTop: '0', fontFamily: "'Garamond', serif" }}>
+                  4. DECLARAÇÃO DE VIABILIDADE
+                </h2>
+                <p style={{ textAlign: 'justify', fontSize: '13pt', lineHeight: '1.5', marginBottom: '0', marginTop: '0', color: '#000', fontFamily: "'Garamond', serif", whiteSpace: 'pre-line' }}>
+                  {formData.viabilidade}
+                </p>
               </div>
             </div>
 
@@ -237,7 +268,7 @@ export default function EstudoContratacao({ onBack }: EstudoContratacaoProps) {
                 <span>Brasília - DF</span>
                 <span>Manaus - AM</span>
               </div>
-              <p className="text-[8pt] text-neutral-400 mt-1">WWW.CAVALCANTEREIS.ADV.BR</p>
+              <p style={{ fontSize: '8pt', color: '#aaa', marginTop: '4px', textAlign: 'center', fontFamily: 'Arial, sans-serif' }}>WWW.CAVALCANTEREIS.ADV.BR</p>
             </div>
           </div>
         </div>
