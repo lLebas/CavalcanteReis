@@ -14,7 +14,11 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState('login');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
-  const [propostaToLoad, setPropostaToLoad] = useState<string | null>(null); // ID da proposta para carregar
+  const [propostaToLoad, setPropostaToLoad] = useState<string | null>(null);
+  const [minutaToLoad, setMinutaToLoad] = useState<string | null>(null);
+  const [estudoToLoad, setEstudoToLoad] = useState<string | null>(null);
+  const [termoToLoad, setTermoToLoad] = useState<string | null>(null);
+  const [parecerToLoad, setParecerToLoad] = useState<string | null>(null);
 
   const handleLogin = () => {
     setIsNavigating(true);
@@ -77,9 +81,25 @@ export default function App() {
       <SavedProposals
         onBackToHome={() => handleNavigate('home')}
         onLogout={handleLogout}
-        onLoadProposal={(propostaId: string) => {
-          setPropostaToLoad(propostaId);
+        onLoadProposal={(id: string) => {
+          setPropostaToLoad(id);
           handleNavigate('gerador-propostas');
+        }}
+        onLoadMinuta={(id: string) => {
+          setMinutaToLoad(id);
+          handleNavigate('gerador-minuta');
+        }}
+        onLoadEstudo={(id: string) => {
+          setEstudoToLoad(id);
+          handleNavigate('estudo-contratacao');
+        }}
+        onLoadTermo={(id: string) => {
+          setTermoToLoad(id);
+          handleNavigate('termo-referencia');
+        }}
+        onLoadParecer={(id: string) => {
+          setParecerToLoad(id);
+          handleNavigate('parecer-juridico');
         }}
       />
     );
@@ -88,8 +108,12 @@ export default function App() {
   if (currentPage === 'gerador-minuta') {
     return (
       <MinutaGenerator
-        onBackToHome={() => handleNavigate('home')}
+        onBackToHome={() => {
+          setMinutaToLoad(null);
+          handleNavigate('home');
+        }}
         onLogout={handleLogout}
+        onSave={() => handleNavigate('propostas-salvas')}
       />
     );
   }
@@ -97,7 +121,13 @@ export default function App() {
   if (currentPage === 'estudo-contratacao') {
     return (
       <EstudoContratacao
-        onBack={() => handleNavigate('home')}
+        onBack={() => {
+          setEstudoToLoad(null);
+          handleNavigate('home');
+        }}
+        onLogout={handleLogout}
+        onSave={() => handleNavigate('propostas-salvas')}
+        documentId={estudoToLoad}
       />
     );
   }
@@ -105,7 +135,12 @@ export default function App() {
   if (currentPage === 'termo-referencia') {
     return (
       <TermoReferencia
-        onBack={() => handleNavigate('home')}
+        onBack={() => {
+          setTermoToLoad(null);
+          handleNavigate('home');
+        }}
+        onSave={() => handleNavigate('propostas-salvas')}
+        documentId={termoToLoad}
       />
     );
   }
@@ -113,11 +148,15 @@ export default function App() {
   if (currentPage === 'parecer-juridico') {
     return (
       <ParecerJuridico
-        onBack={() => handleNavigate('home')}
+        onBack={() => {
+          setParecerToLoad(null);
+          handleNavigate('home');
+        }}
+        onSave={() => handleNavigate('propostas-salvas')}
+        documentId={parecerToLoad}
       />
     );
   }
 
   return <Home onNavigate={handleNavigate} onLogout={handleLogout} />;
 }
-

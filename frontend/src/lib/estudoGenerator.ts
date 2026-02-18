@@ -2,6 +2,9 @@
 import { Document, Packer, Paragraph, TextRun, ImageRun, Header, Footer, AlignmentType } from "docx";
 import { saveAs } from "file-saver";
 import { generateEstudoContratacaoContent } from "./docxHelper";
+import axios from 'axios';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 // ========== FUNÇÃO AUXILIAR: CARREGAR IMAGEM ==========
 const loadImageAsBuffer = async (url: string): Promise<ArrayBuffer | null> => {
@@ -89,7 +92,43 @@ const createHorizontalFooter = (): Footer => {
   });
 };
 
-// ========== FUNÇÃO: GERAR E BAIXAR ESTUDO DE CONTRATAÇÃO ==========
+// ========== FUNÇÃO: GERAR E BAIXAR ESTUDO DE CONTRATAÇÃO (VIA BACKEND) ==========
+export const downloadEstudoContratacaoViaBackend = async (data: {
+  municipio: string;
+  processo: string;
+  localAssinatura?: string;
+  dia: string;
+  mes: string;
+  ano: string;
+  topicos: Array<{ titulo: string; texto: string }>;
+}) => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/documents/generate-estudo-docx`,
+      data,
+      {
+        responseType: 'blob',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    const blob = new Blob([response.data], {
+      type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    });
+
+    saveAs(blob, `Estudo_Contratacao_${data.municipio.replace(/\//g, '-')}.docx`);
+
+    return true;
+  } catch (error) {
+    console.error('Erro ao gerar Estudo de Contratação via backend:', error);
+    throw error;
+  }
+};
+
+// ========== FUNÇÃO LEGADA: GERAR E BAIXAR ESTUDO DE CONTRATAÇÃO (FRONTEND) ==========
+// Mantida para compatibilidade, mas use downloadEstudoContratacaoViaBackend para melhor resultado
 export const downloadEstudoContratacao = async (data: {
   municipio: string;
   processo: string;
@@ -101,7 +140,7 @@ export const downloadEstudoContratacao = async (data: {
 }) => {
   try {
     // Carrega a logo
-    const logoBuffer = await loadImageAsBuffer('/logo-cavalcante-reis.png');
+    const logoBuffer = await loadImageAsBuffer('/barrocas.png');
 
     // Cria o cabeçalho e rodapé
     const header = createLogoHeader(logoBuffer);

@@ -43,9 +43,46 @@ model Minuta {
   cargo            String?
   services         Json?    // Serviços selecionados
   customCabimentos Json?    // Textos personalizados
+  formData         Json?    // Estado completo do gerador (options, clauseData, percentual)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
   expiresAt        DateTime // Data de expiração (padrão: 1 ano)
 
   @@map("minutas")
+}
+
+// ========== MODELO: ESTUDO DE CONTRATAÇÃO ==========
+model EstudoContratacao {
+  id        String   @id @default(uuid())
+  municipio String
+  formData  Json?    // Todos os campos do formulário (processo, local, dia, mes, ano, topicosAtivos)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  expiresAt DateTime // Data de expiração (padrão: 1 ano)
+
+  @@map("estudos_contratacao")
+}
+
+// ========== MODELO: TERMO DE REFERÊNCIA ==========
+model TermoReferencia {
+  id        String   @id @default(uuid())
+  municipio String
+  formData  Json?    // Todos os campos do formulário
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  expiresAt DateTime // Data de expiração (padrão: 1 ano)
+
+  @@map("termos_referencia")
+}
+
+// ========== MODELO: PARECER JURÍDICO ==========
+model ParecerJuridico {
+  id        String   @id @default(uuid())
+  municipio String
+  formData  Json?    // Todos os campos do formulário
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  expiresAt DateTime // Data de expiração (padrão: 1 ano)
+
+  @@map("pareceres_juridicos")
 }

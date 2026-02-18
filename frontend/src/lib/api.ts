@@ -60,6 +60,7 @@ export interface Minuta {
   cargo?: string;
   services?: Record<string, boolean>;
   customCabimentos?: Record<string, string>;
+  formData?: Record<string, unknown>;
   expiresAt?: string;
   createdAt?: string;
   updatedAt?: string;
@@ -76,8 +77,118 @@ export const minutasApi = {
     return response.data;
   },
 
+  create: async (minuta: Omit<Minuta, 'id' | 'createdAt' | 'updatedAt'>): Promise<Minuta> => {
+    const response = await api.post('/minutas', minuta);
+    return response.data;
+  },
+
   delete: async (id: string): Promise<void> => {
     await api.delete(`/minutas/${id}`);
+  },
+};
+
+export interface EstudoContratacao {
+  id?: string;
+  municipio: string;
+  formData?: Record<string, unknown>;
+  expiresAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export const estudosApi = {
+  getAll: async (): Promise<EstudoContratacao[]> => {
+    const response = await api.get('/estudos');
+    return response.data;
+  },
+
+  getById: async (id: string): Promise<EstudoContratacao> => {
+    const response = await api.get(`/estudos/${id}`);
+    return response.data;
+  },
+
+  create: async (estudo: Omit<EstudoContratacao, 'id' | 'createdAt' | 'updatedAt'>): Promise<EstudoContratacao> => {
+    const response = await api.post('/estudos', estudo);
+    return response.data;
+  },
+
+  update: async (id: string, estudo: Partial<EstudoContratacao>): Promise<EstudoContratacao> => {
+    const response = await api.put(`/estudos/${id}`, estudo);
+    return response.data;
+  },
+
+  delete: async (id: string): Promise<void> => {
+    await api.delete(`/estudos/${id}`);
+  },
+};
+
+export interface TermoReferencia {
+  id?: string;
+  municipio: string;
+  formData?: Record<string, unknown>;
+  expiresAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export const termosApi = {
+  getAll: async (): Promise<TermoReferencia[]> => {
+    const response = await api.get('/termos');
+    return response.data;
+  },
+
+  getById: async (id: string): Promise<TermoReferencia> => {
+    const response = await api.get(`/termos/${id}`);
+    return response.data;
+  },
+
+  create: async (termo: Omit<TermoReferencia, 'id' | 'createdAt' | 'updatedAt'>): Promise<TermoReferencia> => {
+    const response = await api.post('/termos', termo);
+    return response.data;
+  },
+
+  update: async (id: string, termo: Partial<TermoReferencia>): Promise<TermoReferencia> => {
+    const response = await api.put(`/termos/${id}`, termo);
+    return response.data;
+  },
+
+  delete: async (id: string): Promise<void> => {
+    await api.delete(`/termos/${id}`);
+  },
+};
+
+export interface ParecerJuridico {
+  id?: string;
+  municipio: string;
+  formData?: Record<string, unknown>;
+  expiresAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export const pareceresApi = {
+  getAll: async (): Promise<ParecerJuridico[]> => {
+    const response = await api.get('/pareceres');
+    return response.data;
+  },
+
+  getById: async (id: string): Promise<ParecerJuridico> => {
+    const response = await api.get(`/pareceres/${id}`);
+    return response.data;
+  },
+
+  create: async (parecer: Omit<ParecerJuridico, 'id' | 'createdAt' | 'updatedAt'>): Promise<ParecerJuridico> => {
+    const response = await api.post('/pareceres', parecer);
+    return response.data;
+  },
+
+  update: async (id: string, parecer: Partial<ParecerJuridico>): Promise<ParecerJuridico> => {
+    const response = await api.put(`/pareceres/${id}`, parecer);
+    return response.data;
+  },
+
+  delete: async (id: string): Promise<void> => {
+    await api.delete(`/pareceres/${id}`);
   },
 };
 

@@ -4,8 +4,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import Modal from "./Modal";
 import DOMPurify from "dompurify";
-import { Settings, FileText, ArrowLeft, LogOut, Download, RefreshCw, X, ChevronRight, Plus, Trash2 } from "lucide-react";
+import { Settings, FileText, ArrowLeft, LogOut, Download, RefreshCw, X, ChevronRight, Plus, Trash2, Save } from "lucide-react";
 import { saveAs } from "file-saver";
+import { minutasApi } from "@/lib/api";
 // ========== IMPORTS: BIBLIOTECA DOCX ==========
 import { Document, Packer, Paragraph, TextRun, ImageRun, Header, AlignmentType, PageBreak, Table, TableRow, TableCell, WidthType, HeadingLevel, SectionType } from "docx";
 import { createSimpleParagraph } from "../lib/docxHelper"; // Helper para criação de parágrafos simples
@@ -201,6 +202,7 @@ const DEFAULT_TEXT_PARTES = `Por este instrumento particular, de um lado, o MUNI
 interface MinutaGeneratorProps {
   onBackToHome: () => void;
   onLogout: () => void;
+  onSave?: () => void;
 }
 
 // ========== COMPONENTE: MENU DE CLÁUSULAS (ESQUERDA) ==========
@@ -1043,6 +1045,8 @@ const ControlsSidebar = ({
   onStartFromScratch,
   onDownloadDocx,
   loadingDocx,
+  onSaveMinuta,
+  isSaving,
 }: any) => {
 
   const handleOptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1123,6 +1127,15 @@ const ControlsSidebar = ({
           disabled={loadingDocx}
         >
           {loadingDocx ? "Gerando..." : <><Download size={18} /> Docs</>}
+        </button>
+        <button
+          className="btn primary"
+          style={{ width: '100%', marginTop: '8px' }}
+          onClick={onSaveMinuta}
+          disabled={isSaving}
+        >
+          <Save size={16} />
+          {isSaving ? 'Salvando...' : 'Salvar Minuta'}
         </button>
       </div>
     </aside>
@@ -2716,8 +2729,9 @@ const MinutaDocument = ({
 };
 
 // ========== COMPONENTE PRINCIPAL ==========
-export default function MinutaGenerator({ onBackToHome, onLogout }: MinutaGeneratorProps) {
+export default function MinutaGenerator({ onBackToHome, onLogout, onSave }: MinutaGeneratorProps) {
   const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [options, setOptions] = useState({
     numeroContrato: "",
     numeroInexigibilidade: "",
@@ -2786,6 +2800,35 @@ export default function MinutaGenerator({ onBackToHome, onLogout }: MinutaGenera
   // - NÃO tem rodapé (apenas cabeçalho com logo)
   // - Usa imagem /barrocas.png no cabeçalho
   // - Conteúdo flui automaticamente sem quebras manuais
+  const handleSaveMinuta = async () => {
+    setIsSaving(true);
+    try {
+      const municipio = (options.numeroContrato || 'Minuta').trim() || 'Minuta';
+      await minutasApi.create({
+        municipio,
+        formData: { options, clauseData, percentual } as Record<string, unknown>,
+        expiresAt: undefined,
+      });
+      setModal({
+        open: true,
+        title: 'Salvo!',
+        message: 'Minuta salva com sucesso.',
+        type: 'info',
+      });
+      if (onSave) onSave();
+    } catch (error) {
+      console.error('Erro ao salvar minuta:', error);
+      setModal({
+        open: true,
+        title: 'Erro',
+        message: 'Não foi possível salvar a minuta. Tente novamente.',
+        type: 'error',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const handleDownloadDocx = async () => {
     // ========== VALIDAÇÃO: CAMPOS OBRIGATÓRIOS ==========
     if (!options.numeroContrato || !options.numeroContrato.trim()) {
@@ -3294,6 +3337,8 @@ export default function MinutaGenerator({ onBackToHome, onLogout }: MinutaGenera
               }}
               onDownloadDocx={handleDownloadDocx}
               loadingDocx={loadingDocx}
+              onSaveMinuta={handleSaveMinuta}
+              isSaving={isSaving}
             />
 
             {/* Preview */}

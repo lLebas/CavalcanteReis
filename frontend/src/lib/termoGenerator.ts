@@ -2,6 +2,55 @@
 import { Document, Packer, Paragraph, TextRun, ImageRun, Header, Footer, AlignmentType } from "docx";
 import { saveAs } from "file-saver";
 import { generateTermoReferenciaContent } from "./docxHelper";
+import axios from 'axios';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+// ========== FUNÇÃO: GERAR E BAIXAR TERMO VIA BACKEND ==========
+export const downloadTermoReferenciaViaBackend = async (data: {
+  municipio: string;
+  endereco?: string;
+  localAssinatura?: string;
+  processo: string;
+  dataFormatada: string;
+  ano: string;
+  responsavel: string;
+  cargoResponsavel: string;
+  secretario: string;
+  cargoSecretario: string;
+  clausulas: Array<{
+    numero: number;
+    titulo: string;
+    subitens: Array<{
+      numero: string;
+      texto: string;
+    }>;
+  }>;
+}) => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/documents/generate-termo-docx`,
+      data,
+      {
+        responseType: 'blob',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    const blob = new Blob([response.data], {
+      type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    });
+
+    saveAs(blob, `Termo_Referencia_${data.municipio.replace(/\//g, '-')}.docx`);
+
+    return true;
+  } catch (error) {
+    console.error('Erro ao gerar Termo de Referência via backend:', error);
+    throw error;
+  }
+};
 
 // ========== FUNÇÃO AUXILIAR: CARREGAR IMAGEM ==========
 const loadImageAsBuffer = async (url: string): Promise<ArrayBuffer | null> => {

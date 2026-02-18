@@ -29,8 +29,9 @@ export class MinutasService {
         dataAssinatura: createMinutaDto.dataAssinatura,
         representante: createMinutaDto.representante,
         cargo: createMinutaDto.cargo,
-        services: createMinutaDto.services || {},
-        customCabimentos: createMinutaDto.customCabimentos || {},
+        services: (createMinutaDto.services || {}) as any,
+        customCabimentos: (createMinutaDto.customCabimentos || {}) as any,
+        formData: (createMinutaDto.formData || {}) as any,
         expiresAt,
       },
     });
@@ -78,7 +79,7 @@ export class MinutasService {
     return this.prisma.minuta.update({
       where: { id },
       data: {
-        ...updateMinutaDto,
+        ...(updateMinutaDto as any),
         // Se expiresAt foi passado como string, converte para Date
         expiresAt: updateMinutaDto.expiresAt
           ? new Date(updateMinutaDto.expiresAt)

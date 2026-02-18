@@ -99,4 +99,55 @@ export class DocumentsController {
     res.setHeader('Content-Length', buffer.length.toString());
     res.send(buffer);
   }
+
+  @Post('generate-estudo-docx')
+  @ApiOperation({ summary: 'Gerar arquivo DOCX do Estudo de Contratação' })
+  async generateEstudoDocx(@Body() data: any, @Res() res: Response) {
+    const buffer = await this.documentsService.generateEstudoDocx(data);
+
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    );
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename=Estudo_Contratacao_${data.municipio || 'Documento'}.docx`,
+    );
+    res.setHeader('Content-Length', buffer.length.toString());
+    res.send(buffer);
+  }
+
+  @Post('generate-termo-docx')
+  @ApiOperation({ summary: 'Gerar arquivo DOCX do Termo de Referência' })
+  async generateTermoDocx(@Body() data: any, @Res() res: Response) {
+    const buffer = await this.documentsService.generateTermoDocx(data);
+
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    );
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename=Termo_Referencia_${data.municipio || 'Documento'}.docx`,
+    );
+    res.setHeader('Content-Length', buffer.length.toString());
+    res.send(buffer);
+  }
+
+  @Post('generate-parecer-docx')
+  @ApiOperation({ summary: 'Gerar arquivo DOCX do Parecer Jurídico' })
+  async generateParecerDocx(@Body() data: any, @Res() res: Response) {
+    const buffer = await this.documentsService.generateParecerDocx(data);
+
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    );
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename=Parecer_Juridico_${data.municipio || 'Documento'}.docx`,
+    );
+    res.setHeader('Content-Length', buffer.length.toString());
+    res.send(buffer);
+  }
 }

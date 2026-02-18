@@ -7,7 +7,27 @@
       "Bash(node_modules.binprisma generate)",
       "Bash(.node_modules.binprisma.cmd generate)",
       "Bash(test:*)",
-      "Bash(pnpm prisma db push:*)"
+      "Bash(pnpm prisma db push:*)",
+      "Bash(npx prisma migrate dev:*)",
+      "Bash(npx prisma db push:*)",
+      "Bash(DATABASE_URL=\"postgresql://postgres.kkyxmdxwgcdmoupceedq:Reisadvogados@aws-1-us-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true\" npx prisma db push:*)",
+      "Bash(DATABASE_URL=\"postgresql://postgres:Reisadvogados@db.kkyxmdxwgcdmoupceedq.supabase.co:5432/postgres\" npx prisma db push:*)",
+      "Bash(DATABASE_URL=\"postgresql://postgres:Reisadvogados@db.kkyxmdxwgcdmoupceedq.supabase.co:5432/postgres\" npx prisma generate:*)",
+      "Bash(npx tsc:*)",
+      "Bash(node_modules/.bin/prisma generate:*)",
+      "Bash(ls:*)",
+      "Bash(python3:*)",
+      "Bash(python:*)",
+      "Bash(node --version:*)",
+      "Bash(node -e:*)",
+      "Bash(# Find the actual path with proper encoding ls -la \"\"h:/Serviçõs/CavalcanteReis/backend/src/documents/documents.service.ts\"\")",
+      "Bash(powershell -Command \"Get-Item ''h:\\\\Servi*\\\\CavalcanteReis\\\\backend\\\\src\\\\documents\\\\documents.service.ts'' | Select-Object FullName\")",
+      "Bash(powershell -Command \"Write-Host ''PS works''\")",
+      "Bash(powershell -File:*)",
+      "Bash(/tmp/split_generators.ps1:*)",
+      "Bash(powershell -Command:*)",
+      "Bash(/tmp/fix_minuta.ps1:*)",
+      "Bash(wc:*)"
     ]
   }
 }

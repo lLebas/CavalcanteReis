@@ -36,6 +36,10 @@ export class CreateMinutaDto {
   @IsOptional()
   customCabimentos?: Record<string, string>;
 
+  @IsObject()
+  @IsOptional()
+  formData?: Record<string, unknown>;
+
   @IsString()
   @IsOptional()
   expiresAt?: string;
