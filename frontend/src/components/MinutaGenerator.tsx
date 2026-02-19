@@ -2983,7 +2983,7 @@ export default function MinutaGenerator({ onBackToHome, onLogout, onSave }: Minu
                   width: 180 * 9525, // 180pt em EMUs (paridade com prévia)
                   height: (180 * 9525) * 0.34, // Proporção aproximada
                 },
-              }),
+              } as any),
             ],
             alignment: AlignmentType.CENTER,
             spacing: { after: 800 }, // Mais espaço após a imagem grande
@@ -3004,7 +3004,7 @@ export default function MinutaGenerator({ onBackToHome, onLogout, onSave }: Minu
                   width: 180 * 9525, // 180pt em EMUs (paridade com prévia)
                   height: (180 * 9525) * 0.34, // Proporção aproximada
                 },
-              }),
+              } as any),
             ],
             alignment: AlignmentType.CENTER,
             spacing: { after: 400 }, // Espaço padrão após a imagem
