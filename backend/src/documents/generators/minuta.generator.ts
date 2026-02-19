@@ -231,7 +231,7 @@ export async function generateMinutaDocx(data: any): Promise<Buffer> {
       children: [
         new Paragraph({
           alignment: AlignmentType.CENTER,
-          spacing: { before: 400, after: 600 },
+          spacing: { before: 0, after: 200 },
           children: [new ImageRun({ data: prefeituraLogoBuffer, transformation: { width: 180, height: 180 * 0.75 } } as any)],
         }),
       ],
@@ -978,7 +978,14 @@ export async function generateMinutaDocx(data: any): Promise<Buffer> {
     sections: [{
       properties: {
         page: {
-          margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 },
+          margin: {
+            top: 1417,    // 2.5cm
+            right: 1417,
+            bottom: 1417,
+            left: 1417,
+            header: 450,  // 0.8cm — logo compacto, sem vácuo no topo
+            footer: 709,  // 1.25cm — rodapé com endereços respira bem
+          },
         }
       },
       headers: { default: createHeader() },

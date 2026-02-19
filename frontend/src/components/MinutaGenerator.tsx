@@ -834,6 +834,49 @@ const EditSidebar = ({ clause, onClose, onUpdateClause, clauseData }: any) => {
           </button>
         </div>
 
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+          <button
+            onClick={() => {
+              const allSelected: Record<string, any> = {};
+              Object.entries(objects).forEach(([key, obj]: [string, any]) => {
+                allSelected[key] = obj.texto;
+              });
+              onUpdateClause(`clause${clause}`, allSelected);
+            }}
+            style={{
+              flex: 1,
+              padding: '10px',
+              background: '#f0f8f5',
+              color: '#227056',
+              border: '2px solid #227056',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontSize: '12px',
+              fontWeight: '600',
+            }}
+          >
+            ✓ Selecionar Todos
+          </button>
+          <button
+            onClick={() => {
+              onUpdateClause(`clause${clause}`, {});
+            }}
+            style={{
+              flex: 1,
+              padding: '10px',
+              background: '#fff5f5',
+              color: '#e74c3c',
+              border: '2px solid #e74c3c',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontSize: '12px',
+              fontWeight: '600',
+            }}
+          >
+            ✗ Remover Todos
+          </button>
+        </div>
+
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {Object.entries(objects).map(([key, obj]: [string, any]) => (
             <label
@@ -912,6 +955,49 @@ const EditSidebar = ({ clause, onClose, onUpdateClause, clauseData }: any) => {
           }}
         >
           <X size={20} />
+        </button>
+      </div>
+
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+        <button
+          onClick={() => {
+            const allSelected: Record<string, string> = {};
+            Object.entries(clauseInfo.subitens).forEach(([key, texto]: [string, string]) => {
+              allSelected[key] = texto;
+            });
+            onUpdateClause(`clause${clause}`, allSelected);
+          }}
+          style={{
+            flex: 1,
+            padding: '10px',
+            background: '#f0f8f5',
+            color: '#227056',
+            border: '2px solid #227056',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontSize: '12px',
+            fontWeight: '600',
+          }}
+        >
+          ✓ Selecionar Todos
+        </button>
+        <button
+          onClick={() => {
+            onUpdateClause(`clause${clause}`, {});
+          }}
+          style={{
+            flex: 1,
+            padding: '10px',
+            background: '#fff5f5',
+            color: '#e74c3c',
+            border: '2px solid #e74c3c',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontSize: '12px',
+            fontWeight: '600',
+          }}
+        >
+          ✗ Remover Todos
         </button>
       </div>
 

@@ -34,8 +34,8 @@ const createLogoHeader = (logoBuffer: ArrayBuffer | null, largura: number = 160)
           new ImageRun({
             data: logoBuffer,
             transformation: {
-              width: largura * 9525, // Converte pt para EMUs
-              height: (largura * 9525) * 0.34, // Proporção aproximada
+              width: largura,
+              height: Math.round(largura * 0.338), // proporção barrocas.png (115/340)
             },
           } as any),
         ],

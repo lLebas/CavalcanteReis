@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Download, Settings, LogOut, Save } from 'lucide-react';
+import { ArrowLeft, Download, Settings, LogOut, Save, X } from 'lucide-react';
 import { downloadTermoReferenciaViaBackend } from '@/lib/termoGenerator';
 import { termosApi } from '@/lib/api';
+import { toast } from 'sonner';
 
 interface TermoReferenciaProps {
   onBack: () => void;
@@ -243,6 +244,8 @@ export default function TermoReferencia({ onBack, onLogout, onSave, documentId: 
   const [isDownloading, setIsDownloading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [documentId, setDocumentId] = useState<string | null>(initialDocumentId || null);
+  const [selectedSubitems, setSelectedSubitems] = useState<Record<string, boolean>>({});
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (initialDocumentId) {
@@ -258,6 +261,11 @@ export default function TermoReferencia({ onBack, onLogout, onSave, documentId: 
   const handleDownload = async () => {
     setIsDownloading(true);
     try {
+      const clausulasFiltradas = CLAUSULAS.map(c => ({
+        ...c,
+        subitens: c.subitens.filter(s => !!selectedSubitems[s.numero]),
+      })).filter(c => c.subitens.length > 0);
+
       await downloadTermoReferenciaViaBackend({
         municipio: formData.municipio,
         endereco: formData.endereco,
@@ -269,11 +277,11 @@ export default function TermoReferencia({ onBack, onLogout, onSave, documentId: 
         cargoResponsavel: formData.cargoResponsavel,
         secretario: formData.secretario,
         cargoSecretario: formData.cargoSecretario,
-        clausulas: CLAUSULAS,
+        clausulas: clausulasFiltradas.length > 0 ? clausulasFiltradas : CLAUSULAS,
       });
     } catch (error) {
       console.error('Erro ao gerar documento:', error);
-      alert('Erro ao gerar documento. Tente novamente.');
+      toast.error('Erro ao gerar documento. Tente novamente.');
     } finally {
       setIsDownloading(false);
     }
@@ -294,11 +302,11 @@ export default function TermoReferencia({ onBack, onLogout, onSave, documentId: 
         });
         setDocumentId(created.id || null);
       }
-      alert('Termo salvo com sucesso!');
+      toast.success('Termo salvo com sucesso!');
       if (onSave) onSave();
     } catch (error) {
       console.error('Erro ao salvar:', error);
-      alert('Erro ao salvar. Tente novamente.');
+      toast.error('Erro ao salvar. Tente novamente.');
     } finally {
       setIsSaving(false);
     }
@@ -388,11 +396,15 @@ export default function TermoReferencia({ onBack, onLogout, onSave, documentId: 
             </p>
           </div>
           {Array.from({ length: 13 }, (_, i) => i + 1).map(num => {
-            const ativo = clausulaAtiva === num;
+            const ativo = clausulaAtiva === num && sidebarOpen;
+            const clausula = CLAUSULAS.find(c => c.numero === num);
+            const countSelected = clausula
+              ? clausula.subitens.filter(s => !!selectedSubitems[s.numero]).length
+              : 0;
             return (
               <button
                 key={num}
-                onClick={() => setClausulaAtiva(num)}
+                onClick={() => { setClausulaAtiva(num); setSidebarOpen(true); }}
                 style={{
                   width: '100%', padding: '10px 16px', textAlign: 'left',
                   background: ativo ? '#f0f9f5' : 'transparent', border: 'none',
@@ -405,7 +417,14 @@ export default function TermoReferencia({ onBack, onLogout, onSave, documentId: 
                 }}
               >
                 <span style={{ flex: 1 }}>{CLAUSE_LABELS[num]}</span>
-                {ativo && <span style={{ color: '#227056', fontSize: '18px', flexShrink: 0, marginLeft: '6px' }}>›</span>}
+                {countSelected > 0 && (
+                  <span style={{
+                    background: '#227056', color: 'white', borderRadius: '10px',
+                    fontSize: '10px', fontWeight: '700', padding: '1px 6px',
+                    flexShrink: 0, marginLeft: '4px',
+                  }}>{countSelected}</span>
+                )}
+                {ativo && <span style={{ color: '#227056', fontSize: '18px', flexShrink: 0, marginLeft: '4px' }}>›</span>}
               </button>
             );
           })}
@@ -482,93 +501,244 @@ export default function TermoReferencia({ onBack, onLogout, onSave, documentId: 
         <div className="content" style={{ flex: 1, overflowY: 'auto', padding: '40px 20px' }}>
           <p className="preview-title">Documento do Termo de Referência</p>
 
-          {PAGE_GROUPS.map((grupo, pageIndex) => {
-            const isFirstPage = pageIndex === 0;
-            const isLastPage = pageIndex === PAGE_GROUPS.length - 1;
+          {(() => {
+            // ── Agrupamento estático de cláusulas por página ──────────────────
+            const CLAUSE_PAGES: number[][] = [
+              [1],
+              [2],
+              [3, 4],
+              [5],
+              [6, 7],
+              [8],
+              [9, 10],
+              [11, 12, 13],
+            ];
+
+            const hasSelected = (nums: number[]) =>
+              nums.some(n => {
+                const c = CLAUSULAS.find(c => c.numero === n);
+                return c && c.subitens.some(s => !!selectedSubitems[s.numero]);
+              });
+
+            const anySelected = CLAUSULAS.some(c =>
+              c.subitens.some(s => !!selectedSubitems[s.numero])
+            );
+
+            const renderGroup = (nums: number[]) =>
+              nums.map(num => {
+                const clausula = CLAUSULAS.find(c => c.numero === num);
+                if (!clausula) return null;
+                const subs = clausula.subitens.filter(s => !!selectedSubitems[s.numero]);
+                if (subs.length === 0) return null;
+                return (
+                  <div key={num} style={{ marginBottom: '20px' }}>
+                    <p style={titleStyle}>{clausula.titulo}</p>
+                    {renderSubitens(subs)}
+                  </div>
+                );
+              });
+
+            // Página 1 sempre aparece; demais só se tiverem conteúdo selecionado
+            const pagesToShow = CLAUSE_PAGES.filter((group, i) =>
+              i === 0 || hasSelected(group)
+            );
+            const lastIdx = pagesToShow.length - 1;
+
+            const SignatureBlock = () => (
+              <div style={{ marginTop: 'auto', paddingTop: '30px' }}>
+                <p style={{ fontFamily: "'Garamond', serif", fontSize: '11pt', textAlign: 'justify', marginBottom: '8px', lineHeight: '1.5' }}>
+                  E assim justos e contratados, as partes firmam o presente, em 03 (três) vias de igual teor e forma para o mesmo fim, juntamente com duas testemunhas civilmente capazes.
+                </p>
+                <p style={{ fontFamily: "'Garamond', serif", fontSize: '11pt', textAlign: 'center', marginBottom: '40px' }}>
+                  {formData.localAssinatura}, {formData.dia} de {formData.mes} de {formData.ano}.
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', alignItems: 'center' }}>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ width: '300px', borderTop: '1px solid #000', margin: '0 auto', paddingTop: '6px' }}>
+                      <p style={{ fontFamily: "'Garamond', serif", fontSize: '11pt', margin: '0', fontWeight: 'bold' }}>{formData.responsavel}</p>
+                      <p style={{ fontFamily: "'Garamond', serif", fontSize: '9pt', margin: '0' }}>{formData.cargoResponsavel}</p>
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ width: '300px', borderTop: '1px solid #000', margin: '0 auto', paddingTop: '6px' }}>
+                      <p style={{ fontFamily: "'Garamond', serif", fontSize: '11pt', margin: '0', fontWeight: 'bold' }}>{formData.secretario}</p>
+                      <p style={{ fontFamily: "'Garamond', serif", fontSize: '9pt', margin: '0' }}>{formData.cargoSecretario}</p>
+                    </div>
+                  </div>
+                </div>
+                <div style={{ marginTop: '32px' }}>
+                  <p style={{ fontFamily: "'Garamond', serif", fontSize: '11pt', margin: '0 0 8px 0', fontStyle: 'italic' }}>
+                    A P R O V O, o presente Termo de Referência, consoante o previsto no art. 7º da Lei Federal n.º 14.133/2021.
+                  </p>
+                  <p style={{ fontFamily: "'Garamond', serif", fontSize: '11pt', margin: '0' }}>
+                    Em _____/_____/_____
+                  </p>
+                </div>
+              </div>
+            );
 
             return (
-              <div key={pageIndex} style={pageStyle} className="pdf-page-render">
-                {/* Logo em cada página */}
-                <LogoBarrocas />
+              <>
+                {pagesToShow.map((group, pageIdx) => {
+                  const isFirstPage = pageIdx === 0;
+                  const isLastPage = pageIdx === lastIdx;
 
-                {/* Cabeçalho só na primeira página */}
-                {isFirstPage && (
-                  <>
-                    {/* DADOS DO CONTRATANTE */}
-                    <div style={{ textAlign: 'center', marginBottom: '14px' }}>
-                      <p style={{ fontFamily: "'Garamond', serif", fontSize: '12pt', fontWeight: 'normal', margin: '0 0 2px 0' }}>
-                        DADOS DO CONTRATANTE:
-                      </p>
-                      <p style={{ fontFamily: "'Garamond', serif", fontSize: '12pt', fontWeight: 'normal', margin: '0 0 2px 0' }}>
-                        {formData.municipio}
-                      </p>
-                      <p style={{ fontFamily: "'Garamond', serif", fontSize: '11pt', margin: '0 0 0 0' }}>
-                        Endereço: {formData.endereco}
-                      </p>
-                    </div>
-                    {/* TÍTULO */}
-                    <h1 style={{
-                      textAlign: 'center', fontSize: '13pt', fontWeight: 'bold',
-                      textDecoration: 'underline', fontFamily: "'Garamond', serif",
-                      marginBottom: '4px', marginTop: '10px',
-                    }}>
-                      TERMO DE REFERÊNCIA
-                    </h1>
-                    <p style={{ textAlign: 'center', fontSize: '12pt', fontFamily: "'Garamond', serif", marginBottom: '28px', fontWeight: 'normal', color: '#000' }}>
-                      INEXIGIBILIDADE DE LICITAÇÃO
-                    </p>
-                  </>
-                )}
-
-                {/* Cláusulas da página */}
-                {grupo.map(clausulaNum => {
-                  const clausula = CLAUSULAS.find(c => c.numero === clausulaNum);
-                  if (!clausula) return null;
                   return (
-                    <div key={clausulaNum} style={{ marginBottom: '20px' }}>
-                      <p style={titleStyle}>{clausula.titulo}</p>
-                      {renderSubitens(clausula.subitens)}
+                    <div key={pageIdx} style={pageStyle} className="pdf-page-render">
+                      {/* LOGO EM TODAS AS PÁGINAS */}
+                      <LogoBarrocas />
+
+                      {/* CABEÇALHO CENTRALIZADO (só na 1ª página) */}
+                      {isFirstPage && (
+                        <>
+                          <div style={{ textAlign: 'center', width: '100%', marginBottom: '10px' }}>
+                            <p style={{ fontFamily: "'Garamond', serif", fontSize: '12pt', fontWeight: 'normal', margin: '0 0 2px 0' }}>
+                              DADOS DO CONTRATANTE:
+                            </p>
+                            <p style={{ fontFamily: "'Garamond', serif", fontSize: '12pt', fontWeight: 'bold', margin: '0 0 2px 0' }}>
+                              {formData.municipio}
+                            </p>
+                            <p style={{ fontFamily: "'Garamond', serif", fontSize: '11pt', margin: '0' }}>
+                              Endereço: {formData.endereco}
+                            </p>
+                          </div>
+                          <h1 style={{
+                            textAlign: 'center', fontSize: '13pt', fontWeight: 'bold',
+                            textDecoration: 'underline', fontFamily: "'Garamond', serif",
+                            margin: '10px 0 4px 0',
+                          }}>
+                            TERMO DE REFERÊNCIA
+                          </h1>
+                          <p style={{
+                            textAlign: 'center', fontSize: '12pt', fontFamily: "'Garamond', serif",
+                            margin: '0 0 48px 0', fontWeight: 'normal', color: '#000',
+                          }}>
+                            INEXIGIBILIDADE DE LICITAÇÃO
+                          </p>
+                        </>
+                      )}
+
+                      {/* CLÁUSULAS DO GRUPO */}
+                      {renderGroup(group)}
+
+                      {/* ESTADO VAZIO (só na 1ª página se nada está selecionado ainda) */}
+                      {isFirstPage && !anySelected && (
+                        <div style={{ textAlign: 'center', color: '#aaa', padding: '40px 0', fontFamily: "'Garamond', serif" }}>
+                          <p style={{ fontSize: '14pt', marginBottom: '8px' }}>Nenhum subitem selecionado</p>
+                          <p style={{ fontSize: '11pt' }}>Clique em uma cláusula no painel esquerdo para selecionar subitens.</p>
+                        </div>
+                      )}
+
+                      {/* ASSINATURAS (última página) */}
+                      {isLastPage && <SignatureBlock />}
                     </div>
                   );
                 })}
-
-                {/* Finalização apenas na última página */}
-                {isLastPage && (
-                  <div style={{ marginTop: 'auto', paddingTop: '30px' }}>
-                    <p style={{ fontFamily: "'Garamond', serif", fontSize: '11pt', textAlign: 'justify', marginBottom: '8px', lineHeight: '1.5' }}>
-                      E assim justos e contratados, as partes firmam o presente, em 03 (três) vias de igual teor e forma para o mesmo fim, juntamente com duas testemunhas civilmente capazes.
-                    </p>
-                    <p style={{ fontFamily: "'Garamond', serif", fontSize: '11pt', textAlign: 'left', marginBottom: '40px' }}>
-                      {formData.localAssinatura}, {formData.dia} de {formData.mes} de {formData.ano}.
-                    </p>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', alignItems: 'center' }}>
-                      <div style={{ textAlign: 'center' }}>
-                        <div style={{ width: '300px', borderTop: '1px solid #000', margin: '0 auto', paddingTop: '6px' }}>
-                          <p style={{ fontFamily: "'Garamond', serif", fontSize: '11pt', margin: '0', fontWeight: 'bold' }}>{formData.responsavel}</p>
-                          <p style={{ fontFamily: "'Garamond', serif", fontSize: '9pt', margin: '0' }}>{formData.cargoResponsavel}</p>
-                        </div>
-                      </div>
-                      <div style={{ textAlign: 'center' }}>
-                        <div style={{ width: '300px', borderTop: '1px solid #000', margin: '0 auto', paddingTop: '6px' }}>
-                          <p style={{ fontFamily: "'Garamond', serif", fontSize: '11pt', margin: '0', fontWeight: 'bold' }}>{formData.secretario}</p>
-                          <p style={{ fontFamily: "'Garamond', serif", fontSize: '9pt', margin: '0' }}>{formData.cargoSecretario}</p>
-                        </div>
-                      </div>
-                    </div>
-                    <div style={{ marginTop: '32px', padding: '12px 16px', border: '1px solid #000' }}>
-                      <p style={{ fontFamily: "'Garamond', serif", fontSize: '10pt', margin: '0 0 10px 0', fontStyle: 'italic' }}>
-                        A P R O V O, o presente Termo de Referência, consoante o previsto no art. 7º da Lei Federal n.º 14.133/2021.
-                      </p>
-                      <p style={{ fontFamily: "'Garamond', serif", fontSize: '10pt', margin: '0', textAlign: 'right' }}>
-                        Em _____/_____/_____
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
+              </>
             );
-          })}
+          })()}
         </div>
+
+        {/* PAINEL DIREITO: SELEÇÃO DE SUBITENS */}
+        {sidebarOpen && (() => {
+          const clausula = CLAUSULAS.find(c => c.numero === clausulaAtiva);
+          if (!clausula) return null;
+          return (
+            <aside style={{
+              width: '400px',
+              background: 'white',
+              borderLeft: '1px solid #eee',
+              padding: '20px',
+              overflowY: 'auto',
+              height: '100vh',
+              position: 'fixed',
+              right: 0,
+              top: 0,
+              boxShadow: '-2px 0 8px rgba(0,0,0,0.1)',
+              zIndex: 100,
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#227056', flex: 1, marginRight: '8px', lineHeight: '1.4' }}>
+                  {clausula.titulo}
+                </h3>
+                <button
+                  onClick={() => setSidebarOpen(false)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#999', flexShrink: 0 }}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Botões Selecionar / Remover Todos */}
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+                <button
+                  onClick={() => {
+                    const newSelected = { ...selectedSubitems };
+                    clausula.subitens.forEach(s => { newSelected[s.numero] = true; });
+                    setSelectedSubitems(newSelected);
+                  }}
+                  style={{
+                    flex: 1, padding: '10px', background: '#f0f8f5', color: '#227056',
+                    border: '2px solid #227056', borderRadius: '8px', cursor: 'pointer',
+                    fontSize: '12px', fontWeight: '600',
+                  }}
+                >
+                  ✓ Selecionar Todos
+                </button>
+                <button
+                  onClick={() => {
+                    const newSelected = { ...selectedSubitems };
+                    clausula.subitens.forEach(s => { delete newSelected[s.numero]; });
+                    setSelectedSubitems(newSelected);
+                  }}
+                  style={{
+                    flex: 1, padding: '10px', background: '#fff5f5', color: '#e74c3c',
+                    border: '2px solid #e74c3c', borderRadius: '8px', cursor: 'pointer',
+                    fontSize: '12px', fontWeight: '600',
+                  }}
+                >
+                  ✗ Remover Todos
+                </button>
+              </div>
+
+              {/* Lista de Subitens */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {clausula.subitens.map(sub => (
+                  <label
+                    key={sub.numero}
+                    style={{
+                      display: 'flex', alignItems: 'flex-start', gap: '10px', padding: '12px',
+                      border: `2px solid ${selectedSubitems[sub.numero] ? '#227056' : '#eee'}`,
+                      borderRadius: '6px',
+                      background: selectedSubitems[sub.numero] ? '#f0f8f5' : 'transparent',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={!!selectedSubitems[sub.numero]}
+                      onChange={e => {
+                        const newSelected = { ...selectedSubitems };
+                        if (e.target.checked) newSelected[sub.numero] = true;
+                        else delete newSelected[sub.numero];
+                        setSelectedSubitems(newSelected);
+                      }}
+                      style={{ marginTop: '4px', accentColor: '#227056' }}
+                    />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: '600', fontSize: '13px', marginBottom: '4px' }}>
+                        {sub.numero}
+                      </div>
+                      <div style={{ fontSize: '11px', color: '#666', lineHeight: '1.5' }}>
+                        {sub.texto.substring(0, 150)}...
+                      </div>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </aside>
+          );
+        })()}
       </main>
     </div>
   );

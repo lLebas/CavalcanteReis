@@ -1,4 +1,4 @@
-import { Document, Packer, Paragraph, TextRun, AlignmentType, ImageRun, BorderStyle } from 'docx';
+import { Document, Packer, Paragraph, TextRun, AlignmentType, ImageRun, BorderStyle, Header } from 'docx';
 import * as fs from 'fs';
 import * as path from 'path';
 import { parseRichText } from './shared.helpers';
@@ -7,50 +7,43 @@ export async function generateEstudoDocx(dados: any): Promise<Buffer> {
   const defaultFont = 'Garamond';
   const defaultSize = 26; // 13pt (docx usa meios-pontos: 13 * 2 = 26)
 
-  // 1. CARREGAR IMAGEM COMO BUFFER (Resolve o erro da imagem não aparecer)
-  const publicDir = path.join(process.cwd(), 'frontend', 'public');
+  // 1. CARREGAR IMAGEM COMO BUFFER
+  const publicDir = path.join(process.cwd(), 'public');
   let barrocasBuffer: Buffer | null = null;
 
   try {
     barrocasBuffer = fs.readFileSync(path.join(publicDir, 'barrocas.png'));
   } catch (error) {
-    // Tenta caminho alternativo
-    try {
-      barrocasBuffer = fs.readFileSync(path.join(process.cwd(), 'public', 'barrocas.png'));
-    } catch (e) {
-      console.warn('Logo barrocas.png não encontrado, continuando sem imagem');
-    }
+    console.warn('Logo barrocas.png não encontrado, continuando sem imagem');
   }
 
-  // 2. MARGENS IDÊNTICAS AO FRONTEND (em Twips: 1 inch = 1440 twips)
-  const MARGENS = {
-    top: 1417,    // 2.5cm (igual ao frontend)
-    right: 1417,  // 2.5cm
-    bottom: 1417, // 2.5cm
-    left: 1417,   // 2.5cm
-  };
-
-  // ARRAY ONDE VAMOS COLOCAR TUDO (Isso garante que nada seja cortado)
-  const children: Paragraph[] = [];
-
-  // 3. CABEÇALHO MANUAL (Logo centralizada)
-  if (barrocasBuffer) {
-    children.push(
+  // 2. CABEÇALHO COM LOGO (igual a Termo e Parecer — aparece em todas as páginas)
+  const createHeader = () => new Header({
+    children: barrocasBuffer ? [
       new Paragraph({
         alignment: AlignmentType.CENTER,
         children: [
           new ImageRun({
             data: barrocasBuffer,
-            transformation: {
-              width: 340,
-              height: 115,
-            },
+            transformation: { width: 340, height: 115 },
           } as any),
         ],
         spacing: { before: 0, after: 200 },
-      })
-    );
-  }
+      }),
+    ] : [],
+  });
+
+  // 3. MARGENS (em Twips: 1 inch = 1440 twips, 2.5cm = 1417)
+  const MARGENS = {
+    top: 1417,    // 2.5cm — onde o corpo começa
+    right: 1417,
+    bottom: 1417,
+    left: 1417,
+    header: 450,  // 0.8cm — distância do topo da folha até o logo (compacto, sem vácuo)
+  };
+
+  // ARRAY ONDE VAMOS COLOCAR TUDO
+  const children: Paragraph[] = [];
 
   // Identificação centralizada (sem negrito nos rótulos)
   if (dados.municipio) {
@@ -222,7 +215,8 @@ export async function generateEstudoDocx(dados: any): Promise<Buffer> {
   const doc = new Document({
     sections: [{
       properties: { page: { margin: MARGENS } },
-      children: children, // Aqui vai a lista completa sem cortes
+      headers: { default: createHeader() },
+      children: children,
     }],
   });
 

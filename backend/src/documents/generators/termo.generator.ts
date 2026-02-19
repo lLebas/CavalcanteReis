@@ -29,7 +29,7 @@ export async function generateTermoDocx(dados: any): Promise<Buffer> {
               transformation: { width: 340, height: 115 },
             } as any),
           ],
-          spacing: { after: 200 },
+          spacing: { before: 0, after: 0 },
         }),
       ] : [],
     });
@@ -258,7 +258,13 @@ export async function generateTermoDocx(dados: any): Promise<Buffer> {
     sections: [{
       properties: {
         page: {
-          margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 },
+          margin: {
+            top: 1417,    // 2.5cm
+            right: 1417,
+            bottom: 1417,
+            left: 1417,
+            header: 450,  // 0.8cm — logo compacto no topo
+          },
         }
       },
       headers: { default: createHeader() },

@@ -6,7 +6,6 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 // ========== FUNÇÃO: GERAR E BAIXAR PARECER VIA BACKEND ==========
 export const downloadParecerJuridicoViaBackend = async (data: {
-  municipio: string;
   processo: string;
   local: string;
   dataFormatada: string;
@@ -33,7 +32,7 @@ export const downloadParecerJuridicoViaBackend = async (data: {
       type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     });
 
-    saveAs(blob, `Parecer_Juridico_${data.municipio.replace(/\//g, '-')}.docx`);
+    saveAs(blob, `Parecer_Juridico_Processo_${(data.processo || '').replace(/\//g, '-')}.docx`);
 
     return true;
   } catch (error) {

@@ -17,14 +17,6 @@ export default function Home({ onNavigate, onLogout }: HomeProps) {
 
   const cards = [
     {
-      id: 'dashboard',
-      title: '📊 Dashboard de Documentos',
-      description: 'Visualize e gerencie todos os documentos salvos',
-      icon: Save,
-      color: '#e74c3c',
-      action: () => window.location.href = '/dashboard',
-    },
-    {
       id: 'gerador-propostas',
       title: 'Gerador de Propostas',
       description: 'Crie propostas personalizadas para seus clientes',
@@ -66,8 +58,8 @@ export default function Home({ onNavigate, onLogout }: HomeProps) {
     },
     {
       id: 'propostas-salvas',
-      title: 'Propostas Salvas',
-      description: 'Visualize e gerencie suas propostas salvas',
+      title: 'Documentos Salvos',
+      description: 'Visualize e gerencie todos os documentos salvos',
       icon: Save,
       color: '#2ecc71',
       action: () => onNavigate('propostas-salvas'),

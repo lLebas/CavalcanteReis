@@ -492,12 +492,12 @@ export async function generatePropostaDocx(data: any): Promise<Buffer> {
     ...(mun01Buffer ? [new Paragraph({
       alignment: AlignmentType.CENTER,
       spacing: { before: 200, after: 200 },
-      children: [new ImageRun({ data: mun01Buffer, transformation: { width: 800, height: 400 } } as any)], // AUMENTADO: 800px largura (quase toda a página A4)
+      children: [new ImageRun({ data: mun01Buffer, transformation: { width: 600, height: 300 } } as any)], // 600px cabe dentro da margem A4 (~159mm útil)
     })] : []),
     ...(mun02Buffer ? [new Paragraph({
       alignment: AlignmentType.CENTER,
       spacing: { before: 200, after: 200 },
-      children: [new ImageRun({ data: mun02Buffer, transformation: { width: 800, height: 288 } } as any)], // AUMENTADO: 800px largura (mantém proporção)
+      children: [new ImageRun({ data: mun02Buffer, transformation: { width: 600, height: 216 } } as any)], // mantém proporção 800:288 → 600:216
     })] : []),
     new Paragraph({
       alignment: AlignmentType.JUSTIFIED,
@@ -511,7 +511,7 @@ export async function generatePropostaDocx(data: any): Promise<Buffer> {
       ],
     }),
 
-    // Profissional 1: IURI DO LAGO NOGUEIRA CAVALCANTE REIS (Yuri - no Tópico 5)
+    // Profissional 1: IURI DO LAGO NOGUEIRA CAVALCANTE REIS
     new Paragraph({
       children: [
         new TextRun({ text: 'IURI DO LAGO NOGUEIRA CAVALCANTE REIS', bold: true, font: defaultFont, size: 24 }),
@@ -530,7 +530,26 @@ export async function generatePropostaDocx(data: any): Promise<Buffer> {
       ],
     }),
 
-    // Profissional 2: GABRIEL GAUDÊNCIO ZANCHETTA CALIMAN (no Tópico 5)
+    // Profissional 2: PEDRO AFONSO FIGUEIREDO DE SOUZA
+    new Paragraph({
+      children: [
+        new TextRun({ text: 'PEDRO AFONSO FIGUEIREDO DE SOUZA', bold: true, font: defaultFont, size: 24 }),
+      ],
+      spacing: { before: 100, after: 0 },
+    }),
+    new Paragraph({
+      alignment: AlignmentType.JUSTIFIED,
+      spacing: { before: 0, after: 150 },
+      children: [
+        new TextRun({
+          text: 'Graduado em Direito pela Pontifícia Universidade Católica de Minas Gerais. Especialista em Direito Penal e Processo Penal pela Academia Brasileira de Direito Constitucional. Mestre em Direito nas Relações Econômicas e Sociais pela Faculdade de Direito Milton Campos. Diretor de Comunicação e Conselheiro Consultivo, Científico e Fiscal do Instituto de Ciências Penais. Autor de artigos e capítulos de livros jurídicos. Advogado associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: pedro@cavalcantereis.adv.br).',
+          font: defaultFont,
+          size: defaultSize,
+        }),
+      ],
+    }),
+
+    // Profissional 3: GABRIEL GAUDÊNCIO ZANCHETTA CALIMAN
     new Paragraph({
       children: [
         new TextRun({ text: 'GABRIEL GAUDÊNCIO ZANCHETTA CALIMAN', bold: true, font: defaultFont, size: 24 }),
@@ -543,6 +562,25 @@ export async function generatePropostaDocx(data: any): Promise<Buffer> {
       children: [
         new TextRun({
           text: 'Graduado em Direito pelo Centro Universitário de Brasília (UniCeub). Especialista em Gestão Pública e Tributária pelo Gran Centro Universitário. Membro da Comissão de Assuntos Tributários da OAB/DF. Advogado associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: gabrielcaliman@cavalcantereis.adv.br).',
+          font: defaultFont,
+          size: defaultSize,
+        }),
+      ],
+    }),
+
+    // Profissional 4: RYSLHAINY DOS SANTOS CORDEIRO
+    new Paragraph({
+      children: [
+        new TextRun({ text: 'RYSLHAINY DOS SANTOS CORDEIRO', bold: true, font: defaultFont, size: 24 }),
+      ],
+      spacing: { before: 100, after: 0 },
+    }),
+    new Paragraph({
+      alignment: AlignmentType.JUSTIFIED,
+      spacing: { before: 0, after: 200 },
+      children: [
+        new TextRun({
+          text: 'Graduada em Direito pelo Centro Universitário ICESP. Pós-graduada em Direito Civil e Processo Civil, Direito Tributário e Processo Tributário e Planejamento Tributário (Faculdade Legale). Advogada associada do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: ryslhainy@cavalcantereis.adv.br).',
           font: defaultFont,
           size: defaultSize,
         }),
@@ -569,73 +607,6 @@ export async function generatePropostaDocx(data: any): Promise<Buffer> {
           text: 'Nossa contratação, portanto, devido à altíssima qualificação e experiência, aliada à singularidade do objeto da demanda, bem como os diferenciais já apresentados acima, está inserida dentre as hipóteses do art. 6°, XVIII "e" e art. 74, III, "e", da Lei n.º 14.133/2021.',
           font: defaultFont,
           size: defaultSize,
-        }),
-      ],
-    }),
-    // REMOVIDO: PageBreak() - tópicos 3 e 4 devem ficar juntos
-
-    // Dois últimos advogados ANTES do Tópico 6 (lado a lado - igual à prévia)
-    // Usar Table para garantir que fiquem lado a lado
-    new Table({
-      width: { size: 100, type: WidthType.PERCENTAGE },
-      borders: {
-        top: { style: BorderStyle.NONE },
-        bottom: { style: BorderStyle.NONE },
-        left: { style: BorderStyle.NONE },
-        right: { style: BorderStyle.NONE },
-        insideVertical: { style: BorderStyle.NONE },
-        insideHorizontal: { style: BorderStyle.NONE }
-      },
-      columnWidths: [Math.floor(11906 / 2), Math.floor(11906 / 2)], // 50% cada
-      rows: [
-        new TableRow({
-          children: [
-            // Felipe - lado esquerdo
-            new TableCell({
-              borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } },
-              margins: { top: 0, bottom: 0, left: 100, right: 100 },
-              children: [
-                new Paragraph({
-                  children: [new TextRun({ text: 'FELIPE NOBREGA ROCHA', bold: true, font: defaultFont, size: 24 })],
-                  spacing: { before: 200, after: 0 },
-                }),
-                new Paragraph({
-                  alignment: AlignmentType.JUSTIFIED,
-                  spacing: { before: 0, after: 0 },
-                  children: [
-                    new TextRun({
-                      text: 'Graduado em Direito pela Universidade Presbiteriana Mackenzie. LLM (Master of Laws) em Direito Empresarial pela Fundação Getúlio Vargas (FGV). Mestrado Profissional em Direito pelo Instituto Brasileiro de Ensino, Desenvolvimento e Pesquisa (IDP). Advogado associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: felipe@cavalcantereis.adv.br).',
-                      font: defaultFont,
-                      size: defaultSize,
-                    }),
-                  ],
-                }),
-              ],
-            }),
-            // Ryslhainy - lado direito
-            new TableCell({
-              borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } },
-              margins: { top: 0, bottom: 0, left: 100, right: 100 },
-              children: [
-                new Paragraph({
-                  children: [new TextRun({ text: 'RYSLHAINY DOS SANTOS CORDEIRO', bold: true, font: defaultFont, size: 24 })],
-                  spacing: { before: 200, after: 0 },
-                }),
-                new Paragraph({
-                  alignment: AlignmentType.JUSTIFIED,
-                  spacing: { before: 0, after: 200 },
-                  children: [
-                    new TextRun({
-                      text: 'Graduada em Direito pelo Centro Universitário ICESP. Pós-graduada em Direito Civil e Processo Civil, Direito Tributário e Processo Tributário e Planejamento Tributário (Faculdade Legale). Advogada associada do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: ryslhainy@cavalcantereis.adv.br).',
-                      font: defaultFont,
-                      size: defaultSize,
-                    }),
-                  ],
-                }),
-              ],
-            }),
-          ],
-          cantSplit: true, // Não quebrar - manter lado a lado
         }),
       ],
     }),
@@ -672,7 +643,13 @@ export async function generatePropostaDocx(data: any): Promise<Buffer> {
     sections: [{
       properties: {
         page: {
-          margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 },
+          margin: {
+            top: 1417,    // 2.5cm
+            right: 1417,
+            bottom: 2268, // 4cm — espaço suficiente para rodapé com 4 cidades
+            left: 1417,
+            footer: 709,  // 1.25cm — distância do fim da folha ao rodapé
+          },
         }
       },
       footers: { default: createFooter() },

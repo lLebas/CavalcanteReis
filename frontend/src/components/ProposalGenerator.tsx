@@ -496,7 +496,7 @@ const ProposalDocument = ({ options, prazo, services, customCabimentos, customEs
     if (footerOffices.am.enabled) enabledOffices.push(footerOffices.am);
 
     return (
-      <div className="page-footer-container" style={{ marginTop: 'auto', paddingTop: '20px', width: '100%' }}>
+      <div className="page-footer-container">
         {/* Container com flexbox para escritórios lado a lado */}
         <div style={{
           display: 'flex',
@@ -561,8 +561,8 @@ const ProposalDocument = ({ options, prazo, services, customCabimentos, customEs
   // ========== COMPONENTE INTERNO: PÁGINA ==========
   // Componente wrapper que cria uma página A4 com margens, logo (se não for capa) e rodapé
   const Page = ({ children, pageNumber, isCover = false, FooterComponent }: any) => {
-    // Padding ajustado para proteger o rodapé (30mm bottom para conteúdo não cobrir rodapé)
-    const padding = isCover ? '20mm 20mm 30mm 20mm' : '20mm 25mm 30mm 25mm';
+    // Padding ajustado para proteger o rodapé (10mm bottom — rodapé agora em fluxo normal)
+    const padding = isCover ? '20mm 20mm 10mm 20mm' : '20mm 25mm 10mm 25mm';
 
     return (
       <div className="pdf-page-render" data-page={pageNumber} style={{
@@ -572,13 +572,13 @@ const ProposalDocument = ({ options, prazo, services, customCabimentos, customEs
         background: 'white',
         padding: padding,
         width: '210mm',
-        minHeight: '297mm', // minHeight permite crescimento se necessário
+        minHeight: '297mm',
         position: 'relative',
         boxSizing: 'border-box',
         display: 'flex',
         flexDirection: 'column',
         pageBreakAfter: 'always',
-        overflow: 'visible' // Permite overflow para fluxo contínuo
+        overflow: 'hidden', // Contém o rodapé dentro da área visível da página
       }}>
         {!isCover && (
           <div style={{ textAlign: 'center', marginBottom: '25pt', flexShrink: 0 }}>
@@ -922,16 +922,12 @@ const ProposalDocument = ({ options, prazo, services, customCabimentos, customEs
             bio: "Graduado em Direito pela Pontifícia Universidade Católica de Minas Gerais. Especialista em Direito Penal e Processo Penal pela Academia Brasileira de Direito Constitucional. Mestre em Direito nas Relações Econômicas e Sociais pela Faculdade de Direito Milton Campos. Diretor de Comunicação e Conselheiro Consultivo, Científico e Fiscal do Instituto de Ciências Penais. Autor de artigos e capítulos de livros jurídicos. Advogado associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: pedro@cavalcantereis.adv.br)."
           },
           {
-            name: "SÉRGIO RICARDO ALVES DE JESUS FILHO",
-            bio: "Graduado em Direito pelo Centro Universitário de Brasília (UniCEUB). Graduando em Ciências Contábeis pelo Centro Universitário de Brasília (UniCEUB). Pós-graduando em Direito Tributário pelo Instituto Brasileiro de Ensino, Desenvolvimento e Pesquisa (IDP). Membro da Comissão de Assuntos Tributários da OAB/DF. Advogado Associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: sergio@cavalcantereis.adv.br)."
-          },
-          {
             name: "GABRIEL GAUDÊNCIO ZANCHETTA CALIMAN",
             bio: "Graduado em Direito pelo Centro Universitário de Brasília (UniCeub). Especialista em Gestão Pública e Tributária pelo Gran Centro Universitário. Membro da Comissão de Assuntos Tributários da OAB/DF. Advogado associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: gabrielcaliman@cavalcantereis.adv.br)."
           },
           {
-            name: "FELIPE NOBREGA ROCHA",
-            bio: "Graduado em Direito pela Universidade Presbiteriana Mackenzie. LLM (Master of Laws) em Direito Empresarial pela Fundação Getúlio Vargas (FGV). Mestrado Profissional em Direito pelo Instituto Brasileiro de Ensino, Desenvolvimento e Pesquisa (IDP). Advogado associado do escritório de advocacia"
+            name: "RYSLHAINY DOS SANTOS CORDEIRO",
+            bio: "Graduada em Direito pelo Centro Universitário ICESP. Pós-graduada em Direito Civil e Processo Civil, Direito Tributário e Processo Tributário e Planejamento Tributário (Faculdade Legale). Advogada associada do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: ryslhainy@cavalcantereis.adv.br)."
           },
         ];
 
@@ -2315,20 +2311,12 @@ export default function ProposalGenerator({ onBackToHome, onLogout, propostaToLo
           { text: " - Graduado em Direito pela Pontifícia Universidade Católica de Minas Gerais. Especialista em Direito Penal e Processo Penal pela Academia Brasileira de Direito Constitucional. Mestre em Direito nas Relações Econômicas e Sociais pela Faculdade de Direito Milton Campos. Diretor de Comunicação e Conselheiro Consultivo, Científico e Fiscal do Instituto de Ciências Penais. Autor de artigos e capítulos de livros jurídicos. Advogado associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: pedro@cavalcantereis.adv.br)." },
         ], { alignment: AlignmentType.JUSTIFIED }),
         createMixedParagraph([
-          { text: "SÉRGIO RICARDO ALVES DE JESUS FILHO", bold: true },
-          { text: " - Graduado em Direito pelo Centro Universitário de Brasília (UniCEUB). Graduando em Ciências Contábeis pelo Centro Universitário de Brasília (UniCEUB). Pós-graduando em Direito Tributário pelo Instituto Brasileiro de Ensino, Desenvolvimento e Pesquisa (IDP). Membro da Comissão de Assuntos Tributários da OAB/DF. Advogado Associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: sergio@cavalcantereis.adv.br)." },
-        ], { alignment: AlignmentType.JUSTIFIED }),
-        createMixedParagraph([
           { text: "GABRIEL GAUDÊNCIO ZANCHETTA CALIMAN", bold: true },
           { text: " - Graduado em Direito pelo Centro Universitário de Brasília (UniCeub). Especialista em Gestão Pública e Tributária pelo Gran Centro Universitário. Membro da Comissão de Assuntos Tributários da OAB/DF. Advogado associado do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: gabrielcaliman@cavalcantereis.adv.br)." },
         ], { alignment: AlignmentType.JUSTIFIED }),
         createMixedParagraph([
-          { text: "FELIPE NOBREGA ROCHA", bold: true },
-          { text: " - CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: felipe@cavalcantereis.adv.br)." },
-        ], { alignment: AlignmentType.JUSTIFIED }),
-        createMixedParagraph([
           { text: "RYSLHAINY DOS SANTOS CORDEIRO", bold: true },
-          { text: " - Advogada associada do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: ryslhainy@cavalcantereis.adv.br)." },
+          { text: " - Graduada em Direito pelo Centro Universitário ICESP. Pós-graduada em Direito Civil e Processo Civil, Direito Tributário e Processo Tributário e Planejamento Tributário (Faculdade Legale). Advogada associada do escritório de advocacia CAVALCANTE REIS ADVOGADOS, inscrito no CNPJ sob o n.º 26.632.686/0001-27, localizado na SHIS QL 10, Conj. 06, Casa 19, Lago Sul, Brasília/DF, CEP 71630-065, (61) 3248-0612 (endereço eletrônico: ryslhainy@cavalcantereis.adv.br)." },
         ], { alignment: AlignmentType.JUSTIFIED }),
         new Paragraph({ text: "", spacing: { after: 400 } }),
         createSimpleParagraph(

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Download, Settings, LogOut, Save } from 'lucide-react';
 import { downloadEstudoContratacaoViaBackend } from '@/lib/estudoGenerator';
 import { estudosApi } from '@/lib/api';
+import { toast } from 'sonner';
 
 interface EstudoContratacaoProps {
   onBack: () => void;
@@ -342,11 +343,11 @@ export default function EstudoContratacao({ onBack, onLogout, onSave, documentId
         const created = await estudosApi.create(payload);
         setDocumentId(created.id || null);
       }
-      alert('Estudo salvo com sucesso!');
+      toast.success('Estudo salvo com sucesso!');
       if (onSave) onSave();
     } catch (error) {
       console.error('Erro ao salvar estudo:', error);
-      alert('Erro ao salvar estudo. Tente novamente.');
+      toast.error('Erro ao salvar estudo. Tente novamente.');
     } finally {
       setIsSaving(false);
     }
@@ -381,7 +382,7 @@ export default function EstudoContratacao({ onBack, onLogout, onSave, documentId
       });
     } catch (error) {
       console.error('Erro ao gerar documento:', error);
-      alert('Erro ao gerar documento. Tente novamente.');
+      toast.error('Erro ao gerar documento. Tente novamente.');
     } finally {
       setIsDownloading(false);
     }

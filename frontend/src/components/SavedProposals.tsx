@@ -35,6 +35,16 @@ const TABS: TabConfig[] = [
   { id: 'parecer', label: 'Parecer Jurídico', icon: <Gavel size={18} />, color: '#b03a2e' },
 ];
 
+interface ModalState {
+  open: boolean;
+  title: string;
+  message: string;
+  type: 'info' | 'warning' | 'danger' | 'success';
+  confirmText?: string;
+  cancelText?: string;
+  pendingAction?: (() => Promise<void>) | null;
+}
+
 export default function SavedProposals({
   onBackToHome, onLogout, onLoadProposal,
   onLoadMinuta, onLoadEstudo, onLoadTermo, onLoadParecer
@@ -46,10 +56,7 @@ export default function SavedProposals({
   const [termos, setTermos] = useState<TermoReferencia[]>([]);
   const [pareceres, setPareceres] = useState<ParecerJuridico[]>([]);
   const [loading, setLoading] = useState({ proposta: true, minuta: true, estudo: true, termo: true, parecer: true });
-  const [modal, setModal] = useState<any>({ open: false, title: '', message: '', type: 'info' });
-
-  const setTabLoading = (tab: TabId, val: boolean) =>
-    setLoading(prev => ({ ...prev, [tab]: val }));
+  const [modal, setModal] = useState<ModalState>({ open: false, title: '', message: '', type: 'info', pendingAction: null });
 
   useEffect(() => {
     const loadAll = async () => {
@@ -85,59 +92,82 @@ export default function SavedProposals({
     return diff > 0 ? diff : 0;
   };
 
-  const handleDeleteProposal = async (id: string, municipio?: string) => {
-    if (!window.confirm(`Tem certeza que deseja excluir a proposta de "${municipio}"?`)) return;
-    try {
-      await propostasApi.delete(id);
-      setProposals(proposals.filter(p => p.id !== id));
-      setModal({ open: true, title: 'Sucesso', message: 'Proposta deletada com sucesso!', type: 'success' });
-    } catch (error: any) {
-      setModal({ open: true, title: 'Erro', message: `Erro ao deletar: ${error.message}`, type: 'error' });
-    }
+  const closeModal = () => setModal(prev => ({ ...prev, open: false, pendingAction: null }));
+
+  const confirmDelete = (
+    label: string,
+    municipio: string | undefined,
+    action: () => Promise<void>
+  ) => {
+    setModal({
+      open: true,
+      title: `Excluir ${label}`,
+      message: `Tem certeza que deseja excluir "${municipio || 'este documento'}"? Esta ação não pode ser desfeita.`,
+      type: 'danger',
+      confirmText: 'Excluir',
+      cancelText: 'Cancelar',
+      pendingAction: action,
+    });
   };
 
-  const handleDeleteMinuta = async (id: string, municipio?: string) => {
-    if (!window.confirm(`Tem certeza que deseja excluir a minuta de "${municipio}"?`)) return;
-    try {
-      await minutasApi.delete(id);
-      setMinutas(minutas.filter(m => m.id !== id));
-      setModal({ open: true, title: 'Sucesso', message: 'Minuta deletada com sucesso!', type: 'success' });
-    } catch (error: any) {
-      setModal({ open: true, title: 'Erro', message: `Erro ao deletar: ${error.message}`, type: 'error' });
-    }
+  const handleDeleteProposal = (id: string, municipio?: string) => {
+    confirmDelete('Proposta', municipio, async () => {
+      try {
+        await propostasApi.delete(id);
+        setProposals(prev => prev.filter(p => p.id !== id));
+        setModal({ open: true, title: 'Sucesso', message: 'Proposta deletada com sucesso!', type: 'success', pendingAction: null });
+      } catch (error: any) {
+        setModal({ open: true, title: 'Erro', message: `Erro ao deletar: ${error.message}`, type: 'info', pendingAction: null });
+      }
+    });
   };
 
-  const handleDeleteEstudo = async (id: string, municipio?: string) => {
-    if (!window.confirm(`Tem certeza que deseja excluir o estudo de "${municipio}"?`)) return;
-    try {
-      await estudosApi.delete(id);
-      setEstudos(estudos.filter(e => e.id !== id));
-      setModal({ open: true, title: 'Sucesso', message: 'Estudo deletado com sucesso!', type: 'success' });
-    } catch (error: any) {
-      setModal({ open: true, title: 'Erro', message: `Erro ao deletar: ${error.message}`, type: 'error' });
-    }
+  const handleDeleteMinuta = (id: string, municipio?: string) => {
+    confirmDelete('Minuta', municipio, async () => {
+      try {
+        await minutasApi.delete(id);
+        setMinutas(prev => prev.filter(m => m.id !== id));
+        setModal({ open: true, title: 'Sucesso', message: 'Minuta deletada com sucesso!', type: 'success', pendingAction: null });
+      } catch (error: any) {
+        setModal({ open: true, title: 'Erro', message: `Erro ao deletar: ${error.message}`, type: 'info', pendingAction: null });
+      }
+    });
   };
 
-  const handleDeleteTermo = async (id: string, municipio?: string) => {
-    if (!window.confirm(`Tem certeza que deseja excluir o termo de "${municipio}"?`)) return;
-    try {
-      await termosApi.delete(id);
-      setTermos(termos.filter(t => t.id !== id));
-      setModal({ open: true, title: 'Sucesso', message: 'Termo deletado com sucesso!', type: 'success' });
-    } catch (error: any) {
-      setModal({ open: true, title: 'Erro', message: `Erro ao deletar: ${error.message}`, type: 'error' });
-    }
+  const handleDeleteEstudo = (id: string, municipio?: string) => {
+    confirmDelete('Estudo', municipio, async () => {
+      try {
+        await estudosApi.delete(id);
+        setEstudos(prev => prev.filter(e => e.id !== id));
+        setModal({ open: true, title: 'Sucesso', message: 'Estudo deletado com sucesso!', type: 'success', pendingAction: null });
+      } catch (error: any) {
+        setModal({ open: true, title: 'Erro', message: `Erro ao deletar: ${error.message}`, type: 'info', pendingAction: null });
+      }
+    });
   };
 
-  const handleDeleteParecer = async (id: string, municipio?: string) => {
-    if (!window.confirm(`Tem certeza que deseja excluir o parecer de "${municipio}"?`)) return;
-    try {
-      await pareceresApi.delete(id);
-      setPareceres(pareceres.filter(p => p.id !== id));
-      setModal({ open: true, title: 'Sucesso', message: 'Parecer deletado com sucesso!', type: 'success' });
-    } catch (error: any) {
-      setModal({ open: true, title: 'Erro', message: `Erro ao deletar: ${error.message}`, type: 'error' });
-    }
+  const handleDeleteTermo = (id: string, municipio?: string) => {
+    confirmDelete('Termo de Referência', municipio, async () => {
+      try {
+        await termosApi.delete(id);
+        setTermos(prev => prev.filter(t => t.id !== id));
+        setModal({ open: true, title: 'Sucesso', message: 'Termo deletado com sucesso!', type: 'success', pendingAction: null });
+      } catch (error: any) {
+        setModal({ open: true, title: 'Erro', message: `Erro ao deletar: ${error.message}`, type: 'info', pendingAction: null });
+      }
+    });
+  };
+
+  const handleDeleteParecer = (id: string, municipio?: string) => {
+    confirmDelete('Parecer Jurídico', municipio, async () => {
+      try {
+        await pareceresApi.delete(id);
+        setPareceres(prev => prev.filter(p => p.id !== id));
+        setModal({ open: true, title: 'Sucesso', message: 'Parecer deletado com sucesso!', type: 'success', pendingAction: null });
+      } catch (error: any) {
+        setModal({ open: true, title: 'Erro', message: `Erro ao deletar: ${error.message}`, type: 'info', pendingAction: null });
+      }
+    });
   };
 
   const counts: Record<TabId, number> = {
@@ -163,10 +193,30 @@ export default function SavedProposals({
     </div>
   );
 
-  const LoadingState = () => (
-    <div style={{ textAlign: 'center', padding: '60px' }}>
-      <div className="spinner"></div>
-      <p style={{ marginTop: '20px', color: '#666' }}>Carregando...</p>
+  const SkeletonCard = () => (
+    <div style={{
+      background: 'white', borderRadius: '14px', padding: '28px',
+      boxShadow: '0 4px 16px rgba(0,0,0,0.08)', border: '2px solid #e8e8e8'
+    }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px', marginBottom: '16px' }}>
+        <div className="skeleton-pulse" style={{ width: '48px', height: '48px', borderRadius: '10px', background: '#e8e8e8', flexShrink: 0 }} />
+        <div style={{ flex: 1 }}>
+          <div className="skeleton-pulse" style={{ height: '20px', background: '#e8e8e8', borderRadius: '6px', marginBottom: '10px', width: '70%' }} />
+          <div className="skeleton-pulse" style={{ height: '14px', background: '#e8e8e8', borderRadius: '6px', width: '45%' }} />
+        </div>
+      </div>
+      <div className="skeleton-pulse" style={{ height: '14px', background: '#e8e8e8', borderRadius: '6px', marginBottom: '8px', width: '80%' }} />
+      <div className="skeleton-pulse" style={{ height: '14px', background: '#e8e8e8', borderRadius: '6px', width: '55%', marginBottom: '24px' }} />
+      <div style={{ display: 'flex', gap: '10px' }}>
+        <div className="skeleton-pulse" style={{ flex: 1, height: '40px', background: '#e8e8e8', borderRadius: '8px' }} />
+        <div className="skeleton-pulse" style={{ width: '42px', height: '40px', background: '#e8e8e8', borderRadius: '8px' }} />
+      </div>
+    </div>
+  );
+
+  const SkeletonGrid = () => (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '20px' }}>
+      {[1, 2, 3].map(i => <SkeletonCard key={i} />)}
     </div>
   );
 
@@ -263,7 +313,7 @@ export default function SavedProposals({
 
         {/* === PROPOSTAS === */}
         {activeTab === 'proposta' && (
-          loading.proposta ? <LoadingState /> :
+          loading.proposta ? <SkeletonGrid /> :
           proposals.length === 0 ? <EmptyState label="Proposta" /> : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '20px' }}>
               {proposals.map(proposta => (
@@ -304,7 +354,7 @@ export default function SavedProposals({
 
         {/* === MINUTAS === */}
         {activeTab === 'minuta' && (
-          loading.minuta ? <LoadingState /> :
+          loading.minuta ? <SkeletonGrid /> :
           minutas.length === 0 ? <EmptyState label="Minuta" /> : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '20px' }}>
               {minutas.map(minuta => (
@@ -349,7 +399,7 @@ export default function SavedProposals({
 
         {/* === ESTUDO DE CONTRATAÇÃO === */}
         {activeTab === 'estudo' && (
-          loading.estudo ? <LoadingState /> :
+          loading.estudo ? <SkeletonGrid /> :
           estudos.length === 0 ? <EmptyState label="Estudo de Contratação" /> : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '20px' }}>
               {estudos.map(estudo => (
@@ -391,7 +441,7 @@ export default function SavedProposals({
 
         {/* === TERMO DE REFERÊNCIA === */}
         {activeTab === 'termo' && (
-          loading.termo ? <LoadingState /> :
+          loading.termo ? <SkeletonGrid /> :
           termos.length === 0 ? <EmptyState label="Termo de Referência" /> : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '20px' }}>
               {termos.map(termo => (
@@ -433,7 +483,7 @@ export default function SavedProposals({
 
         {/* === PARECER JURÍDICO === */}
         {activeTab === 'parecer' && (
-          loading.parecer ? <LoadingState /> :
+          loading.parecer ? <SkeletonGrid /> :
           pareceres.length === 0 ? <EmptyState label="Parecer Jurídico" /> : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '20px' }}>
               {pareceres.map(parecer => (
@@ -475,7 +525,24 @@ export default function SavedProposals({
 
       </main>
 
-      <Modal {...modal} onConfirm={() => setModal({ ...modal, open: false })} />
+      <Modal
+        open={modal.open}
+        title={modal.title}
+        message={modal.message}
+        type={modal.type}
+        confirmText={modal.confirmText || 'OK'}
+        cancelText={modal.cancelText}
+        onConfirm={async () => {
+          if (modal.pendingAction) {
+            const action = modal.pendingAction;
+            closeModal();
+            await action();
+          } else {
+            closeModal();
+          }
+        }}
+        onCancel={modal.pendingAction ? closeModal : undefined}
+      />
     </div>
   );
 }

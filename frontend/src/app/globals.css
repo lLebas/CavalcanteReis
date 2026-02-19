@@ -376,16 +376,12 @@ html,
   /* Permite conteúdo fluir */
 }
 
-/* Rodapé fixo na parte inferior de cada página */
+/* Rodapé na parte inferior de cada página — em fluxo flex normal */
 .page-footer-container {
-  position: absolute;
-  bottom: 15mm;
-  /* Ajustado para ficar mais acima */
-  left: 25mm;
-  right: 25mm;
-  width: calc(100% - 50mm);
-  z-index: 10;
-  /* Garante que fica acima do conteúdo */
+  width: 100%;
+  margin-top: auto;
+  padding-top: 8px;
+  flex-shrink: 0;
 }
 
 /* Linha horizontal com as cidades do rodapé */
@@ -641,4 +637,14 @@ html,
   to {
     transform: rotate(360deg);
   }
+}
+
+@keyframes skeleton-shimmer {
+  0% { opacity: 1; }
+  50% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+
+.skeleton-pulse {
+  animation: skeleton-shimmer 1.6s ease-in-out infinite;
 }

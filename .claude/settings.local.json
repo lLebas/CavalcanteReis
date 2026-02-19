@@ -27,7 +27,8 @@
       "Bash(/tmp/split_generators.ps1:*)",
       "Bash(powershell -Command:*)",
       "Bash(/tmp/fix_minuta.ps1:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(echo:*)"
     ]
   }
 }

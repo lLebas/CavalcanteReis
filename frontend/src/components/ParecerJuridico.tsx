@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Download, Settings, LogOut, Save } from 'lucide-react';
 import { downloadParecerJuridicoViaBackend } from '@/lib/parecerGenerator';
 import { pareceresApi } from '@/lib/api';
+import { toast } from 'sonner';
 
 interface ParecerJuridicoProps {
   onBack: () => void;
@@ -202,7 +203,6 @@ const PAGE_GROUPS = [
 
 export default function ParecerJuridico({ onBack, onLogout, onSave, documentId: initialDocumentId }: ParecerJuridicoProps) {
   const [formData, setFormData] = useState({
-    municipio: 'BARROCAS/BA',
     processo: '000/2025',
     local: 'Barrocas/BA',
     dia: '____',
@@ -211,7 +211,9 @@ export default function ParecerJuridico({ onBack, onLogout, onSave, documentId: 
     assessor: 'ASSESSORIA JURÍDICA',
   });
 
-  const [secaoAtiva, setSecaoAtiva] = useState<number>(1);
+  const [secoesAtivas, setSecoesAtivas] = useState<Record<number, boolean>>({
+    1: true, 2: true, 3: true, 4: true,
+  });
   const [isDownloading, setIsDownloading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [documentId, setDocumentId] = useState<string | null>(initialDocumentId || null);
@@ -230,17 +232,17 @@ export default function ParecerJuridico({ onBack, onLogout, onSave, documentId: 
   const handleDownload = async () => {
     setIsDownloading(true);
     try {
+      const secoesFiltradas = SECOES.filter(s => !!secoesAtivas[s.numero]);
       await downloadParecerJuridicoViaBackend({
-        municipio: formData.municipio,
         processo: formData.processo,
         local: formData.local,
         dataFormatada: `${formData.dia} de ${formData.mes} de ${formData.ano}`,
         assessor: formData.assessor,
-        secoes: SECOES,
+        secoes: secoesFiltradas.length > 0 ? secoesFiltradas : SECOES,
       });
     } catch (error) {
       console.error('Erro ao gerar documento:', error);
-      alert('Erro ao gerar documento. Tente novamente.');
+      toast.error('Erro ao gerar documento. Tente novamente.');
     } finally {
       setIsDownloading(false);
     }
@@ -250,7 +252,7 @@ export default function ParecerJuridico({ onBack, onLogout, onSave, documentId: 
     setIsSaving(true);
     try {
       const payload = {
-        municipio: formData.municipio,
+        municipio: formData.local,
         formData: formData as unknown as Record<string, unknown>,
       };
       if (documentId) {
@@ -259,11 +261,11 @@ export default function ParecerJuridico({ onBack, onLogout, onSave, documentId: 
         const created = await pareceresApi.create(payload);
         setDocumentId(created.id || null);
       }
-      alert('Parecer salvo com sucesso!');
+      toast.success('Parecer salvo com sucesso!');
       if (onSave) onSave();
     } catch (error) {
       console.error('Erro ao salvar:', error);
-      alert('Erro ao salvar. Tente novamente.');
+      toast.error('Erro ao salvar. Tente novamente.');
     } finally {
       setIsSaving(false);
     }
@@ -347,24 +349,31 @@ export default function ParecerJuridico({ onBack, onLogout, onSave, documentId: 
             </p>
           </div>
           {[1, 2, 3, 4].map(num => {
-            const ativo = secaoAtiva === num;
+            const ativo = !!secoesAtivas[num];
             return (
               <button
                 key={num}
-                onClick={() => setSecaoAtiva(num)}
+                onClick={() => setSecoesAtivas(prev => ({ ...prev, [num]: !prev[num] }))}
                 style={{
                   width: '100%', padding: '10px 16px', textAlign: 'left',
-                  background: ativo ? '#f0f9f5' : 'transparent', border: 'none',
-                  borderLeft: ativo ? '3px solid #227056' : '3px solid transparent',
+                  background: ativo ? '#f0f9f5' : '#fff5f5', border: 'none',
+                  borderLeft: ativo ? '3px solid #227056' : '3px solid #e74c3c',
                   borderBottom: '1px solid #f0f0f0',
-                  color: ativo ? '#227056' : '#555',
-                  fontSize: '12px', fontWeight: ativo ? '600' : '400',
+                  color: ativo ? '#227056' : '#e74c3c',
+                  fontSize: '12px', fontWeight: '600',
                   cursor: 'pointer', display: 'flex', justifyContent: 'space-between',
                   alignItems: 'center', lineHeight: '1.35', transition: 'all 0.12s',
                 }}
               >
                 <span style={{ flex: 1 }}>{SECTION_LABELS[num]}</span>
-                {ativo && <span style={{ color: '#227056', fontSize: '18px', flexShrink: 0, marginLeft: '6px' }}>›</span>}
+                <span style={{
+                  width: '18px', height: '18px', borderRadius: '50%',
+                  background: ativo ? '#227056' : '#e74c3c',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  flexShrink: 0, fontSize: '10px', color: 'white', fontWeight: '700',
+                }}>
+                  {ativo ? '✓' : '✗'}
+                </span>
               </button>
             );
           })}
@@ -378,13 +387,7 @@ export default function ParecerJuridico({ onBack, onLogout, onSave, documentId: 
           </div>
 
           <div className="field">
-            <label>Município</label>
-            <input value={formData.municipio} onChange={e => setFormData({ ...formData, municipio: e.target.value })}
-              style={{ borderRadius: '8px', border: '1px solid #ccc' }} />
-          </div>
-
-          <div className="field">
-            <label>Processo Administrativo</label>
+            <label>Número do Processo</label>
             <input value={formData.processo} onChange={e => setFormData({ ...formData, processo: e.target.value })}
               style={{ borderRadius: '8px', border: '1px solid #ccc' }} />
           </div>
@@ -429,69 +432,67 @@ export default function ParecerJuridico({ onBack, onLogout, onSave, documentId: 
         <div className="content" style={{ flex: 1, overflowY: 'auto', padding: '40px 20px' }}>
           <p className="preview-title">Documento do Parecer Jurídico</p>
 
-          {PAGE_GROUPS.map((grupo, pageIndex) => {
-            const isFirstPage = pageIndex === 0;
-            const isLastPage = pageIndex === PAGE_GROUPS.length - 1;
-
+          {(() => {
+            const secoesFiltradas = SECOES.filter(s => !!secoesAtivas[s.numero]);
             return (
-              <div key={pageIndex} style={pageStyle} className="pdf-page-render">
-                {/* Logo em cada página */}
+              <div style={pageStyle} className="pdf-page-render">
                 <LogoBarrocas />
 
-                {/* Cabeçalho apenas na primeira página */}
-                {isFirstPage && (
-                  <>
-                    <h1 style={{
-                      textAlign: 'center', fontSize: '14pt', fontWeight: 'bold',
-                      textDecoration: 'underline', fontFamily: "'Garamond', serif",
-                      marginBottom: '8px', marginTop: '0',
-                    }}>
-                      PARECER JURÍDICO
-                    </h1>
-                    <div style={{ marginBottom: '16px' }}>
-                      <p style={{ fontFamily: "'Garamond', serif", fontSize: '11pt', margin: '2px 0' }}>
-                        <strong>Município:</strong> {formData.municipio}
-                      </p>
-                      <p style={{ fontFamily: "'Garamond', serif", fontSize: '11pt', margin: '2px 0' }}>
-                        <strong>Processo Administrativo:</strong> {formData.processo}
-                      </p>
-                    </div>
-                  </>
-                )}
+                {/* TÍTULO CENTRALIZADO */}
+                <h1 style={{
+                  textAlign: 'center', fontSize: '14pt', fontWeight: 'bold',
+                  textDecoration: 'underline', fontFamily: "'Garamond', serif",
+                  marginBottom: '12px', marginTop: '0',
+                }}>
+                  PARECER JURÍDICO
+                </h1>
 
-                {/* Seções da página */}
-                {grupo.map(secaoNum => {
-                  const secao = SECOES.find(s => s.numero === secaoNum);
-                  if (!secao) return null;
-                  return (
-                    <div key={secaoNum} style={{ marginBottom: '20px' }}>
+                {/* TEXTO TÉCNICO ALINHADO À DIREITA */}
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '24px' }}>
+                  <p style={{
+                    fontFamily: "'Garamond', serif",
+                    fontSize: '9pt',
+                    fontWeight: 'bold',
+                    textAlign: 'justify',
+                    lineHeight: '1.4',
+                    margin: '0',
+                    width: '62%',
+                  }}>
+                    {`PARECER JURÍDICO, PROCESSO Nº ${formData.processo || '_______'}, CONTRATO OBJETIVANDO O DESENVOLVIMENTO DE SERVIÇOS ADVOCATÍCIOS ESPECIALIZADOS EM PRESTAÇÃO DE SERVIÇOS DE ASSESSORIA TÉCNICA E JURÍDICA NAS ÁREAS DE DIREITO PÚBLICO, TRIBUTÁRIO, ECONÔMICO, FINANCEIRO E PREVIDENCIÁRIO, EM ESPECIAL PARA ALCANÇAR O INCREMENTO DE RECEITAS, DENTRE ELAS: FOLHA DE PAGAMENTO, RECUPERAÇÃO DE VERBAS INDENIZATÓRIAS E CONTRIBUIÇÕES PREVIDENCIÁRIAS; REVISAR O RECOLHIMENTO INDEVIDO AO PROGRAMA DE FORMAÇÃO DO PATRIMÔNIO DO SERVIDOR PÚBLICO (PASEP), REVISAR O RECOLHIMENTO INDEVIDO A CONTRIBUIÇÃO DE SAT/RAT, BEM COMO RECUPERAR OS CRÉDITOS DE ISSQN; RECUPERAÇÃO DOS VALORES REPASSADOS À MENOR PELA UNIÃO FEDERAL A TÍTULO DE FUNDEF e FUNDEB ; AUDITORIA E CONSULTORIA ENERGÉTICA CONSISTENTE NO LEVANTAMENTO DE DADOS, PREPARAÇÃO, ENCAMINHAMENTO E ACOMPANHAMENTO DA RECUPERAÇÃO FINANCEIRA DOS VALORES PAGOS OU COBRADOS INDEVIDAMENTE PELA CONCESSIONÁRIA/DISTRIBUIDORA DE ENERGIA ELÉTRICA; RECUPERAÇÃO DE IMPOSTO DE RENDA INCIDENTE SOBRE AS AQUISIÇÕES DE BENS E SERVIÇOS FICANDO RESPONSÁVEL PELO AJUIZAMENTO, ACOMPANHAMENTO E INTERVENÇÕES DE TERCEIRO EM AÇÕES JUDICIAIS E ADMINISTRATIVAS DE INTERESSE DO MUNICÍPIO.`}
+                  </p>
+                </div>
+
+                {/* SEÇÕES ATIVAS */}
+                {secoesFiltradas.length === 0 ? (
+                  <div style={{ textAlign: 'center', color: '#aaa', padding: '40px 0', fontFamily: "'Garamond', serif" }}>
+                    <p style={{ fontSize: '13pt' }}>Todas as seções foram desativadas.</p>
+                    <p style={{ fontSize: '10pt' }}>Clique nas seções no painel esquerdo para reativá-las.</p>
+                  </div>
+                ) : (
+                  secoesFiltradas.map(secao => (
+                    <div key={secao.numero} style={{ marginBottom: '20px' }}>
                       <p style={sectionTitleStyle}>{secao.titulo}</p>
                       <p style={bodyTextStyle}>{secao.conteudo}</p>
                     </div>
-                  );
-                })}
+                  ))
+                )}
 
-                {/* Finalização apenas na última página */}
-                {isLastPage && (
-                  <div style={{ marginTop: 'auto', paddingTop: '30px' }}>
-                    <p style={{ fontFamily: "'Garamond', serif", fontSize: '11pt', marginBottom: '30px' }}>
-                      {formData.local} ___ de {formData.mes} de {formData.ano}.
-                    </p>
-                    <div style={{ textAlign: 'center' }}>
-                      <p style={{ fontFamily: "'Garamond', serif", fontSize: '11pt', fontWeight: 'bold', margin: '0 0 8px 0' }}>
+                {/* ASSINATURAS */}
+                <div style={{ marginTop: 'auto', paddingTop: '30px' }}>
+                  <p style={{ fontFamily: "'Garamond', serif", fontSize: '11pt', marginBottom: '30px' }}>
+                    {formData.local}, {formData.dia} de {formData.mes} de {formData.ano}.
+                  </p>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ borderTop: '1px solid #000', width: '240px', margin: '0 auto', paddingTop: '6px' }}>
+                      <p style={{ fontFamily: "'Garamond', serif", fontSize: '11pt', fontWeight: 'bold', margin: '0' }}>
                         {formData.assessor}
                       </p>
-                      <div style={{ borderTop: '1px solid #000', width: '240px', margin: '0 auto', paddingTop: '4px' }}>
-                        <p style={{ fontFamily: "'Garamond', serif", fontSize: '9pt', margin: '0', color: '#555' }}>
-                          _______________________________
-                        </p>
-                      </div>
                     </div>
                   </div>
-                )}
+                </div>
               </div>
             );
-          })}
+          })()}
         </div>
       </main>
     </div>

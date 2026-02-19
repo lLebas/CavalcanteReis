@@ -27,32 +27,14 @@ export async function generateParecerDocx(dados: any): Promise<Buffer> {
             transformation: { width: 340, height: 115 },
           } as any),
         ],
-        spacing: { after: 200 },
+        spacing: { before: 0, after: 0 },
       }),
     ] : [],
   });
 
   const docChildren: Paragraph[] = [];
 
-  // 3. IDENTIFICAÇÃO CENTRALIZADA (sem negrito nos rótulos)
-  docChildren.push(
-    new Paragraph({
-      alignment: AlignmentType.CENTER,
-      children: [
-        new TextRun({ text: dados.municipio || '', font: defaultFont, size: defaultSize }),
-      ],
-      spacing: { after: 80 },
-    }),
-    new Paragraph({
-      alignment: AlignmentType.CENTER,
-      children: [
-        new TextRun({ text: `Processo Administrativo: ${dados.processo || ''}`, font: defaultFont, size: defaultSize }),
-      ],
-      spacing: { after: 280 },
-    })
-  );
-
-  // 4. TÍTULO
+  // 3. TÍTULO CENTRALIZADO
   docChildren.push(
     new Paragraph({
       alignment: AlignmentType.CENTER,
@@ -65,7 +47,26 @@ export async function generateParecerDocx(dados: any): Promise<Buffer> {
           underline: {},
         }),
       ],
-      spacing: { after: 800 },
+      spacing: { before: 0, after: 280 },
+    })
+  );
+
+  // 4. TEXTO TÉCNICO ALINHADO À DIREITA (recuo ~38% da largura do conteúdo)
+  const textoTecnico = `PARECER JURÍDICO, PROCESSO Nº ${dados.processo || '_______'}, CONTRATO OBJETIVANDO O DESENVOLVIMENTO DE SERVIÇOS ADVOCATÍCIOS ESPECIALIZADOS EM PRESTAÇÃO DE SERVIÇOS DE ASSESSORIA TÉCNICA E JURÍDICA NAS ÁREAS DE DIREITO PÚBLICO, TRIBUTÁRIO, ECONÔMICO, FINANCEIRO E PREVIDENCIÁRIO, EM ESPECIAL PARA ALCANÇAR O INCREMENTO DE RECEITAS, DENTRE ELAS: FOLHA DE PAGAMENTO, RECUPERAÇÃO DE VERBAS INDENIZATÓRIAS E CONTRIBUIÇÕES PREVIDENCIÁRIAS; REVISAR O RECOLHIMENTO INDEVIDO AO PROGRAMA DE FORMAÇÃO DO PATRIMÔNIO DO SERVIDOR PÚBLICO (PASEP), REVISAR O RECOLHIMENTO INDEVIDO A CONTRIBUIÇÃO DE SAT/RAT, BEM COMO RECUPERAR OS CRÉDITOS DE ISSQN; RECUPERAÇÃO DOS VALORES REPASSADOS À MENOR PELA UNIÃO FEDERAL A TÍTULO DE FUNDEF e FUNDEB ; AUDITORIA E CONSULTORIA ENERGÉTICA CONSISTENTE NO LEVANTAMENTO DE DADOS, PREPARAÇÃO, ENCAMINHAMENTO E ACOMPANHAMENTO DA RECUPERAÇÃO FINANCEIRA DOS VALORES PAGOS OU COBRADOS INDEVIDAMENTE PELA CONCESSIONÁRIA/DISTRIBUIDORA DE ENERGIA ELÉTRICA; RECUPERAÇÃO DE IMPOSTO DE RENDA INCIDENTE SOBRE AS AQUISIÇÕES DE BENS E SERVIÇOS FICANDO RESPONSÁVEL PELO AJUIZAMENTO, ACOMPANHAMENTO E INTERVENÇÕES DE TERCEIRO EM AÇÕES JUDICIAIS E ADMINISTRATIVAS DE INTERESSE DO MUNICÍPIO.`;
+
+  docChildren.push(
+    new Paragraph({
+      alignment: AlignmentType.JUSTIFIED,
+      indent: { left: 3450 },
+      children: [
+        new TextRun({
+          text: textoTecnico,
+          bold: true,
+          font: defaultFont,
+          size: 18, // 9pt
+        }),
+      ],
+      spacing: { after: 560 },
     })
   );
 
@@ -146,11 +147,17 @@ export async function generateParecerDocx(dados: any): Promise<Buffer> {
 
   const doc = new Document({
     creator: 'CAVALCANTE REIS',
-    title: `Parecer Jurídico - ${dados.municipio}`,
+    title: `Parecer Jurídico - Processo ${dados.processo || ''}`,
     sections: [{
       properties: {
         page: {
-          margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 },
+          margin: {
+            top: 1417,    // 2.5cm
+            right: 1417,
+            bottom: 1417,
+            left: 1417,
+            header: 450,  // 0.8cm — logo compacto no topo
+          },
         }
       },
       headers: { default: createHeader() },
