@@ -500,7 +500,7 @@ export const generateParecerJuridicoContent = (data: {
         bottom: {
           color: "000000",
           space: 1,
-          value: "single",
+          style: "single",
           size: 6,
         },
       },
