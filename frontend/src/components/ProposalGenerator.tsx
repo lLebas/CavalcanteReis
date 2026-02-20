@@ -1957,7 +1957,7 @@ export default function ProposalGenerator({ onBackToHome, onLogout, propostaToLo
                   width: 170 * 9525,  // 170pt em EMUs (paridade com prévia)
                   height: 60 * 9525,  // Altura fixa para não distorcer
                 },
-              }),
+              } as any),
             ],
             alignment: AlignmentType.CENTER,
             spacing: { after: 400 },
@@ -1976,7 +1976,7 @@ export default function ProposalGenerator({ onBackToHome, onLogout, propostaToLo
                   width: 145 * 9525,  // 145pt em EMUs (paridade com prévia)
                   height: 50 * 9525,  // Altura fixa proporcional
                 },
-              }),
+              } as any),
             ],
             alignment: AlignmentType.CENTER,
             spacing: { after: 100 },  // Reduzido de 200 para 100 para menos espaço
@@ -2265,7 +2265,7 @@ export default function ProposalGenerator({ onBackToHome, onLogout, propostaToLo
                   width: 300 * 9525, // 300pt em EMUs (paridade com prévia)
                   height: (300 * 9525) * 0.75, // Proporção aproximada
                 },
-              }),
+              } as any),
             ],
             alignment: AlignmentType.CENTER,
             spacing: { before: 200, after: 200 },
@@ -2285,7 +2285,7 @@ export default function ProposalGenerator({ onBackToHome, onLogout, propostaToLo
                   width: 300 * 9525, // 300pt em EMUs (paridade com prévia)
                   height: (300 * 9525) * 0.75, // Proporção aproximada
                 },
-              }),
+              } as any),
             ],
             alignment: AlignmentType.CENTER,
             spacing: { after: 400 },
@@ -2370,7 +2370,7 @@ export default function ProposalGenerator({ onBackToHome, onLogout, propostaToLo
                   width: 150 * 9525, // 150pt em EMUs (paridade com prévia)
                   height: (150 * 9525) * 0.3, // Proporção aproximada da assinatura
                 },
-              }),
+              } as any),
             ],
             alignment: AlignmentType.CENTER,
             spacing: { before: 200, after: 200 },
